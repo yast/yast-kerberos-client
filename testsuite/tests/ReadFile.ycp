@@ -1,7 +1,7 @@
 /**
  *  ReadFile.ycp
  *  Test of Kerberos::ReadFile function
- *  Jiri Suchomel <jsuchome@suse.cz>
+ *  Author:	Jiri Suchomel <jsuchome@suse.cz>
  *  $Id$
  */
 

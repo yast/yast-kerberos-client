@@ -1,7 +1,7 @@
 /**
  *  Read.ycp
  *  Test of Kerberos::Read function (whole read process, many config files)
- *  Jiri Suchomel <jsuchome@suse.cz>
+ *  Author:	Jiri Suchomel <jsuchome@suse.cz>
  *  $Id$
  */
 

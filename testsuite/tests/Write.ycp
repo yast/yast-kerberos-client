@@ -1,7 +1,7 @@
 /**
  *  Write.ycp
  *  Test of Kerberos::Write function
- *  Jiri Suchomel <jsuchome@suse.cz>
+ *  Author:	Jiri Suchomel <jsuchome@suse.cz>
  *  $Id$
  */
 
