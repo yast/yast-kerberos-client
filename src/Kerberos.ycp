@@ -1,5 +1,5 @@
 /**
- * File:	modules/Kerberos-client.ycp
+ * File:	modules/Kerberos.ycp
  * Package:	Configuration of kerberos-client
  * Summary:	Data for configuration of kerberos-client, i/o functions.
  * Authors:	Jiri Suchomel <jsuchome@suse.cz>

@@ -9,9 +9,9 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
-import "Kerberos-client";
+import "Kerberos";
 
 include "ui/common_popups.ycp";
 include "ui/common_messages.ycp";

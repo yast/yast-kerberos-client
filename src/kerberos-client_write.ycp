@@ -19,12 +19,12 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
 y2milestone("----------------------------------------");
 y2milestone("Kerberos-client write started");
 
-import "Kerberos-client";
+import "Kerberos";
 import "Progress";
 
 list args = WFM::Args();

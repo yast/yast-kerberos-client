@@ -9,7 +9,7 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
 /**
  * All helps are here

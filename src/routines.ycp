@@ -9,7 +9,7 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
 /* FIXME: Remove this file if you do not need it! */
 
