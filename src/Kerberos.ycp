@@ -51,7 +51,7 @@ global string default_domain = "";
 
 // adress of KDC (key distribution centre) server for default realm
 global string kdc = "";
-string kpasswd_server = "";
+string admin_server = "";
 
 global string clockskew = "300";
 
@@ -239,9 +239,9 @@ global define boolean Read () ``{
 
         kdc = ReadFile (add ( add (.etc.krb5_conf.v, default_realm), "kdc"),"");
 
-	kpasswd_server = ReadFile (add ( add (.etc.krb5_conf.v, default_realm), "kpasswd_server"),"");
-	if (kpasswd_server == kdc)
-	    kpasswd_server = ""; // we could replace it in Write in this case...
+	admin_server = ReadFile (add ( add (.etc.krb5_conf.v, default_realm), "admin_server"),"");
+	if (admin_server == kdc)
+	    admin_server = ""; // we could replace it in Write in this case...
 
         default_domain = ReadFile ( add ( add (.etc.krb5_conf.v,
             default_realm), "default_domain"), "");
@@ -475,10 +475,10 @@ AFS will not be enabled."));
 	    if (default_domain != "")
 		SCR::Write( add (add (.etc.krb5_conf.v, default_realm),
 		    "default_domain"), default_domain);
-	    if (kpasswd_server == "" && kdc != "")
+	    if (admin_server == "" && kdc != "")
 		// save only when the entry was mising or same as KDC
 		SCR::Write (add (add (.etc.krb5_conf.v, default_realm),
-		    "kpasswd_server"),kdc);
+		    "admin_server"),kdc);
 	}
 	else if (default_realm != "")
 	{
@@ -493,9 +493,9 @@ AFS will not be enabled."));
 	    if (default_domain != "")
 		SCR::Write( add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "default_domain"), default_domain);
-	    if (kpasswd_server == "" && kdc != "")
+	    if (admin_server == "" && kdc != "")
 		SCR::Write(add (add (.etc.krb5_conf.v.realms, default_realm),
-		    "kpasswd_server"), kdc);
+		    "admin_server"), kdc);
 	}
 
 	// write advanced settings

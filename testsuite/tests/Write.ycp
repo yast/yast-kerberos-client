@@ -85,7 +85,7 @@
 	    ]
 	]
     ];
-    Kerberos::kpasswd_server = "user_defined"; // -> won't be written
+    Kerberos::admin_server = "user_defined"; // -> won't be written
 
     Testsuite::Test(``(Kerberos::Write ()), [ READ, $[], $[] ], 0);
 }

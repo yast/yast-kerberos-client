@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  1 16:58:12 CET 2005 - jsuchome@suse.cz
+
+- use admin_server instead of kpasswd_server in /etc/krb5.conf
+  (#67034) 
+
+-------------------------------------------------------------------
 Mon Jan 31 12:41:21 CET 2005 - jsuchome@suse.cz
 
 - install also architecture-specific packages (#49808) 
