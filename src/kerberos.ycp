@@ -1,5 +1,5 @@
 /**
- * File:	clients/kerberos-client.ycp
+ * File:	clients/kerberos.ycp
  * Package:	Configuration of kerberos-client
  * Summary:	Main file
  * Authors:	Jiri Suchomel <jsuchome@suse.cz>

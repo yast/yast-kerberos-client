@@ -55,6 +55,7 @@ global define boolean Modified() ``{
 
 /**
  * Get all the Kerberos configuration from a map.
+ * @param settings imported map
  * @return	success
  */
 global define boolean Import (map settings) ``{
@@ -118,13 +119,13 @@ global define boolean Read () ``{
     {
         y2debug("krb5.conf sections: %1", SCR::Dir(.etc.krb5_conf.s));
 
-        default_realm = ReadString (.etc.krb5_conf.v.libdefaults.default_realm);
+        default_realm = ReadFile (.etc.krb5_conf.v.libdefaults.default_realm);
 
-        clockskew = ReadString (.etc.krb5_conf.v.libdefaults.clockskew);
+        clockskew = ReadFile (.etc.krb5_conf.v.libdefaults.clockskew);
 
-        kdc = ReadString ( add ( add (.etc.krb5_conf.v, default_realm), "kdc"));
+        kdc = ReadFile ( add ( add (.etc.krb5_conf.v, default_realm), "kdc"));
 
-        default_domain = ReadString ( add ( add (.etc.krb5_conf.v,
+        default_domain = ReadFile ( add ( add (.etc.krb5_conf.v,
             default_realm), "default_domain"));
     }
     else
@@ -246,7 +247,7 @@ Install this package now?")))
  * @param path_to_value path for agent (.etc.krb5_conf)
  * @return string the value
  */
-global define string ReadString (path path_to_value) ``{
+global define string ReadFile (path path_to_value) ``{
 
     string value = SCR::Read (path_to_value);
     if (value == nil)
