@@ -345,8 +345,8 @@ define symbol AdvancedDialog() ``{
     string help_text =
 
     // help text (do not transl. values "m","h", "d")
-    _("<p>Values of <b>Ticket Lifetime</b>, <b>Renewable Lifetime</b> and
-<b>Clock Skew</b> are in seconds as default. Alternatively, specify the time
+    _("<p>Values of <b>Ticket Lifetime</b>, <b>Renewable Lifetime</b>, and
+<b>Clock Skew</b> are in seconds by default. Alternatively, specify the time
 unit (<i>m</i> for minutes, <i>h</i> for hours, or <i>d</i> for days) and use
 it as a value suffix (e.g., <i>1d</i> or <i>24h</i> for one day).</p>
 ") +
@@ -365,7 +365,7 @@ after closing the session.</p>
     // help text
     _("<p>To enable Kerberos support for your <b>openssh client</b>, check the
 appropriate check box. In such a case, Kerberos tickets are used for user
-authentiction on the ssh server.</p>
+authentication on the ssh server.</p>
 ") +
 
     // help text
@@ -380,9 +380,10 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
 
     //helptext
     _("<p>
-If you want to synchronize your time with NTP server, configure your computer
-as NTP client. You can configure it by pushing <b>NTP Configuration</b> button.
-</p>");
+To synchronize your time with an NTP server, configure your computer
+as an NTP client. Access the configuration with <b>NTP Configuration</b>.
+</p>
+");
 
     string uid		= Kerberos::minimum_uid;
     string ticket	= Kerberos::ticket_lifetime;
@@ -479,8 +480,9 @@ Try again."));
 	    if (!regexpmatch (clockskew, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (clockskew, "^([0-9]+)$"))
 	    {
-		Popup::Error (_("Invalid format of Clock Skew entry.
-Try again."));
+		Popup::Error (_("Invalid format of clock skew entry.
+Try again.
+"));
 		UI::SetFocus (`id(`skew));
 		continue;
 	    }
