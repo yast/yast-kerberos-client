@@ -184,7 +184,7 @@ global define boolean Write () ``{
             {
                 // Popup text (required application):
                 if (UI::YesNoPopup(_("To configure PAM authentication with Kerberos,
-the package \"pam_krb5\" is necessary.
+the package \"pam_krb5\" is required.
 Install this package now?
 ")))
                 {
