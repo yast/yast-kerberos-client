@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  3 17:14:30 CET 2005 - jsuchome@suse.cz
+
+- replace new default values in /etc/krb5.conf (#67297)
+- do not write epmty values to /etc/krb5.conf
+
+-------------------------------------------------------------------
 Tue Mar  1 16:58:12 CET 2005 - jsuchome@suse.cz
 
 - use admin_server instead of kpasswd_server in /etc/krb5.conf
