@@ -243,11 +243,11 @@ domain name is usually used.</p>") +
 	    // check for openafs* packages
 	    if (use_afs)
 	    {
-		if (!Require::AreAllPackagesInstalled (["openafs",
+		if (!Require::AreAllPackagesInstalledTarget (["openafs",
 		    "openafs-client"]) &&
 		     !contains (packages, "openafs"))
 		{
-		    if (!Require::IsPackageAvailable ("openafs"))
+		    if (!Mode::config && !Require::IsPackageAvailableTarget ("openafs"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation!
@@ -259,7 +259,7 @@ AFS cannot be enabled."), "openafs"));
 			UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
 			continue;
 		    }
-		    if (!Require::IsPackageAvailable ("openafs-client"))
+		    if (!Mode::config && !Require::IsPackageAvailableTarget ("openafs-client"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation!
@@ -294,7 +294,7 @@ Intall them?")))
 
     if (result == `next && use_pam_krb)
     {
-	if  (!Require::IsAnyPackageInstalled (["heimdal-tools"]) &&
+	if  (!Require::IsAnyPackageInstalledTarget (["heimdal-tools"]) &&
 	    !contains (packages, "heimdal-tools") &&
 		// yes/no popup
 		Popup::YesNo (_("To use Kerberos client services,
