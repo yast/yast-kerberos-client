@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar 11 08:48:39 CET 2004 - jsuchome@suse.cz
+
+- set icon for wizard
+- testsuite enabled again
+- 2.9.6
+
+-------------------------------------------------------------------
 Wed Mar 10 10:40:56 CET 2004 - jsuchome@suse.de
 
 - disabled testsuite
