@@ -122,10 +122,12 @@ global define boolean Import (map settings) ``{
     afs_serverip = client["afs_serverip"]:"";
     afs_cell = client["afs_cell"]:"";
     if (size(afs_serverip) > 0)
+    {
 	use_afs = true;
+	afs_modified = true;
+    }
     else
 	use_afs = false;
-    afs_modified = true;
 
     ssh_support = client["ssh_support"]:false;
     ticket_lifetime = client["ticket_lifetime"]:"1d";
@@ -186,6 +188,21 @@ global define string ReadFile (path path_to_value, string def_value) ``{
         value = def_value;
 
     return value;
+}
+
+/**
+ * Write the item value to /etc/krb5.conf
+ * Do not write anything for empty and nil values
+ * @param path_to_value path for agent (.etc.krb5_conf)
+ * @param value
+ * @return false when nothing was written, success of write otherwise
+ */
+global define boolean WriteFile (path path_to_value, string value) {
+
+    if (value == nil || value == "")
+	return false;
+
+    return SCR::Write (path_to_value, value);
 }
 
 /**
@@ -257,24 +274,29 @@ global define boolean Read () ``{
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
 
-
     // propose some good values, if there are install defaults
-    // what if user _wants_ to have MY.REALM?
     if (default_domain == "" && FileExists ("/bin/ypdomainname"))
     {
-        map yp_domain = (map) SCR::Execute (.target.bash_output, "/bin/ypdomainname");
-        default_domain = deletechars (yp_domain["stdout"]:"", "\n");
+        map out = (map) SCR::Execute (.target.bash_output, "/bin/ypdomainname");
+        default_domain = deletechars (out["stdout"]:"", "\n");
+    }
+    if (default_domain == "" && FileExists ("/bin/domainname"))
+    {
+        map out = (map) SCR::Execute (.target.bash_output, "/bin/domainname");
+        default_domain = deletechars (out["stdout"]:"", "\n");
     }
 
-    if ((default_realm == "" || default_realm == "MY.REALM") &&
+    if ((default_realm == "" || default_realm == "MY.REALM" ||
+	 default_realm == "EXAMPLE.COM") &&
         default_domain != "")
     {
         default_realm = toupper (default_domain);
     }
-    if ((kdc == "" || kdc == "MY.COMPUTER") && FileExists ("/usr/bin/ypwhich"))
+    if ((kdc == "" || kdc == "MY.COMPUTER" || kdc == "kerberos.example.com") &&
+	FileExists ("/usr/bin/ypwhich"))
     {
-        map yp_serv = (map) SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
-        kdc = deletechars( yp_serv["stdout"]:"", "\n");
+        map out = (map) SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
+        kdc = deletechars (out["stdout"]:"", "\n");
     }
 
     if (SCR::Read (.target.stat, "/etc/sysconfig/afs-client") != $[])
@@ -452,7 +474,7 @@ AFS will not be enabled."));
     if (modified)
     {
 	// change the default realm name
-	SCR::Write(.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
+	WriteFile (.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
 
 	// write the mapping domain-realm
 	if (default_domain != "")
@@ -460,24 +482,20 @@ AFS will not be enabled."));
 	    string domain = default_domain;
 	    if ( findfirstof (domain, ".") != 0)
 		domain = "." + domain;
-	    SCR::Write( add (.etc.krb5_conf.v.domain_realm, domain),
-		default_realm);
+	    WriteFile (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
 	}
 
-	if (clockskew != "")
-	    SCR::Write(.etc.krb5_conf.v.libdefaults.clockskew, clockskew);
+	WriteFile (.etc.krb5_conf.v.libdefaults.clockskew, clockskew);
 
 	if (contains (SCR::Dir(.etc.krb5_conf.s), default_realm))
 	{
 	    // update the default realm settings
-	    if (kdc != "")
-		SCR::Write(add(add(.etc.krb5_conf.v, default_realm),"kdc"),kdc);
-	    if (default_domain != "")
-		SCR::Write( add (add (.etc.krb5_conf.v, default_realm),
-		    "default_domain"), default_domain);
-	    if (admin_server == "" && kdc != "")
+	    WriteFile (add (add (.etc.krb5_conf.v, default_realm),"kdc"),kdc);
+	    WriteFile (add (add (.etc.krb5_conf.v, default_realm),
+		"default_domain"), default_domain);
+	    if (admin_server == "")
 		// save only when the entry was mising or same as KDC
-		SCR::Write (add (add (.etc.krb5_conf.v, default_realm),
+		WriteFile (add (add (.etc.krb5_conf.v, default_realm),
 		    "admin_server"),kdc);
 	}
 	else if (default_realm != "")
@@ -485,16 +503,12 @@ AFS will not be enabled."));
 	    // specify the type of this subsection
 	    SCR::Write( add (.etc.krb5_conf.st.realms, default_realm), 1);
 	    // write the settings of the new default realm
-	    if (kdc != "")
-	    {
-		SCR::Write(
-		    add(add(.etc.krb5_conf.v.realms,default_realm),"kdc"), kdc);
-	    }
-	    if (default_domain != "")
-		SCR::Write( add (add (.etc.krb5_conf.v.realms, default_realm),
-		    "default_domain"), default_domain);
-	    if (admin_server == "" && kdc != "")
-		SCR::Write(add (add (.etc.krb5_conf.v.realms, default_realm),
+	    WriteFile (
+		add (add(.etc.krb5_conf.v.realms,default_realm),"kdc"), kdc);
+	    WriteFile (add (add (.etc.krb5_conf.v.realms, default_realm),
+		"default_domain"), default_domain);
+	    if (admin_server == "")
+		WriteFile(add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "admin_server"), kdc);
 	}
 
@@ -507,15 +521,15 @@ AFS will not be enabled."));
 	    pam_sect = .etc.krb5_conf.v.appdefaults.pam;
 	}
 
-	SCR::Write (add (pam_sect, "ticket_lifetime"), ticket_lifetime);
-	SCR::Write (add (pam_sect, "renew_lifetime"), renew_lifetime);
-	SCR::Write (add (pam_sect, "forwardable"), forwardable);
-	SCR::Write (add (pam_sect, "proxiable"), proxiable);
-	SCR::Write (add (pam_sect, "retain_after_close"), retain_after_close);
-	SCR::Write (add (pam_sect, "minimum_uid"), minimum_uid);
+	WriteFile (add (pam_sect, "ticket_lifetime"), ticket_lifetime);
+	WriteFile (add (pam_sect, "renew_lifetime"), renew_lifetime);
+	WriteFile (add (pam_sect, "forwardable"), forwardable);
+	WriteFile (add (pam_sect, "proxiable"), proxiable);
+	WriteFile (add (pam_sect, "retain_after_close"), retain_after_close);
+	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
 
-	if (afs_modified)
-	    SCR::Write (add (pam_sect, "afs_cells"), afs_cell);
+	if (afs_modified && afs_cell != "")
+	    WriteFile (add (pam_sect, "afs_cells"), afs_cell);
 
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);
