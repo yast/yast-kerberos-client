@@ -1,0 +1,30 @@
+@HEADER-COMMENT@
+# neededforbuild yast2-devel-packages
+
+@HEADER@
+Requires:	yast2
+
+BuildArchitectures:	noarch
+
+Summary:	Configuration of kerberos-client
+
+%description
+-
+
+@PREP@
+
+@BUILD@
+
+@INSTALL@
+
+@CLEAN@
+
+%files
+%defattr(-,root,root)
+%dir @yncludedir@/kerberos-client
+@yncludedir@/kerberos-client/*
+@clientdir@/kerberos-client.ycp
+@clientdir@/kerberos-client_*.ycp
+@moduledir@/Kerberos-client.ycp
+@configdir@/kerberos-client.y2cc
+%doc @docdir@
