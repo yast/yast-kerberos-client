@@ -11,34 +11,54 @@
 
 textdomain "kerberos";
 
+import "Wizard";
+
+import "Kerberos";
+import "Report";
+
+include "ui/common_popups.ycp";
+include "ui/common_messages.ycp";
+
 
 /**
- * The only dialog
- * @return  `back or `next
+ * Read settings dialog
+ * @return `abort if aborted and `next otherwise
  */
-global define symbol KerberosDialog () ``{
+global define symbol ReadDialog() ``{
+    boolean ret = Kerberos::Read();
+    return ret ? `next : `abort;
+}
 
-    // help text
+/**
+ * Write settings dialog
+ * @return `abort if aborted and `next otherwise
+ */
+global define symbol WriteDialog() ``{
+    boolean ret = Kerberos::Write();
+    return ret ? `next : `abort;
+}
+
+/**
+ * Configure PAM files to authenticate your users against Kerberos server
+ * @return dialog result
+ */
+global define symbol PamDialog() ``{
+
+    // help text 1/2
     string help_text = _("<p>
 <b>Autentication with Kerberos</b><br>
 You can update your PAM settings to enable the Kerberos autentication for your users. 
 </p>")+
 
+    // help text 2/2
 _("<p><b>Authentication modes</b><br>
 If you choose <b>optional</b> mode, the primary authentication is with the existing framework, such as user entries in the <i>/etc/shadow</i> or NIS/LDAP database. The only difference is that, in addition, if there is a Kerberos principal associated with the user, PAM module will try to obtain a ticket on behalf of the user, using the previously suplied password.
 <br>
 Otherwise, when you want to use Kerberos PAM module as a primary authentication mechanism, select <b>sufficient</b>. When user fails to log in (because there is no such principal in Kerberos database or the KDC is down), the system will try to authenticate the user with the entered password against the remaining defined database (local files, NIS, LDAP). 
 </p>");
 
-    help_text = help_text + _("<p>
-<b>Setting the Kerberos client</b><br>
-This is just a simple confiuration of your client. Please enter your <b>domain</b>, <b>default realm</b> and the <b>host name</b> or <b>address</b> of your Key Distribution Center (KDC)");
-
     boolean use_pam_krb = Kerberos::use_pam_krb;
-    string default_realm = Kerberos::default_realm;
-    string kdc = Kerberos::kdc;
     string control = Kerberos::control;
-    string default_domain = Kerberos::default_domain;
 //    string arguments = Kerberos::argumets;
 
     list controls = [
@@ -56,7 +76,7 @@ This is just a simple confiuration of your client. Please enter your <b>domain</
                 `RadioButtonGroup(`id(`rd),
                     `Left(`HVSquash(`VBox (
                         // radio button label
-                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do &not use Kerberos"), !use_pam_krb)),
+                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do no&t use Kerberos"), !use_pam_krb)),
                         // radio button label
                         `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))),
                 // text entry label
@@ -64,32 +84,13 @@ This is just a simple confiuration of your client. Please enter your <b>domain</
                     _("&Authentication mode"), controls),
                 `VSpacing (0.5))
         ),
-        `VSpacing(1),
-        // frame label
-        `Frame (_("Kerberos client settings"),
-            `VBox (
-                `VSpacing (0.5),
-                `HSquash(
-                    // textentry label
-                    `TextEntry (`id (`realm), _("Default &realm"),
-                         default_realm)),
-                `HSquash(
-                    // textentry label
-                    `TextEntry (`id (`domain), _("Default &domain"),
-                         default_domain)),
-                `HSquash(
-                    // textentry label
-                    `TextEntry (`id (`kdc), _("&KDC server address"), kdc)),
-                `VSpacing (0.5)
-            )
-        ),
         `VSpacing(1)
     ));
 
     Wizard::SetContentsButtons (
         // dialog title
-        _("Kerberos Client Configuration"), con, help_text,
-        UI::BackButtonLabel (), UI::FinishButtonLabel ());
+        _("Authentication with Kerberos"), con, help_text,
+        UI::BackButtonLabel (), UI::NextButtonLabel ());
 
     UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
 
@@ -106,12 +107,94 @@ This is just a simple confiuration of your client. Please enter your <b>domain</
             UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
         }
 
-        default_realm = UI::QueryWidget (`id(`realm), `Value);
-        default_domain = UI::QueryWidget (`id(`domain), `Value);
-        kdc = UI::QueryWidget (`id(`kdc), `Value);
         control = UI::QueryWidget (`id (`auth_control), `Value);
 
+
+    } while
+    (result != `back && result != `next && result !=`cancel && result !=`abort);
+
+    if (result == `next)
+    {
+        if (use_pam_krb != Kerberos::use_pam_krb ||
+            control != Kerberos::control)
+        {
+            Kerberos::use_pam_krb = use_pam_krb;
+            Kerberos::control = control;
+            Kerberos::pam_modified = true;
+        }
+    }
+
+    return result;
+}
+
+/**
+ * Dialog for configuring Kerberos client (values in /etc/krb5.conf)
+ * @return dialog result
+ */
+global define symbol ConfigureDialog() ``{
+
+    // help text 1/3
+    string help_text = _("<p>
+<b>Setting up the Kerberos client</b><br>
+This is a confiuration of your client. Please enter your <b>domain</b>, <b>default realm</b> and the <b>host name</b> or <b>adress</b> of your Key Distribution Center (KDC)") +
+
+    // help text 2/3
+    _("<p>
+It is common practice to use domain name in uppercase for your default realm name. But you can use what do you prefere.") +
+
+    // help text 3/3
+    _("<p>
+The <b>clock skew</b> is the tolerance for the time stapms not exactly matching the host's system clock. It is usually set to 300 seconds.</p>");
+
+    string default_realm = Kerberos::default_realm;
+    string kdc = Kerberos::kdc;
+    string default_domain = Kerberos::default_domain;
+    string clockskew = Kerberos::clockskew;
+    integer max_skew = 10000; // randoly choosed
+
+    term con = `HVSquash(
+        `VBox (
+        `VSpacing(1),
+        // frame label
+        `Frame (_("Kerberos client settings"),
+            `VBox (
+                `VSpacing (0.5),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`domain), _("Default &domain"),
+                         default_domain)),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`realm), _("Default real&m"),
+                         default_realm)),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`kdc), _("&KDC server adress"), kdc)),
+                // infield label
+                `IntField (`id (`skew), _("&Clock skew"), 0, max_skew,
+                    tointeger(clockskew)),
+                `VSpacing (0.5)
+            )
+        ),
+        `VSpacing(1)
+    ));
+
+    Wizard::SetContentsButtons (
+        // dialog title
+        _("Kerberos Client Configuration"), con, help_text,
+        UI::BackButtonLabel (), UI::NextButtonLabel ());
+
+    any result = nil;
+    do
+    {
+        result = UI::UserInput ();
+
         if (result == `next) {
+
+            default_realm = UI::QueryWidget (`id(`realm), `Value);
+            default_domain = UI::QueryWidget (`id(`domain), `Value);
+            kdc = UI::QueryWidget (`id(`kdc), `Value);
+            clockskew = sformat ("%1", UI::QueryWidget (`id(`skew), `Value));
 
             if (default_realm == "")
             {
@@ -130,25 +213,18 @@ This is just a simple confiuration of your client. Please enter your <b>domain</
             }
         }
 
-    } while (result != `back && result != `next && result != `cancel);
+    } while
+    (result != `back && result != `next && result !=`cancel && result !=`abort);
 
     if (result == `next)
     {
-        if (use_pam_krb != Kerberos::use_pam_krb ||
-            control != Kerberos::control)
-        {
-            Kerberos::use_pam_krb = use_pam_krb;
-            Kerberos::control = control;
-            Kerberos::pam_modified = true;
-        }
         Kerberos::default_domain = default_domain;
         Kerberos::default_realm = default_realm;
         Kerberos::kdc = kdc;
+        Kerberos::clockskew = clockskew;
     }
-
     return result;
 }
-
 
 /* EOF */
 }

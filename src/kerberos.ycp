@@ -24,8 +24,7 @@ y2milestone ("Kerberos-client module started");
 import "Kerberos";
 import "Wizard";
 import "Report";
-include "kerberos-client/dialogs.ycp";
-//include "kerberos-client/wizards.ycp";
+include "kerberos-client/wizards.ycp";
 
 /* is this proposal or not? */
 boolean propose = false;
@@ -42,13 +41,13 @@ if(size(args) > 0) {
 /* main ui function */
 any ret = nil;
 
+if(propose)
+    ret = KerberosAutoSequence();
+else
+    ret = KerberosSequence();
+
+
 /*
-if(propose) ret = KerberosAutoSequence();
-else ret = KerberosSequence();
-*/
-
-
-
 // -- main
 
 Wizard::CreateDialog ();
@@ -58,6 +57,7 @@ Kerberos::Read ();
 
 symbol result = KerberosDialog ();
 
+
 if (result == `next)
 {
     if (Kerberos::Write (false))
@@ -66,13 +66,14 @@ was saved and can be used."));
 }
 
 UI::CloseDialog();
+*/
 
-y2debug("ret == %1", result);
+y2debug("ret == %1", ret);
 
 /* Finish */
 y2milestone("Kerberos-client module finished");
 y2milestone("----------------------------------------");
-return result;
+return ret;
 
 /* EOF */
 }

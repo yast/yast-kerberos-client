@@ -11,6 +11,7 @@ client_DATA =			\
 #	kerberos-client_proposal.ycp	
 
 ynclude_DATA =			\
+    wizards.ycp \
 	dialogs.ycp
 #	complex.ycp
 #	routines.ycp
@@ -22,4 +23,3 @@ module_DATA =			\
 	Kerberos.ycp
 
 EXTRA_DIST = $(client_DATA) $(config_DATA) $(module_DATA) $(ynclude_DATA)
-#EXTRA_DIST = $(client_DATA) $(ynclude_DATA) $(config_DATA) $(module_DATA)

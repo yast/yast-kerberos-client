@@ -28,4 +28,5 @@ Summary:	Configuration of kerberos-client
 @configdir@/kerberos.y2cc
 %dir @yncludedir@/kerberos-client
 @yncludedir@/kerberos-client/dialogs.ycp
+@yncludedir@/kerberos-client/wizards.ycp
 %doc @docdir@

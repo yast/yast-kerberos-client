@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan  6 17:12:27 CET 2003 - jsuchome@suse.de
+
+- splited to two dialogs: pam and klient configuration
+- autoinstallation
+- 2.7.1
+
+-------------------------------------------------------------------
 Tue Dec 17 15:46:20 CET 2002 - jsuchome@suse.de
 
 - proposing values for realm, kdc

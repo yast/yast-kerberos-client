@@ -26,7 +26,8 @@ y2milestone("----------------------------------------");
 y2milestone("Kerberos-client auto started");
 
 import "Kerberos";
-include "kerberos-client/dialogs.ycp";
+include "kerberos-client/wizards.ycp";
+
 string func = WFM::Args(0);
 map param = WFM::Args(1);
 
@@ -41,10 +42,13 @@ else if (func == "Reset") {
 }
 else if (func == "Change") {
     Kerberos::Import(param);
+    /*
     Wizard::CreateDialog ();
     Wizard::ReplaceAbortButton(`Empty ());
     any res = KerberosDialog();
-    UI::CloseDialog();
+    */
+    any res = KerberosAutoSequence();
+//    UI::CloseDialog();
     return res;
 }
 else if (func == "Result") {
