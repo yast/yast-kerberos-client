@@ -106,14 +106,9 @@ map cmdline = $[
     "id"		: "kerberos",
     // translators: command line help text for Kerberos client module
     "help"		: _("Kerberos client configuration module."),
-    "guihandler"	: ``(KerberosSequence()),
-    "initialize"	: ``(Kerberos::Read()),
-    "finish"		: ``(Kerberos::Write()),
-    /* TODO NI
     "guihandler"	: KerberosSequence,
     "initialize"	: Kerberos::Read,
     "finish"		: Kerberos::Write,
-    */
     "actions"		: $[
 	"pam" :$[
 	    "handler"	: KerberosEnableHandler,
