@@ -28,7 +28,7 @@ import "Summary";
 /**
  * Required packages for this module to operate
  */
-global list<string> required_packages = ["pam_krb5", "heimdal-lib"];
+global list<string> required_packages = ["pam_krb5", "krb5", "krb5-client"];
 
 global boolean write_only = false;
 
@@ -79,7 +79,7 @@ global string minimum_uid = "0";
 // section in /etc/ssh/ssh_config file for storing krb support
 string ssh_section = "*";
 
-// packages to install (openssh, openafs, heimdal-* etc.)
+// packages to install (openssh, openafs, etc.)
 global list<string> packages = [];
 
 /**

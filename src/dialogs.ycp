@@ -11,6 +11,7 @@
 
 textdomain "kerberos";
 
+import "Address";
 import "IP";
 import "Kerberos";
 import "Label";
@@ -228,6 +229,15 @@ domain name is usually used.</p>
 		result = `not_next;
                 continue;
             }
+	    if (use_pam_krb && !Address::Check (kdc))
+	    {
+		// error popup label
+		Report::Error (_("The KDC server address is incorrect.") +
+		    "\n\n" + Address::Valid4 ());
+		UI::SetFocus (`id(`kdc));
+		result = `not_next;
+		continue;
+	    }
 	    if (use_afs && afs_serverip == "")
             {
                 // error popup label
@@ -236,10 +246,11 @@ domain name is usually used.</p>
 		result = `not_next;
                 continue;
             }
-	    if (use_afs && !IP::Check4 (afs_serverip))
+	    if (use_afs && !IP::Check (afs_serverip))
 	    {
 		// Popup text
-		Popup::Error(_("The IP address is incorrect"));
+		Report::Error (_("The IP address is incorrect") +
+		    "\n\n" + IP::Valid4 ());
 		UI::SetFocus(`id(`afs_serverip));
 		result = `not_next;
 		continue;
@@ -312,18 +323,6 @@ Install them?
 	}
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
 
-    if (result == `next && use_pam_krb)
-    {
-	if  (!Package::Installed ("heimdal-tools") &&
-	     !contains (packages, "heimdal-tools") &&
-	     // yes/no popup
-	     Popup::YesNo (_("To use Kerberos client services,
-package \"heimdal-tools\" could be useful.
-Install this package?")))
-		packages = add (packages, "heimdal-tools");
-	if (Mode::config ())
-	    Package::DoInstallAndRemove (packages, []);
-    }
     if (result == `next || result == `advanced)
     {
         Kerberos::modified = true;

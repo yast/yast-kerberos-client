@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan 11 16:38:20 CET 2005 - jsuchome@suse.cz
+
+- switch from heimdal to MIT kerberos
+- check validity of KDC adress
+- 2.11.3 
+
+-------------------------------------------------------------------
 Wed Jan  5 15:54:55 CET 2005 - jsuchome@suse.cz
 
 - removed last select
