@@ -25,10 +25,10 @@ import "Wizard";
  * The dialog that appears when the [Abort] button is pressed.
  * @return `abort if user really wants to abort, `back otherwise
  */
-define symbol ReallyAbort () ``{
+define symbol ReallyAbort () {
 
     boolean ret = true;
-    if (!Stage::cont ())
+    if (!Stage::cont () || contains (WFM::Args (), "from_users"))
     {
 	ret = Popup::ReallyAbort (Kerberos::Modified());;
     }
@@ -65,7 +65,7 @@ define symbol WriteDialog() ``{
  * Dialog for configuring Kerberos client (values in /etc/krb5.conf)
  * @return dialog result
  */
-define symbol ConfigureDialog() ``{
+define symbol ConfigureDialog() {
 
     // help text 1/5
     string help_text = _("<p>
@@ -144,7 +144,7 @@ domain name is usually used.</p>
 		// textentry label
 		`TextEntry (`id(`cell), _("AFS &Cell Name"), cell),
 		// textentry label
-		`TextEntry (`id(`afs_serverip), _("IP Address of A&FS Server"),
+		`TextEntry (`id(`afs_serverip), _("&IP Address of AFS Server"),
 		    afs_serverip)
 	    ),
 	    `VSpacing (0.5)), `HSpacing (0.5)
@@ -159,6 +159,7 @@ domain name is usually used.</p>
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::FinishButton ());
+    Wizard::RestoreAbortButton ();
 
     if (afs_available)
     {
@@ -304,7 +305,11 @@ Install them?
 		    ["openafs", "openafs-client"], p)));
 	    }
         }
-
+	if ((result == `abort || result == `cancel) &&
+	    ReallyAbort () != `abort)
+	{
+	    result = `not_next;
+	}
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
 
     if (result == `next && use_pam_krb)
@@ -350,7 +355,7 @@ Install this package?")))
  * Kerberos advanced configuration
  * @return dialog result
  */
-define symbol AdvancedDialog() ``{
+define symbol AdvancedDialog() {
 
     string help_text =
 
@@ -413,7 +418,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	    // textentry label
 	    `TextEntry (`id (`ticket), _("&Default Ticket Lifetime"), ticket),
 	    // textentry label
-	    `TextEntry (`id (`renew), _("Def&ault Renewable Ticket Lifetime"),
+	    `TextEntry (`id (`renew), _("De&fault Renewable Ticket Lifetime"),
 		renew),
 	    // checkbox label
 	    `Left(`CheckBox (`id (`forw), _("Tickets are For&wardable"), forw)),
@@ -433,7 +438,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	    tointeger (uid)),
 	`HBox (
 	    // textentry label
-	    `TextEntry (`id (`skew), _("&Clock Skew"), clockskew),
+	    `TextEntry (`id (`skew), _("C&lock Skew"), clockskew),
 
 	    `VBox (
 		`Label (""),
@@ -447,7 +452,9 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
     Wizard::SetContentsButtons (
         // dialog title
         _("Advanced Kerberos Client Configuration"), con, help_text,
-        Label::BackButton (), Label::OKButton ());
+        Label::CancelButton (), Label::AcceptButton ());
+    Wizard::HideAbortButton ();
+
     if (Mode::config ())
     {
         UI::ChangeWidget(`id(`ntp), `Enabled, false);
@@ -504,6 +511,11 @@ Try again.
 	    ssh = (boolean) UI::QueryWidget (`id(`ssh), `Value);
 
         }
+	if ((result == `abort || result == `cancel) &&
+	    ReallyAbort () != `abort)
+	{
+	    result = `not_next;
+	}
 
     } while (!contains ([`back, `next, `cancel, `abort], result));
 

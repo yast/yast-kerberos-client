@@ -399,7 +399,6 @@ AFS will not be enabled."));
 		auth_modules = filter (string m, auth_modules,``(m != "krb5afs"));
 		foreach (string type, [ "account", "auth", "password" ], ``{
 		    PamSettings::AddValue ("unix2", type, "use_krb5");
-		    // TODO use Pam::RemoveModule!
 		    PamSettings::RemoveValue ("unix2", type,"call_modules");
 		    if (auth_modules != [])
 			PamSettings::AddValue ("unix2", type, sformat (

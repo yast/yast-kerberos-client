@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Dec 16 09:44:01 CET 2004 - jsuchome@suse.cz
+
+- do not ask for 'Abort Installation' when called from users
+- do not show Abort button in 'pseudo-popups'
+- 2.11.1
+
+-------------------------------------------------------------------
 Wed Oct 27 18:01:57 CEST 2004 - jsuchome@suse.cz
 
 - adapted for new Mode:: interface 

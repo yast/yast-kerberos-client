@@ -28,25 +28,20 @@ define symbol MainSequence() ``{
     map aliases = $[
 	"configure"	: ``( ConfigureDialog() ),
 	"advanced"	: ``( AdvancedDialog() ),
-	"abort"		: ``( ReallyAbort()),
     ];
 
     map sequence = $[
 	"ws_start" : "configure",
 	"configure" : $[
-	    `abort	: "abort",
+	    `abort	: `abort,
+	    `cancel	: `abort,
 	    `advanced	: "advanced",
 	    `next	: `next
 	],
 	"advanced" : $[
-	    `abort	: "abort",
-	    `next	: "configure",
-	],
-	"abort": $[
 	    `abort	: `abort,
-	    `next	: `abort,
-	    `cancel	: `back,
-	    `back	: `back
+	    `cancel	: `abort,
+	    `next	: "configure",
 	],
     ];
 
@@ -70,6 +65,7 @@ define symbol KerberosSequence() ``{
 	"ws_start" : "read",
 	"read" : $[
 	    `abort	: `abort,
+	    `cancel	: `abort,
 	    `next	: "main"
 	],
 	"main" : $[
@@ -78,6 +74,7 @@ define symbol KerberosSequence() ``{
 	],
 	"write" : $[
 	    `abort	: `abort,
+	    `cancel	: `abort,
 	    `next	: `next
 	]
     ];
