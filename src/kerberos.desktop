@@ -1,0 +1,54 @@
+[Desktop Entry]
+Type=Application
+Categories=Qt;X-SuSE-YaST-Net_advanced;
+
+X-KDE-ModuleType=Library
+X-KDE-RootOnly=true
+X-KDE-HasReadOnlyMode=true
+X-KDE-Library=yast2
+X-KDE-FactoryName=kerberos_client
+
+X-SuSE-YaST-Group=Net_advanced
+X-SuSE-YaST-Argument=
+X-SuSE-YaST-RootOnly=true
+X-SuSE-YaST-AutoInst=all
+X-SuSE-YaST-Geometry=
+X-SuSE-YaST-SortKey=
+X-SuSE-YaST-AutoinstResource=kerberos
+
+Icon=kerberos-client
+Exec=/sbin/yast2 kerberos-client 
+
+Name=Kerberos Client
+GenericName=Configure a Kerberos Client
+Name[cs]=Klient Kerberos
+GenericName[cs]=Konfigurovat Kerberos klienta
+Name[de]=Kerberos-Client
+GenericName[de]=Konfiguration eines Kerberos-Client
+Name[es]=Cliente Kerberos
+GenericName[es]=Configurar un cliente Kerberos
+Name[hu]=Kerberos kliens
+GenericName[hu]=Állítson be Kerberos klienst
+Name[it]=Client Kerberos
+GenericName[it]=Configura un client Kerberos
+Name[ko]=Kerberos 클라이언트
+GenericName[ko]=Kerberos 클라이언트 설정
+Name[nl]=Kerberos cliënt
+GenericName[nl]=Configureer een Kerberos cliënt
+Name[pt]=Cliente Kerberos
+GenericName[pt]=Configurar cliente Kerberos
+Name[sk]=Klient Kerberos
+GenericName[sk]=Konfigurácia klienta Kerberos
+Name[sv]=Kerberos-klient
+GenericName[sv]=Ställ in en Kerberos-klient
+Name[el]=Πελάτης Kerberos
+GenericName[el]=Ρυθμίσετε έναν Πελάτη Kerberos
+Name[fr]=Client Kerberos
+GenericName[fr]=Configurer un client Kerberos
+Name[ja]=Kerberos クライアント
+GenericName[ja]=Kerberos クライアントを設定する
+Name[lt]=Kerberos klientas
+GenericName[lt]=Konfigūruoti Kerberos klientą
+Name[sl]=Kerberos odjemalec
+GenericName[sl]=Nastavite Kerberos odjemalca
+GenericName[tr]=Bir Kerberos suncusunu yapılandırın
