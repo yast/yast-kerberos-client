@@ -116,20 +116,17 @@ map cmdline = $[
     */
     "actions"		: $[
 	"pam" :$[
-	    "handler"	: ``(KerberosEnableHandler()),
-//	    "handler"	: KerberosEnableHandler, TODO NI
+	    "handler"	: KerberosEnableHandler,
 	    // translators: command line help text for pam action
 	    "help"	: _("Enable or disable Kerberos authentication")
 	],
 	"summary" :$[
-	    "handler"	: ``(KerberosSummaryHandler()),
-//	    "handler"	: KerberosSummaryHandler, TODO NI
+	    "handler"	: KerberosSummaryHandler,
 	    // translators: command line help text for summary action
 	    "help"	: _("Configuration summary of Kerberos client")
 	],
 	"configure"	: $[
-	    "handler"	: ``(KerberosChangeConfiguration()),
-//	    "handler"	: KerberosChangeConfiguration, TODO NI
+	    "handler"	: KerberosChangeConfiguration,
 	    // translators: command line help text for configure action
 	    "help"	: _("Change the global settings of Kerberos client")
 	]

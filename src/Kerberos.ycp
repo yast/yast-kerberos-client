@@ -28,7 +28,7 @@ import "Label";
 /**
  * Required packages for this module to operate
  */
-global list required_packages = ["pam_krb5", "heimdal-lib"];
+global list<string> required_packages = ["pam_krb5", "heimdal-lib"];
 
 global boolean write_only = false;
 
@@ -80,7 +80,7 @@ global string minimum_uid = "0";
 string ssh_section = "*";
 
 // packages to install (openssh, openafs, heimdal-* etc.)
-global list packages = [];
+global list<string> packages = [];
 
 /**
  * Data was modified?
@@ -368,7 +368,7 @@ global define boolean Write () ``{
     {
 	y2debug ("packages to install: %1", packages);
 	Progress::NextStage ();
-	list to_install = [];
+	list<string> to_install = [];
 	// check if packages are avialable...
 	foreach (string p, packages, ``{
 	    if (Require::IsPackageAvailable (p))

@@ -105,7 +105,7 @@ domain name is usually used.</p>
     boolean use_pam_krb = Kerberos::use_pam_krb;
     boolean afs_available = true;
 
-    list packages = Kerberos::packages;
+    list<string> packages = Kerberos::packages;
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (0.5),
@@ -280,7 +280,7 @@ AFS cannot be enabled.
 are necessary for using AFS.
 Install them?
 ")))
-			packages = union(packages,["openafs","openafs-client"]);
+			packages = (list<string>) union(packages,["openafs","openafs-client"]);
 		    else
 		    {
 			result = nil;
@@ -331,7 +331,7 @@ Install this package?")))
 	    Kerberos::afs_modified	= true;
 	    Kerberos::pam_modified	= true;
 	}
-	Kerberos::packages = union (Kerberos::packages, packages);
+	Kerberos::packages = (list<string>) union (Kerberos::packages, packages);
     }
     return result;
 }
