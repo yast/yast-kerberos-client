@@ -88,6 +88,7 @@ global define symbol MainSequence() ``{
     map aliases = $[
 	"pam"		: ``( PamDialog() ),
 	"configure"	: ``( ConfigureDialog() ),
+	"advanced"	: ``( AdvancedDialog() ),
 	"abort"		: ``( ReallyAbort()),
     ];
 
@@ -100,7 +101,12 @@ global define symbol MainSequence() ``{
 	],
 	"configure" : $[
 	    `abort	: "abort",
-	    `next	: `next
+	    `next	: "advanced",
+//	    `next	: `next
+	],
+	"advanced" : $[
+	    `abort	: "abort",
+	    `next	: `next,
 	],
 	"abort": $[
 	    `abort	: `abort,

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Aug  6 13:44:39 CEST 2003 - jsuchome@suse.de
+
+- new workflow, enabled editing more settings
+- AFS support
+- new agents for /etc/sysconfig/afs-client, /etc/ssh/ssh_config
+- 2.8.2
+
+-------------------------------------------------------------------
 Mon Aug  4 15:59:08 CEST 2003 - jsuchome@suse.de
 
 - using new option for pam_unix2 (call_modules)

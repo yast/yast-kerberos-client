@@ -24,6 +24,7 @@ y2milestone ("Kerberos-client module started");
 import "Kerberos";
 import "Wizard";
 import "Report";
+
 include "kerberos-client/wizards.ycp";
 
 /* is this proposal or not? */
