@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 18 14:22:07 CET 2003 - jsuchome@suse.cz
+
+- adapted to new Network types interface
+
+-------------------------------------------------------------------
 Thu Sep 25 13:44:52 CEST 2003 - jsuchome@suse.cz
 
 - changed button label in Advanced dialog: Next to Ok

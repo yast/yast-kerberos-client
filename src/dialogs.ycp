@@ -239,7 +239,7 @@ domain name is usually used.</p>
 		UI::SetFocus (`id(`afs_serverip));
                 continue;
             }
-	    if (use_afs && !check_ip4 (afs_serverip))
+	    if (use_afs && !IP::Check4 (afs_serverip))
 	    {
 		/* Popup text */
 		Popup::Error(_("The IP address is incorrect"));
