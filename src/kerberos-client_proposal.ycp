@@ -37,8 +37,8 @@ if(func == "MakeProposal") {
 	Progress::off();
 	Kerberos::Read();
     }*/
-    list sum = Kerberos::Summary(false);
-    proposal = select(sum, 0, "");
+    list sum = Kerberos::Summary ();
+    proposal = sum[0]:"";
     Progress::on();
 
     ret = $[
@@ -50,7 +50,7 @@ if(func == "MakeProposal") {
 /* run the module */
 else if(func == "AskUser") {
     map stored = Kerberos::Export();
-    symbol seq = WFM::CallFunction(`kerberos-client(.propose));
+    any seq = WFM::CallFunction ("kerberos-client", [ .propose ] );
     if(seq != `next) Kerberos::Import(stored);
     y2debug("stored=%1",stored);
     y2debug("seq=%1",seq);
