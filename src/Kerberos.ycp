@@ -89,11 +89,31 @@ global block AbortFunction = nil;
 global define boolean Import (map settings) ``{
     use_pam_krb = settings["pam_login", "use_kerberos"]:false;
 //    control	= settings["pam_login", "authentication_mode"]:"";
-    default_domain = settings["kerberos_client", "default_domain"]:"";
-    default_realm = settings["kerberos_client", "default_realm"]:"";
-    kdc = settings["kerberos_client", "kdc_server"]:"";
-    clockskew = settings["kerberos_client", "clockskew"]:clockskew;
 
+	map client = settings["kerberos_client"]:$[];
+    default_domain = client["default_domain"]:"";
+    default_realm = client["default_realm"]:"";
+    kdc = client["kdc_server"]:"";
+    clockskew = client["clockskew"]:clockskew;
+
+    afs_server = client["afs_server"]:"";
+    afs_cell = client["afs_cell"]:"";
+	if (size(afs_server) > 0 )
+		use_afs = true;
+	else
+		use_afs = false;
+
+    ssh_support = client["ssh_support"]:false;
+    ticket_lifetime = client["ticket_lifetime"]:"1d";
+    renew_lifetime = client["renew_lifetime"]:"1d";
+	forwardable = client["forwardable"]:true;
+	proxiable = client["proxiable"]:false;
+    retain_after_close = client["retain_after_close"]:false;
+    minimum_uid = client["minimum_uid"]:0;
+
+    pam_modified = true;
+    afs_modified = true;
+    modified = true;
     return true;
 }
 
@@ -113,7 +133,17 @@ global define map Export () ``{
 			    "default_domain"		: default_domain,
 			    "default_realm"		: default_realm,
 			    "kdc_server"		: kdc,
-			    "clockskew"			: clockskew
+			    "clockskew"			: clockskew,
+				"afs_server"	    : afs_server,
+				"afs_cell"	        : afs_cell,
+				"ssh_support"       : ssh_support,
+				"ticket_lifetime"   : ticket_lifetime,
+                "renew_lifetime"    : renew_lifetime,
+				"forwardable"       : forwardable,
+                "proxiable"         : proxiable,
+                "retain_after_close": retain_after_close,
+                "minimum_uid"       : minimum_uid
+
 	]
     ];
 }
