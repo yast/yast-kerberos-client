@@ -28,6 +28,7 @@ global boolean write_only = false;
 global boolean use_pam_krb = false;
 // if pam_krb5afs module is used for login
 global boolean use_afs = false;
+list auth_modules = [];
 
 // if pam_unix is in /etc/pam.d/login
 boolean pam_unix_present = false;
@@ -112,12 +113,26 @@ global define map Export () ``{
  */
 global define boolean Read () ``{
 
-    // FIXME check if kerberos is enabled in /etc/pam.d/* ?
-
     // check only "auth"?
-    list pam_sett = PamSettings::GetValues ("pam_unix2", "auth");
-    if (contains (PamSettings::GetValues ("pam_unix2", "auth"), "use_krb5"))
-	use_pam_krb = true;
+    list auth_settings = PamSettings::GetValues ("pam_unix2", "auth");
+    boolean comment = false;
+    foreach (`val, auth_settings, ``{
+	if (substring (val, 0, 1) == "#")
+	    comment = true;
+	if (comment)
+	    return;
+	if (contains (auth_settings, "use_krb5"))
+	    use_pam_krb = true;
+	if (issubstring (val, "call_modules="))
+	{
+	    auth_modules = splitstring (select (splitstring (val, "="), 1, ""),",");
+	    if (contains (auth_modules, "krb5afs"))
+	    {
+		use_pam_krb = true;
+		use_afs	= true;
+	    }
+	}
+    });
 
     // now read the settings from /etc/krb5.conf
     if (FileExists ("/etc/krb5.conf"))
@@ -201,11 +216,31 @@ _("<p>To use PAM authentication with Kerberos,
 the package <b>%1</b> is required.<br>
 Install this package now?</p>")))
 	    {
-		// pam settigs -- TODO use Pam::AddModule?
-		string option = (!use_afs) ? "use_krb5" : "call_module=krb5afs";
-		foreach (`type, [ "account", "auth", "password" ], ``{
-		    PamSettings::AddValue ("unix2", type, "use_krb5");
-		});
+		// pam settigs: use only one call of pam module:
+		// either ususal pam_krb (via use_krb5 option) or krb5afs
+		if (!use_afs)
+		{
+		    auth_modules = filter (`m, auth_modules,``(m != "krb5afs"));
+		    foreach (`type, [ "account", "auth", "password" ], ``{
+			PamSettings::AddValue ("unix2", type, "use_krb5");
+			// TODO use Pam::RemoveModule!
+			PamSettings::RemoveValue ("unix2", type,"call_modules");
+			if (auth_modules != [])
+			    PamSettings::AddValue ("unix2", type, sformat (
+			    "call_modules=%1", mergestring (auth_modules,",")));
+		    });
+		}
+		else
+		{
+		    // TODO use Pam::AddModule!
+		    auth_modules = union (auth_modules, ["krb5afs"]);
+		    foreach (`type, [ "account", "auth", "password" ], ``{
+			PamSettings::RemoveValue ("unix2", type, "use_krb5");
+			PamSettings::RemoveValue ("unix2", type,"call_modules");
+			PamSettings::AddValue ("unix2", type, sformat (
+			    "call_modules=%1", mergestring (auth_modules,",")));
+		    });
+		}
 	    }
             else
                 // instalation not succesful ?
@@ -213,9 +248,14 @@ Install this package now?</p>")))
         }
         else
         {
+	    auth_modules = filter (`m, auth_modules,``(m != "krb5afs"));
 	    foreach (`type, [ "account", "auth", "password" ], ``{
 		PamSettings::RemoveValue ("unix2", type, "use_krb5");
-		PamSettings::RemoveValue ("unix2", type, "call_module=krb5afs");
+		PamSettings::RemoveValue ("unix2", type, "call_modules");
+		if (auth_modules != [])
+		    PamSettings::AddValue ("unix2", type, sformat (
+			"call_modules=%1", mergestring (auth_modules,",")));
+
 	    });
         }
     }

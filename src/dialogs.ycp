@@ -157,6 +157,8 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
     {
         result = UI::UserInput ();
 
+//	use_afs = UI::QueryWidget (`id(`afs), `Value);
+
         if (result == `pamyes || result == `pamno)
 	{
             use_pam_krb = (result == `pamyes);

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug  4 15:59:08 CEST 2003 - jsuchome@suse.de
+
+- using new option for pam_unix2 (call_modules)
+- added .desktop file
+
+-------------------------------------------------------------------
 Fri Jul 18 16:01:57 CEST 2003 - jsuchome@suse.de
 
 - pam_krb is now set via PamSettings interface, not into /etc/pam.d/*
