@@ -33,7 +33,10 @@ global define symbol ReallyAbort () ``{
 	ret = Popup::ReallyAbort (Kerberos::Modified());;
     }
     else
-	ret = CallFunction(`inst_confirm_abort(`incomplete));
+    {
+	ret = Popup::ConfirmAbort (`incomplete);
+    }
+
     if ( ret )	return `abort;
     else	return `back;
 }
@@ -67,7 +70,7 @@ global define symbol ConfigureDialog() ``{
     // help text 1/5
     string help_text = _("<p>
 <b>Authentication with Kerberos</b><br>
-You can update your PAM settings to enable Kerberos authentication for your users. 
+You can update your PAM settings to enable Kerberos authentication for your users.
 </p>
 ") +
     // help text 2/5
