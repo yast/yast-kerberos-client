@@ -28,41 +28,53 @@ y2milestone("Kerberos-client auto started");
 import "Kerberos";
 include "kerberos-client/wizards.ycp";
 
-string func = WFM::Args(0);
-map param = WFM::Args(1);
+any ret = nil;
+string func = "";
+map param = $[];
+
+/* Check arguments */
+if(size(Args()) > 0 && is(Args(0), string)) {
+    func = WFM::Args(0);
+    if(size(Args()) > 1 && is(Args(1), map))
+	param = WFM::Args(1);
+}
+y2debug("func=%1", func);
+y2debug("param=%1", param);
+
 
 /* create a  summary*/
-if(func == "Summary") {
-    Kerberos::Import(param);
-    return ( select(Kerberos::Summary(),0, ""));
+if(func == "Import") {
+    ret = Kerberos::Import(param);
+}
+/* create a  summary*/
+else if(func == "Summary") {
+    ret  select(Kerberos::Summary(),0, "");
 }
 else if (func == "Reset") {
     Kerberos::Import($[]);
-	return $[];
+	ret =  $[];
 }
 else if (func == "Change") {
-    Kerberos::Import(param);
-    any res = KerberosAutoSequence();
-    return res;
+    ret = KerberosAutoSequence();
 }
 else if (func == "Result") {
-    return(Kerberos::Export());
+    ret = Kerberos::Export();
 }
 else if (func == "Write") {
-	Kerberos::Import(param);
 	Kerberos::write_only = true;
-	boolean ret = Kerberos::Write();
-	return ret;
+	ret = Kerberos::Write();
 }
 /* unknown function */
 else {
     y2error("unknown function: %1", func);
-    return false;
+    ret = false;
 }
 
+y2debug("ret=%1", ret);
 y2milestone("Kerberos-client auto finished");
 y2milestone("----------------------------------------");
 
+return ret;
 
 /* EOF */
 }
