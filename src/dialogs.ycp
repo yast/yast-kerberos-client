@@ -455,6 +455,10 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
         // dialog title
         _("Advanced Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::OKButton ());
+    if (Mode::config)
+    {
+        UI::ChangeWidget(`id(`ntp), `Enabled, false);
+    }
 
     symbol result = nil;
     do
