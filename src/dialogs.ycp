@@ -85,12 +85,14 @@ Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>a
 It is common practice to use the domain name in uppercase as your default realm name. You can select freely, however.</p>
 ") +
 
+    /* ---- AFS not supported
     // help text 4/5
     _("<p>If you are using Kerberos authentication together with the AFS file
 system, check <b>Kerberos Support for AFS</b>. Enter an IP
 address for the <b>AFS Server</b>. As the name of <b>AFS Cell</b>, the DNS
 domain name is usually used.</p>
 ") +
+    */
 
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
@@ -103,7 +105,7 @@ domain name is usually used.</p>
     string afs_serverip	= Kerberos::afs_serverip;
     boolean use_afs	= Kerberos::use_afs;
     boolean use_pam_krb = Kerberos::use_pam_krb;
-    boolean afs_available = true;
+    boolean afs_available = false;
 
     list<string> packages = Kerberos::packages;
 
@@ -116,7 +118,7 @@ domain name is usually used.</p>
 		// radio button label
                 `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))
 	),
-        `VSpacing (0.5),
+        `VSpacing (),
 	// frame label
 	`Frame (_("Basic Kerberos Settings"), `HBox(`HSpacing (0.5), `VBox(
 	    `VSpacing (0.5),
@@ -131,6 +133,7 @@ domain name is usually used.</p>
             // infield label
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
+	/* ---- AFS not supported
         `VSpacing (0.2),
 	// frame label
 	`Frame (_("AFS Settings"), `HBox(`HSpacing (0.5), `VBox(
@@ -148,7 +151,8 @@ domain name is usually used.</p>
 	    ),
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-        `VSpacing (0.2),
+	*/
+        `VSpacing (),
 	`Right(`PushButton (`id(`advanced), _("Ad&vanced Settings..."))),
         `VSpacing (0.2)
     ), `HSpacing(3));
@@ -159,10 +163,13 @@ domain name is usually used.</p>
         _("Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::FinishButton ());
 
+    /* ---- AFS not supported
     UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
     UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
+    */
 
-    foreach (symbol widget, [`realm, `domain, `kdc, `afs, `advanced], ``{
+//    foreach (symbol widget, [`realm, `domain, `kdc, `afs, `advanced], ``{
+    foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
 	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
     });
 
@@ -170,12 +177,14 @@ domain name is usually used.</p>
     do
     {
         result	= (symbol) UI::UserInput ();
-	use_afs = (boolean)UI::QueryWidget (`id(`afs), `Value) && afs_available;
+//	use_afs = (boolean)UI::QueryWidget (`id(`afs), `Value) && afs_available;
 
+	/*
 	if (result == `afs) {
 	    UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
 	    UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
 	}
+	*/
 
         if (result == `pamyes || result == `pamno)
 	{
@@ -183,18 +192,18 @@ domain name is usually used.</p>
 	    foreach (symbol widget, [`realm, `domain, `kdc, `advanced],``{
 		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	    });
-	    UI::ChangeWidget (`id (`afs),`Enabled,use_pam_krb && afs_available);
+//	    UI::ChangeWidget (`id (`afs),`Enabled,use_pam_krb && afs_available);
 	    if (result == `pamno)
 	    {
 		UI::ChangeWidget (`id (`cell), `Enabled, false);
-		UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
+//		UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
 	    }
 	    else
 	    {
 		UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
-		UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
+//		UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
 	    }
-	    use_afs = use_afs && use_pam_krb;
+//	    use_afs = use_afs && use_pam_krb;
 	}
 
         if (result == `next || result == `advanced) {
@@ -202,9 +211,11 @@ domain name is usually used.</p>
             default_realm = (string) UI::QueryWidget (`id(`realm), `Value);
             default_domain = (string) UI::QueryWidget (`id(`domain), `Value);
             kdc = (string) UI::QueryWidget (`id(`kdc), `Value);
+/*
             afs_serverip = (string) UI::QueryWidget (`id(`afs_serverip), `Value);
             cell = (string) UI::QueryWidget (`id(`cell), `Value);
 	    use_afs = use_afs && use_pam_krb;
+*/
 
             if (use_pam_krb && default_realm == "")
             {
@@ -221,6 +232,7 @@ domain name is usually used.</p>
 		UI::SetFocus (`id(`kdc));
                 continue;
             }
+	    /* ---- AFS not supported
 	    if (use_afs && afs_serverip == "")
             {
                 // error popup label
@@ -230,7 +242,7 @@ domain name is usually used.</p>
             }
 	    if (use_afs && !IP::Check4 (afs_serverip))
 	    {
-		/* Popup text */
+		// Popup text
 		Popup::Error(_("The IP address is incorrect"));
 		UI::SetFocus(`id(`afs_serverip));
 		continue;
@@ -293,6 +305,7 @@ Install them?
 		packages = filter (`p, packages, ``( !contains (
 		    ["openafs", "openafs-client"], p)));
 	    }
+	    */
         }
 
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
@@ -322,6 +335,7 @@ Install this package?")))
             Kerberos::use_pam_krb = use_pam_krb;
         }
 
+	/* ---- AFS not supported
 	if (cell != Kerberos::afs_cell || use_afs != Kerberos::use_afs ||
 	    afs_serverip != Kerberos::afs_serverip)
 	{
@@ -331,6 +345,7 @@ Install this package?")))
 	    Kerberos::afs_modified	= true;
 	    Kerberos::pam_modified	= true;
 	}
+	*/
 	Kerberos::packages = (list<string>) union (Kerberos::packages, packages);
     }
     return result;

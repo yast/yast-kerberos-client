@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar  5 12:50:04 CET 2004 - jsuchome@suse.cz
+
+- correct type handling
+- removed AFS configuration
+- 2.9.4
+
+-------------------------------------------------------------------
 Mon Mar  1 14:51:11 CET 2004 - jsuchome@suse.cz
 
 - merged texts from proofread

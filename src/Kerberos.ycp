@@ -99,7 +99,6 @@ global define boolean Modified() ``{
  */
 global define boolean Import (map settings) ``{
     use_pam_krb = settings["pam_login", "use_kerberos"]:false;
-//    control	= settings["pam_login", "authentication_mode"]:"";
 
 	map client = settings["kerberos_client"]:$[];
     default_domain = client["default_domain"]:"";
@@ -107,26 +106,28 @@ global define boolean Import (map settings) ``{
     kdc = client["kdc_server"]:"";
     clockskew = client["clockskew"]:clockskew;
 
+    /* AFS not supported
     afs_serverip = client["afs_serverip"]:"";
     afs_cell = client["afs_cell"]:"";
 	if (size(afs_serverip) > 0 )
 		use_afs = true;
 	else
 		use_afs = false;
+    afs_modified = true;
+    */
 
     ssh_support = client["ssh_support"]:false;
     ticket_lifetime = client["ticket_lifetime"]:"1d";
     renew_lifetime = client["renew_lifetime"]:"1d";
-	boolean tmp_forwardable = client["forwardable"]:true;
-	forwardable= (tmp_forwardable) ? "true": "false";
-	boolean tmp_proxiable = client["proxiable"]:false;
-	proxiable = (tmp_proxiable) ?   "true" :  "false";
+    boolean tmp_forwardable = client["forwardable"]:true;
+    forwardable= (tmp_forwardable) ? "true": "false";
+    boolean tmp_proxiable = client["proxiable"]:false;
+    proxiable = (tmp_proxiable) ?   "true" :  "false";
     boolean tmp_retain_after_close = client["retain_after_close"]:false;
-	retain_after_close = (tmp_retain_after_close) ? "true" : "false";
+    retain_after_close = (tmp_retain_after_close) ? "true" : "false";
     minimum_uid = client["minimum_uid"]:"0";
 
     pam_modified = true;
-    afs_modified = true;
     modified = true;
     return true;
 }
@@ -140,20 +141,21 @@ global define map Export () ``{
 
     return $[
 	"pam_login": $[
-			    "use_kerberos"		: use_pam_krb,
-//			    "authentication_mode"	: control
+		"use_kerberos"		: use_pam_krb,
 	],
 	"kerberos_client": $[
-			    "default_domain"		: default_domain,
-			    "default_realm"		: default_realm,
-			    "kdc_server"		: kdc,
-			    "clockskew"			: clockskew,
-				"afs_serverip"	    : afs_serverip,
-				"afs_cell"	        : afs_cell,
-				"ssh_support"       : ssh_support,
-				"ticket_lifetime"   : ticket_lifetime,
+		"default_domain"	: default_domain,
+		"default_realm"		: default_realm,
+		"kdc_server"		: kdc,
+		"clockskew"		: clockskew,
+		/*
+		"afs_serverip"		: afs_serverip,
+		"afs_cell"	        : afs_cell,
+		*/
+		"ssh_support"       : ssh_support,
+		"ticket_lifetime"   : ticket_lifetime,
                 "renew_lifetime"    : renew_lifetime,
-				"forwardable"       : ( forwardable == "true" ) ? true : false,
+		"forwardable"       : ( forwardable == "true" ) ? true : false,
                 "proxiable"         : ( proxiable == "true") ? true: false,
                 "retain_after_close": ( retain_after_close == "true") ? true: false ,
                 "minimum_uid"       : minimum_uid
@@ -211,7 +213,7 @@ global define boolean Read () ``{
 	    if (contains (auth_modules, "krb5afs"))
 	    {
 		use_pam_krb = true;
-		use_afs	= true;
+//		use_afs	= true;
 	    }
 	}
     });
@@ -278,7 +280,7 @@ global define boolean Read () ``{
     if (afs_cell == nil || afs_cell == "")
 	afs_cell = tolower (default_realm);
     if (afs_serverip == nil)
-	afs_serverip = "";//FIXME check KDC?
+	afs_serverip = "";
     if (regenerate_ci == nil || regenerate_ci == "")
 	regenerate_ci = "yes";
 
@@ -330,14 +332,14 @@ global define boolean Write () ``{
     // dialog caption
     string caption = _("Saving Kerberos Client Configuration");
 
-    integer no_stages = 4;
-    list stages =  [
+    integer no_stages = 3;
+    list<string> stages =  [
 	    // progress stage label
 	    _("Write PAM settings"),
 	    // progress stage label
 	    _("Write Kerberos client settings"),
 	    // progress stage label
-	    _("Write AFS settings"),
+//	    _("Write AFS settings"), ---- AFS not supported
 	    // progress stage label
 	    _("Write openssh settings"),
     ];
@@ -347,7 +349,7 @@ global define boolean Write () ``{
 	    // progress step label
 	    _("Writing Kerberos client settings..."),
 	    // progress step label
-	    _("Writing AFS settings..."),
+//	    _("Writing AFS settings..."),---- AFS not supported
 	    // progress step label
 	    _("Writing openssh settings..."),
 	    // final progress step label
@@ -376,6 +378,7 @@ global define boolean Write () ``{
 	});
 	Require::DoInstallAndRemoveTarget (to_install, []);
 
+	/* ---- AFS not supported
 	if (use_afs && !Require::AreAllPackagesInstalledTarget (["openafs",
 	    "openafs-client"]))
 	{
@@ -385,6 +388,7 @@ AFS will not be enabled."));
 	    use_afs = false;
 	    afs_modified = false;
 	}
+	*/
     }
 
     Progress::NextStage ();
@@ -408,9 +412,9 @@ AFS will not be enabled."));
 			    "call_modules=%1", mergestring (auth_modules,",")));
 		});
 	    }
+	    /* ---- AFS not supported
 	    else
 	    {
-		// TODO use Pam::AddModule!
 		auth_modules = (list<string>) union (auth_modules, ["krb5afs"]);
 		foreach (string type, [ "account", "auth", "password" ], ``{
 		    PamSettings::RemoveValue ("unix2", type, "use_krb5");
@@ -419,6 +423,7 @@ AFS will not be enabled."));
 			"call_modules=%1", mergestring (auth_modules,",")));
 		});
 	    }
+	    */
         }
         else
         {
@@ -498,10 +503,13 @@ AFS will not be enabled."));
 	SCR::Write (add (pam_sect, "retain_after_close"), retain_after_close);
 	SCR::Write (add (pam_sect, "minimum_uid"), minimum_uid);
 
+	/*
 	if (afs_modified)
 	    SCR::Write (add (pam_sect, "afs_cells"), afs_cell);
+	*/
     }
 
+    /* AFS not supported
     // -- write AFS settings
     Progress::NextStage ();
 
@@ -583,6 +591,7 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 	    }
 	}
     }
+    */
 
     // -- write openssh settings
     Progress::NextStage ();
