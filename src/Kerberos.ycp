@@ -106,9 +106,6 @@ global define boolean Import (map settings) ``{
     kdc = client["kdc_server"]:"";
     clockskew = client["clockskew"]:clockskew;
 
-    /* ----- AFS not supported */
-    if (false)
-    {
     afs_serverip = client["afs_serverip"]:"";
     afs_cell = client["afs_cell"]:"";
     if (size(afs_serverip) > 0)
@@ -116,7 +113,6 @@ global define boolean Import (map settings) ``{
     else
 	use_afs = false;
     afs_modified = true;
-    }
 
     ssh_support = client["ssh_support"]:false;
     ticket_lifetime = client["ticket_lifetime"]:"1d";
@@ -150,10 +146,8 @@ global define map Export () ``{
 		"default_realm"		: default_realm,
 		"kdc_server"		: kdc,
 		"clockskew"		: clockskew,
-		/* --  AFS not supported
 		"afs_serverip"		: afs_serverip,
 		"afs_cell"	        : afs_cell,
-		*/
 		"ssh_support"       : ssh_support,
 		"ticket_lifetime"   : ticket_lifetime,
                 "renew_lifetime"    : renew_lifetime,
@@ -215,7 +209,7 @@ global define boolean Read () ``{
 	    if (contains (auth_modules, "krb5afs"))
 	    {
 		use_pam_krb = true;
-//		use_afs	= true;  --- AFS not supported
+		use_afs	= true;
 	    }
 	}
     });
@@ -334,15 +328,7 @@ global define boolean Write () ``{
     // dialog caption
     string caption = _("Saving Kerberos Client Configuration");
 
-    if (false) // ---- AFS not supported
-    {
-	// progress stage label
-	string stage	= _("Write AFS settings");
-	// progress step label
-	string step	= _("Writing AFS settings...");
-    }
-
-    integer no_stages = 3;
+    integer no_stages = 4;
     list<string> stages =  [
 	    // progress stage label
 	    _("Write PAM settings"),
@@ -350,6 +336,8 @@ global define boolean Write () ``{
 	    _("Write Kerberos client settings"),
 	    // progress stage label
 	    _("Write openssh settings"),
+	    // progress stage label
+	    _("Write AFS settings")
     ];
     list steps = [
 	    // progress step label
@@ -358,6 +346,8 @@ global define boolean Write () ``{
 	    _("Writing Kerberos client settings..."),
 	    // progress step label
 	    _("Writing openssh settings..."),
+	    // progress step label
+	    _("Writing AFS settings..."),
 	    // final progress step label
 	    _("Finished")
     ];
@@ -384,9 +374,6 @@ global define boolean Write () ``{
 	});
 	Package::DoInstallAndRemove (to_install, []);
 
-	/* ---- AFS not supported */
-	if (false)
-	{
 	if (use_afs && !Package::InstalledAll (["openafs", "openafs-client"]))
 	{
 	    // error popup
@@ -394,7 +381,6 @@ global define boolean Write () ``{
 AFS will not be enabled."));
 	    use_afs = false;
 	    afs_modified = false;
-	}
 	}
 	packages = [];
     }
@@ -420,8 +406,7 @@ AFS will not be enabled."));
 			    "call_modules=%1", mergestring (auth_modules,",")));
 		});
 	    }
-	    /* ---- AFS not supported */
-	    else if (false)
+	    else
 	    {
 		auth_modules = (list<string>) union (auth_modules, ["krb5afs"]);
 		foreach (string type, [ "account", "auth", "password" ], ``{
@@ -516,10 +501,8 @@ AFS will not be enabled."));
 	SCR::Write (add (pam_sect, "retain_after_close"), retain_after_close);
 	SCR::Write (add (pam_sect, "minimum_uid"), minimum_uid);
 
-	/* AFS not supported
 	if (afs_modified)
 	    SCR::Write (add (pam_sect, "afs_cells"), afs_cell);
-	*/
 
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);
@@ -529,9 +512,6 @@ AFS will not be enabled."));
 	SCR::UnmountAgent (.etc.krb5_conf);
     }
 
-    /* AFS not supported */
-    if (false)
-    {
     // -- write AFS settings
     Progress::NextStage ();
 
@@ -549,27 +529,23 @@ AFS will not be enabled."));
 	    regenerate_ci = "yes";
 	SCR::Write (.sysconfig.afs-client.REGENERATE_CELL_INFO, regenerate_ci);
 	afs_server = afs_cell;
-	// get the name via 'host ip_addr' call
-	if (use_afs && SCR::Read (.target.stat, "/usr/bin/host") != $[])
+	// get the name via 'getent hosts ip_addr' call
+	if (use_afs && SCR::Read (.target.stat, "/usr/bin/getent") != $[])
 	{
-	    // TODO use 'getent hosts ip' instead of host (see ag_hostnames)
 	    map out = (map) SCR::Execute (.target.bash_output,
-		"LANG=C /usr/bin/host -W 5 " + afs_serverip);
+		"LANG=C /usr/bin/getent hosts " + afs_serverip);
 	    if (out["stderr"]:"" == "")
 	    {
-		string host = deletechars (out["stdout"]:"", "\n");
-		if (!issubstring (host, "not found"))
+		string line = deletechars (out["stdout"]:"", "\n");
+		if (line != "")
 		{
-		    list lh = splitstring (host, " ");
-		    if (lh[ size(lh) - 2]:"" == "pointer")
-			afs_server = lh [ size(lh) -1 ]:afs_server;
-		    // remove the last dot
-		    if (substring (afs_server, size (afs_server) - 1, 1) == ".")
-			afs_server = substring(afs_server,0,size(afs_server)-1);
+		    list ll = splitstring (line, " \t");
+		    if (ll[1]:"" != "")
+			afs_server	= ll[1]:"";
 		}
 	    }
 	    else
-		y2error ("/usr/bin/host' returned error: %1", out["stderr"]:"");
+		y2error ("'getent hosts' returned error: %1", out["stderr"]:"");
 	}
 	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER_NAME, afs_server);
 
@@ -612,7 +588,6 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 		    Service::RunInitScript ("afs-client", command);
 	    }
 	}
-    }
     }
 
     // -- write openssh settings
