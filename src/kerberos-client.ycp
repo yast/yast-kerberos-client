@@ -3,6 +3,7 @@
  * Package:	Configuration of kerberos-client
  * Summary: Just a redirection
  * Authors:  Jiri Suchomel <jsuchome@suse.cz>
+ * $Id$
  */
 
 {
