@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 30 08:38:51 CEST 2004 - jsuchome@suse.cz
+
+- adapt to current 'continue' behaviour
+- 2.9.7
+
+-------------------------------------------------------------------
 Tue Mar 30 02:47:50 CEST 2004 - nashif@suse.de
 
 - #37426: Disable NTP Configuration in config mode (autoyast)

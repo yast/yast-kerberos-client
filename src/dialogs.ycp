@@ -224,6 +224,7 @@ domain name is usually used.</p>
 		// error popup label
 		Report::Error(_("Enter the default realm name."));
 		UI::SetFocus (`id(`realm));
+		result = `not_next;
 		continue;
             }
 
@@ -232,6 +233,7 @@ domain name is usually used.</p>
                 // error popup label
                 Report::Error(_("Enter the address of the KDC server."));
 		UI::SetFocus (`id(`kdc));
+		result = `not_next;
                 continue;
             }
 	    /* ---- AFS not supported
@@ -240,6 +242,7 @@ domain name is usually used.</p>
                 // error popup label
                 Report::Error(_("Enter the address of the AFS server."));
 		UI::SetFocus (`id(`afs_serverip));
+		result = `not_next;
                 continue;
             }
 	    if (use_afs && !IP::Check4 (afs_serverip))
@@ -247,6 +250,7 @@ domain name is usually used.</p>
 		// Popup text
 		Popup::Error(_("The IP address is incorrect"));
 		UI::SetFocus(`id(`afs_serverip));
+		result = `not_next;
 		continue;
 	    }
 	    if (use_afs && cell == "")
@@ -254,6 +258,7 @@ domain name is usually used.</p>
                 // error popup label
                 Report::Error(_("Enter the AFS cell name."));
 		UI::SetFocus (`id(`cell));
+		result = `not_next;
                 continue;
             }
 	    // check for openafs* packages
@@ -274,6 +279,7 @@ AFS cannot be enabled.
 			UI::ChangeWidget (`id (`afs), `Enabled, false);
 			UI::ChangeWidget (`id (`cell), `Enabled, false);
 			UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
+			result = `not_next;
 			continue;
 		    }
 		    if (!Mode::config && !Require::IsPackageAvailable ("openafs-client"))
@@ -287,6 +293,7 @@ AFS cannot be enabled.
 			UI::ChangeWidget (`id (`afs), `Enabled, false);
 			UI::ChangeWidget (`id (`cell), `Enabled, false);
 			UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
+			result = `not_next;
 			continue;
 		    }
 		    // yes/no pupup
@@ -297,7 +304,7 @@ Install them?
 			packages = (list<string>) union(packages,["openafs","openafs-client"]);
 		    else
 		    {
-			result = nil;
+			result = `not_next;
 			continue;
 		    }
 		}
@@ -486,6 +493,7 @@ Install it now?")))
 		Popup::Error (_("Invalid format of Ticket Lifetime entry.
 Try again."));
 		UI::SetFocus (`id(`ticket));
+		result = `not_next;
 		continue;
 	    }
             renew = (string) UI::QueryWidget (`id(`renew), `Value);
@@ -495,6 +503,7 @@ Try again."));
 		Popup::Error (_("Invalid format of Ticket Lifetime entry.
 Try again."));
 		UI::SetFocus (`id(`renew));
+		result = `not_next;
 		continue;
 	    }
             clockskew = (string) UI::QueryWidget (`id(`skew), `Value);
@@ -505,6 +514,7 @@ Try again."));
 Try again.
 "));
 		UI::SetFocus (`id(`skew));
+		result = `not_next;
 		continue;
 	    }
 
