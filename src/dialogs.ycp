@@ -72,10 +72,11 @@ You can update your PAM settings to enable Kerberos authentication for your user
 ") +
 
     // help text 2/3
-    _("<p>If you are using Kerberos authentication together with AFS file system, check <b>Kerberos for AFS</b> checkbox. To set cell name and AFS server for this cell, use <b>Configure</b> button.</p>") +
+    _("<p>To configure Kerberos client settings, click <b>Next</b>.</p>") +
 
     // help text 3/3
-    _("<p>To configure Kerberos client settings, click <b>Next</b>.</p>");
+    _("<p>If you are using Kerberos authentication together with AFS file system, check <b>Kerberos for AFS</b> checkbox. To set cell name and AFS server for this cell, use <b>Configure</b> button. As the name of AFS cell, the DNS domain
+name is usually used.</p>");
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
     boolean use_afs = Kerberos::use_afs;
@@ -288,6 +289,10 @@ for minutes, <i>h</i> for hours and <i>d</i> for days) and use it as a value
 suffix (e.g. <i>1d</i> or <i>24h</i> for one day).</p>") +
 
     // FIXME missing: forwardable/prox
+    /*
+    _("<p>With a <b>Forwardable Ticket</b>, user can get credentials on remote
+machines.") +
+    */
 
     // help text
     _("<p>If <b>Retain Tickets</b> is true, PAM module retains the tickets
@@ -298,9 +303,10 @@ after closing the session.</p>") +
 users with UIDs below the specified number will be ignored. It is useful for
 disabling Kerberos authentication for system administrator (<i>root</i>).</p>")+
 
-    // help text FIXME better?
+    // help text
     _("To enable Kerberos support for your openssh client, check the
-appropriate checkbox.");
+appropriate checkbox. In such case, Kerberos ticket will be used for user
+authentiction on the ssh server.");
 
     string uid		= Kerberos::minimum_uid;
     string ticket	= Kerberos::ticket_lifetime;
@@ -312,6 +318,7 @@ appropriate checkbox.");
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (1),
+	// frame label
 	`Frame (_("Ticket Attributes"), `HBox(`HSpacing (0.5), `VBox(
 	    `VSpacing (0.5),
 	    // textentry label
