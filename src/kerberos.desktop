@@ -55,3 +55,4 @@ GenericName[lt]=Konfigūruoti Kerberos klientą
 Name[sl]=Kerberos odjemalec
 GenericName[sl]=Nastavite Kerberos odjemalca
 GenericName[tr]=Bir Kerberos suncusunu yapılandırın
+X-KDE-SubstituteUID=true
