@@ -27,7 +27,6 @@ Summary:	Configuration of kerberos-client
 @clientdir@/kerberos-client_auto.ycp
 @moduledir@/Kerberos.ycp
 @moduledir@/Kerberos.ybc
-@configdir@/kerberos.y2cc
 @desktopdir@/kerberos.desktop
 @scrconfdir@/*.scr
 %dir @yncludedir@/kerberos-client
