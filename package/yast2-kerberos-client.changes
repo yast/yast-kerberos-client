@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 13 14:32:02 CEST 2003 - jsuchome@suse.de
+
+- do not ask for heimdal-tools in autoinst config (#28716)
+
+-------------------------------------------------------------------
 Wed Aug 13 08:06:11 CEST 2003 - jsuchome@suse.de
 
 - dialogs redesign, new helptext
