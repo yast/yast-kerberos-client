@@ -439,7 +439,7 @@ AFS will not be enabled."));
 	    });
         }
 	// write the changes now
-	PamSettings::Write ([]);
+	PamSettings::Write (false);
     }
 
     // -- write to /etc/krb5.conf
