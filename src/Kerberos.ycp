@@ -22,7 +22,7 @@ import "Package";
 import "PamSettings";
 import "Popup";
 import "Progress";
-import "Runlevel";
+import "Service";
 import "Summary";
 
 /**
@@ -539,9 +539,9 @@ AFS will not be enabled."));
     {
 	// Adjust runlevels in which service runs
 	if (use_afs)
-	    Runlevel::ServiceAdjust ("afs-client", "enable");
+	    Service::Enable ("afs-client");
 	else
-	    Runlevel::ServiceAdjust ("afs-client", "disable");
+	    Service::Disable ("afs-client");
 
 	SCR::Write (.sysconfig.afs-client.THIS_CELL, afs_cell);
 	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER, afs_serverip);
@@ -579,10 +579,10 @@ AFS will not be enabled."));
 	// stop service
 	if (!Mode::config)
 	{
-	    boolean running = Runlevel::ServiceStatus ("afs-client") == 0;
+	    boolean running = Service::Status ("afs-client") == 0;
 	    // start service for first time
 	    if (use_afs && !running)
-		Runlevel::RunInitScript ("afs-client", "start");
+		Service::RunInitScript ("afs-client", "start");
 	    else if (running)
 	    {
 		string command = "restart";
@@ -609,7 +609,7 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 		// popup header
 		if (Popup::AnyQuestion (_("AFS Settings Changed"), message,
 		    Label::YesButton(), Label::NoButton(), `focus_no))
-		    Runlevel::RunInitScript ("afs-client", command);
+		    Service::RunInitScript ("afs-client", command);
 	    }
 	}
     }
