@@ -17,15 +17,9 @@ textdomain "kerberos";
 
 import "Summary";
 
-/**
- * Abort function
- * return boolean return true if abort
- */
-global block AbortFunction = nil;
 
-
-global boolean proposal_valid = false;
-global boolean write_only = false;
+//global boolean proposal_valid = false;
+//global boolean write_only = false;
 
 // if pam_krb5 module is used for login
 global boolean use_pam_krb = false;
@@ -37,8 +31,10 @@ string saved_control = "";
 // argumets to pam module
 global string arguments = "";
 
-// default realm name
+// default realm and domain name
 global string default_realm = "";
+global string default_domain = "";
+
 
 // adress of KDC (key distribution centre) server for default realm
 global string kdc = "";
@@ -76,6 +72,7 @@ global define void Set(map settings)  ``{
 
 /**
  * Dump the Kerberos settings to a map, for autoinstallation use.
+ * @return map with settings
  */
 global define map Export () ``{
 	return $[];
@@ -106,7 +103,7 @@ global define boolean Read () ``{
     saved_control = control;
 
     // now read the settings from /etc/krb5.conf
-    if (SCR::Execute (.target.bash, "/usr/bin/test -e /etc/krb5.conf") == 0)
+    if (FileExists ("/etc/krb5.conf"))
     {
         y2debug("krb5.conf sections: %1", SCR::Dir(.etc.krb5_conf.s));
 
@@ -115,9 +112,33 @@ global define boolean Read () ``{
         clockskew = ReadString (.etc.krb5_conf.v.libdefaults.clockskew);
 
         kdc = ReadString ( add ( add (.etc.krb5_conf.v, default_realm), "kdc"));
+
+        default_domain = ReadString ( add ( add (.etc.krb5_conf.v,
+            default_realm), "default_domain"));
     }
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
+
+    // propose some good values, if there are install defaults
+    // what if user _wants_ to have MY.REALM?
+    if (default_domain == "" && FileExists ("/bin/ypdomainname"))
+    {
+        map yp_domain = SCR::Execute (.target.bash_output, "/bin/ypdomainname");
+        default_domain = yp_domain["stdout"]:"\n";
+        default_domain = substring (default_domain, 0, size(default_domain)-1);
+    }
+
+    if ((default_realm == "" || default_realm == "MY.REALM") &&
+        default_domain != "")
+    {
+        default_realm = toupper (default_domain);
+    }
+    if ((kdc == "" || kdc == "MY.COMPUTER") && FileExists ("/usr/bin/ypwhich"))
+    {
+        map yp_serv = SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
+        kdc = yp_serv["stdout"]:"\n";
+        kdc = substring (kdc,0 , size(kdc) - 1);
+    }
 
     return true;
 }
@@ -127,7 +148,7 @@ global define boolean Read () ``{
  * (No parameters because it is too short to abort)
  * @return true on success
  */
-global define boolean Write (boolean writeonly) ``{
+global define boolean Write () ``{
 
     boolean pam_installed = false;
     boolean ret = true;
@@ -171,11 +192,22 @@ Install this package now?")))
     // change the default realm name
     SCR::Write(.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
 
+    // write the mapping domain-realm
+    if (default_domain != "")
+    {
+        string domain = default_domain;
+        if ( findfirstof (domain, ".") != 0)
+            domain = "." + domain;
+        SCR::Write( add (.etc.krb5_conf.v.domain_realm, domain), default_realm);
+    }
+
     if (contains (SCR::Dir(.etc.krb5_conf.s), default_realm))
     {
         // update the default realm settings
-        SCR::Write(
-            add (add (.etc.krb5_conf.v, default_realm), "kdc"), kdc);
+        SCR::Write( add (add (.etc.krb5_conf.v, default_realm), "kdc"), kdc);
+        if (default_domain != "")
+            SCR::Write( add (add (.etc.krb5_conf.v, default_realm),
+                "default_domain"), default_domain);
     }
     else
     {
@@ -184,11 +216,20 @@ Install this package now?")))
         // write the settings of the new default realm
         SCR::Write(
             add (add (.etc.krb5_conf.v.realms, default_realm), "kdc"), kdc);
+        if (default_domain != "")
+            SCR::Write( add (add (.etc.krb5_conf.v.realms, default_realm),
+                "default_domain"), default_domain);
     }
 
     return ret;
 }
 
+/**
+ * Reads the item value from the /etc/krb5.conf via ini agent
+ * If the item doesn't exist, returns empty string (not nil)
+ * @param path_to_value path for agent (.etc.krb5_conf)
+ * @return string the value
+ */
 global define string ReadString (path path_to_value) ``{
 
     string value = SCR::Read (path_to_value);
@@ -198,6 +239,11 @@ global define string ReadString (path path_to_value) ``{
     return value;
 }
 
+/**
+ * Reads the contens of pam file
+ * @param name name of the file in /etc/pam.d directory
+ * @return string file contens
+ */
 global define string ReadFile (string name) ``{
 
     string ret = SCR::Read (.target.string, "/etc/pam.d/" + name);
@@ -209,10 +255,11 @@ global define string ReadFile (string name) ``{
 
 }
 
-/*
+/**
  * Removes the old module used from authentication from pam file
  * @param file contens
  * @param old_module name of old module
+ * @return modified file contens
  */
 define string RemoveOldEntry (string file, string old_module) ``{
 
@@ -229,12 +276,19 @@ define string RemoveOldEntry (string file, string old_module) ``{
     return file;
 }
 
+/**
+ * Change the authentication settings in the files in /etc/pam.d/
+ * @param files the list of files to modificate
+ * @return success
+ */
 global define boolean UpdatePamFiles (list files) ``{
 
     foreach (`filename, files, ``{
 
-        string content = ReadFile(filename);
         string file_path = "/etc/pam.d/" + filename;
+        if (! FileExists (file_path))
+            return false;
+        string content = ReadFile(filename);
         path unix2_path = add( add( add (.pam, filename), "auth"), "pam_unix2");
 
         if ((saved_control != "" && saved_control != control) ||
@@ -280,13 +334,24 @@ global define boolean UpdatePamFiles (list files) ``{
             SCR::Write (.target.string, file_path, content);
         }
     });
+    return true;
 }
 
+
+/**
+ * Check for file existence
+ * @param path_to_file the path
+ * @return the answer
+ */
+global define boolean FileExists (string path_to_file) ``{
+
+    return (SCR::Execute (.target.bash,
+        sformat ("/usr/bin/test -e %1", path_to_file)) == 0);
+}
 
 
 /**
  * Create a textual summary
- * @param split split configured and unconfigured?
  * @return summary of the current configuration
  */
 global define list Summary() ``{

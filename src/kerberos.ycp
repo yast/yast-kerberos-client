@@ -23,6 +23,7 @@ y2milestone ("Kerberos-client module started");
 
 import "Kerberos";
 import "Wizard";
+import "Report";
 //include "kerberos-client/wizards.ycp";
 
 /* is this proposal or not? */
@@ -65,12 +66,13 @@ Otherwise, when you want to use Kerberos PAM module as a primary authentication 
 
     help_text = help_text + _("<p>
 <b>Setting the Kerberos client</b><br>
-This is just a simple confiuration of your client. Please enter your <b>default realm</b> and the <b>host name</b> or <b>adress</b> of your Key Distribution Center (KDC)");
+This is just a simple confiuration of your client. Please enter your <b>domain</b>, <b>default realm</b> and the <b>host name</b> or <b>adress</b> of your Key Distribution Center (KDC)");
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
     string control = Kerberos::control;
+    string default_domain = Kerberos::default_domain;
 //    string arguments = Kerberos::argumets;
 
     list controls = [
@@ -107,6 +109,10 @@ This is just a simple confiuration of your client. Please enter your <b>default 
                          default_realm)),
                 `HSquash(
                     // textentry label
+                    `TextEntry (`id (`domain), _("Default &domain"),
+                         default_domain)),
+                `HSquash(
+                    // textentry label
                     `TextEntry (`id (`kdc), _("&KDC server adress"), kdc)),
                 `VSpacing (0.5)
             )
@@ -135,10 +141,11 @@ This is just a simple confiuration of your client. Please enter your <b>default 
         }
 
         default_realm = UI::QueryWidget (`id(`realm), `Value);
+        default_domain = UI::QueryWidget (`id(`domain), `Value);
         kdc = UI::QueryWidget (`id(`kdc), `Value);
         control = UI::QueryWidget (`id (`auth_control), `Value);
 
-        if (result == `next && use_pam_krb) {
+        if (result == `next) {
 
             if (default_realm == "")
             {
@@ -168,6 +175,7 @@ This is just a simple confiuration of your client. Please enter your <b>default 
             Kerberos::control = control;
             Kerberos::pam_modified = true;
         }
+        Kerberos::default_domain = default_domain;
         Kerberos::default_realm = default_realm;
         Kerberos::kdc = kdc;
     }

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec 17 15:46:20 CET 2002 - jsuchome@suse.de
+
+- proposing values for realm, kdc
+- enabled domain setting
+
+-------------------------------------------------------------------
 Mon Dec 16 11:05:40 CET 2002 - jsuchome@suse.de
 
 - initial version
