@@ -50,6 +50,10 @@ if(func == "Import") {
 else if(func == "Summary") {
     ret = select(Kerberos::Summary(),0, "");
 }
+// ShortSummary is used by Users module
+else if(func == "ShortSummary") {
+    ret = Kerberos::ShortSummary()
+}
 else if (func == "Reset") {
     Kerberos::Import($[]);
 	ret =  $[];

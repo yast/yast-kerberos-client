@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 18 15:11:18 CET 2004 - jsuchome@suse.cz
+
+- added possibility to call ShortSummary function from auto-client
+
+-------------------------------------------------------------------
 Mon Feb  9 17:35:52 CET 2004 - jsuchome@suse.cz
 
 - removed config file (y2cc)
