@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Mar  8 17:05:40 CET 2004 - jsuchome@suse.cz
+
+- used Sequencer module
+- more type fixes
+
+-------------------------------------------------------------------
 Fri Mar  5 12:50:04 CET 2004 - jsuchome@suse.cz
 
 - correct type handling

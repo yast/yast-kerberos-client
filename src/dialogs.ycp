@@ -193,16 +193,18 @@ domain name is usually used.</p>
 		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	    });
 //	    UI::ChangeWidget (`id (`afs),`Enabled,use_pam_krb && afs_available);
+	    /*
 	    if (result == `pamno)
 	    {
 		UI::ChangeWidget (`id (`cell), `Enabled, false);
-//		UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
+		UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
 	    }
 	    else
 	    {
 		UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
-//		UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
+		UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
 	    }
+	    */
 //	    use_afs = use_afs && use_pam_krb;
 	}
 

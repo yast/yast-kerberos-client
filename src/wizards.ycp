@@ -11,11 +11,11 @@
 
 textdomain "kerberos";
 
+import "Sequencer";
 import "Wizard";
 
 import "Popup";
 import "Label";
-include "wizard/sequencer.ycp";
 
 include "kerberos-client/dialogs.ycp";
 
@@ -50,7 +50,7 @@ define symbol MainSequence() ``{
 	],
     ];
 
-    symbol ret = WizardSequencer(aliases, sequence);
+    symbol ret = Sequencer::Run (aliases, sequence);
     return ret;
 }
 
@@ -83,7 +83,7 @@ define symbol KerberosSequence() ``{
     ];
 
     Wizard::CreateDialog();
-    symbol ret = WizardSequencer(aliases, sequence);
+    symbol ret = Sequencer::Run (aliases, sequence);
     UI::CloseDialog();
 
     return ret;
