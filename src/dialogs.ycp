@@ -59,83 +59,6 @@ global define symbol WriteDialog() ``{
 }
 
 /**
- * Configure PAM files to authenticate your users against Kerberos server
- * @return dialog result
- */
-global define symbol PamDialog() ``{
-
-    // help text 1/2
-    string help_text = _("<p>
-<b>Authentication with Kerberos</b><br>
-You can update your PAM settings to enable Kerberos authentication for your users. 
-</p>
-") +
-
-    // help text 2/2
-    _("<p>To configure Kerberos client settings, click <b>Next</b>.</p>");
-
-    boolean use_pam_krb = Kerberos::use_pam_krb;
-
-    term con = `HVSquash(
-        `VBox (
-        `VSpacing(1),
-        // frame label
-        `Frame (_("Authentication"), `HBox (
-	    `HSpacing (0.5),
-            `VBox (
-                `VSpacing (0.5),
-                `RadioButtonGroup(`id(`rd),
-                    `Left(`HVSquash(`VBox (
-                        // radio button label
-                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do No&t Use Kerberos"), !use_pam_krb)),
-                        // radio button label
-                        `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))),
-                `VSpacing (0.5)),
-	    `HSpacing (0.5))
-        ),
-        `VSpacing(1)
-    ));
-
-    // dialog title
-    Wizard::SetContentsButtons ( _("Authentication with Kerberos"), con,
-	help_text, Label::BackButton(), use_pam_krb ?
-	Label::NextButton (): Label::FinishButton());
-
-    any result = nil;
-    do
-    {
-        result = UI::UserInput ();
-
-        if (result == `pamyes || result == `pamno)
-	{
-            use_pam_krb = (result == `pamyes);
-	    UI::ChangeWidget (`id (`next), `Label, use_pam_krb ?
-		Label::NextButton():Label::FinishButton());
-        }
-
-    } while (!contains ([`back, `cancel, `abort, `next], result));
-
-    if (result == `next)
-    {
-        if (use_pam_krb != Kerberos::use_pam_krb)
-        {
-            Kerberos::pam_modified = true;
-            Kerberos::use_pam_krb = use_pam_krb;
-        }
-	if (!use_pam_krb)
-	    result = `finish;
-	else
-	    Require::RequireAndConflictTargetButtons (["heimdal-tools"], [],
-	        // install required packages (message popup)
-		_("<p>To configure Kerberos client services,
-package <b>%1</b> could be useful.<br>
-Install it now?</p>"), Label::YesButton(), Label::NoButton());
-    }
-
-    return result;
-}
-
-/**
  * Dialog for configuring Kerberos client (values in /etc/krb5.conf)
  * @return dialog result
  */
@@ -143,27 +66,28 @@ global define symbol ConfigureDialog() ``{
 
     // help text 1/5
     string help_text = _("<p>
-<b>Setting up the Kerberos Client</b><br>
-This is a basic configuration of your client. Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>address</b> of your Key Distribution Center (KDC).</p>
+<b>Authentication with Kerberos</b><br>
+You can update your PAM settings to enable Kerberos authentication for your users. 
+</p>
+") +
+    // help text 2/5
+    _("<p>
+<b>Basic Client Settings</b><br>
+Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>address</b> of your Key Distribution Center (KDC).</p>
 ") +
 
-    // help text 2/5
+    // help text 3/5
     _("<p>
 It is common practice to use the domain name in uppercase as your default realm name. You can select freely, however.</p>
 ") +
 
-    // help text 3/5
+    // help text 4/5
     _("<p>If you are using Kerberos authentication together with AFS file
 system, check <b>Kerberos support for AFS</b> checkbox. As the name of
 <b>AFS cell</b>, the DNS domain name is usually used.</p>") +
 
-    // help text 4/5
-    _("<p>To enable Kerberos support for your <b>openssh client</b>, check the
-appropriate checkbox. In such case, Kerberos ticket will be used for user
-authentiction on the ssh server.</p>") +
-
     // help text 5/5
-    _("<p>To configure more settings, click <b>Next</b> button.</p>");
+    _("<p>To configure more settings, click <b>Advanced Settings</b> button.</p>");
 
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
@@ -172,10 +96,20 @@ authentiction on the ssh server.</p>") +
     string cell		= Kerberos::afs_cell;
     string afs_server	= Kerberos::afs_server;
     boolean use_afs	= Kerberos::use_afs;
-    boolean ssh		= Kerberos::ssh_support;
+    boolean use_pam_krb = Kerberos::use_pam_krb;
+
+    list packages = Kerberos::packages;
 
     term con = `HBox (`HSpacing (3), `VBox (
-        `VSpacing (1),
+        `VSpacing (0.5),
+        `RadioButtonGroup(`id(`rd),
+	    `Left(`HVSquash(`VBox (
+		// radio button label
+                `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do No&t Use Kerberos"), !use_pam_krb)),
+		// radio button label
+                `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))
+	),
+        `VSpacing (0.5),
 	// frame label
 	`Frame (_("Basic Kerberos Settings"), `HBox(`HSpacing (0.5), `VBox(
 	    `VSpacing (0.5),
@@ -190,9 +124,13 @@ authentiction on the ssh server.</p>") +
             // infield label
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-        `VSpacing (1),
+        `VSpacing (0.2),
 	// frame label
 	`Frame (_("AFS Settings"), `HBox(`HSpacing (0.5), `VBox(
+	    `VSpacing (0.5),
+	    `Left(`CheckBox (`id(`afs),`opt(`notify),
+		// chekbox label
+		_("Kerberos support for &AFS"), use_afs)),
 	    `VSpacing (0.5),
 	    `HBox (
 		// textentry label
@@ -200,27 +138,30 @@ authentiction on the ssh server.</p>") +
 		// textentry label
 		`TextEntry (`id(`afs_server), _("A&FS Server"), afs_server)
 	    ),
-	    `VSpacing (0.5),
-	    `Left(`CheckBox (`id(`afs),`opt(`notify),
-		// chekbox label
-		_("Kerberos support for &AFS"), use_afs)),
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-        `VSpacing (1),
+        `VSpacing (0.2),
+	/*
 	`Left(`CheckBox (`id (`ssh),
 	    // checkbox label (leave 'openssh')
 	    _("Kerberos support for open&ssh client"), ssh)),
-        `VSpacing (1)
+	*/
+	`Right(`PushButton (`id(`advanced), _("Advanced Settings..."))),
+        `VSpacing (0.2)
     ), `HSpacing(3));
 
 
     Wizard::SetContentsButtons (
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
-        Label::BackButton (), Label::NextButton ());
+        Label::BackButton (), Label::FinishButton ());
 
     UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
     UI::ChangeWidget (`id (`afs_server), `Enabled, use_afs);
+
+    foreach (symbol widget, [`realm, `domain, `kdc, `afs, `advanced], ``{
+	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
+    });
 
     any result = nil;
     do
@@ -233,7 +174,25 @@ authentiction on the ssh server.</p>") +
 	    UI::ChangeWidget (`id (`afs_server), `Enabled, use_afs);
 	}
 
-        if (result == `next) {
+        if (result == `pamyes || result == `pamno)
+	{
+            use_pam_krb = (result == `pamyes);
+	    foreach (symbol widget, [`realm, `domain, `kdc, `afs, `advanced],``{
+		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
+	    });
+	    if (result == `pamno)
+	    {
+		UI::ChangeWidget (`id (`cell), `Enabled, false);
+		UI::ChangeWidget (`id (`afs_server), `Enabled, false);
+	    }
+	    else
+	    {
+		UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
+		UI::ChangeWidget (`id (`afs_server), `Enabled, use_afs);
+	    }
+	}
+
+        if (result == `next || result == `advanced) {
 
             default_realm = UI::QueryWidget (`id(`realm), `Value);
             default_domain = UI::QueryWidget (`id(`domain), `Value);
@@ -274,19 +233,56 @@ authentiction on the ssh server.</p>") +
                 result = nil;
                 continue;
             }
+	    // check for openafs* packages - FIXME maybe is not available?
+	    if (use_afs)
+	    {
+		if (!Require::AreAllPackagesInstalled (["openafs",
+		    "openafs-client"]) &&
+		     !contains (packages, "openafs"))
+		{
+		    // yes/no pupup
+		    if (Popup::YesNo (_("Packages \"openafs\" and \"openafs-client\"
+are necessary for using AFS.
+Intall them?")))
+			packages = union(packages,["openafs","openafs-client"]);
+		    else
+		    {
+			result = nil;
+			continue;
+		    }
+		}
+	    }
+	    else
+	    {
+		packages = filter (`p, packages, ``( !contains (
+		    ["openafs", "openafs-client"], p)));
+	    }
         }
 
-    } while (!contains ([`back, `cancel, `abort, `next], result));
+    } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
 
-    if (result == `next)
+    if (result == `next && use_pam_krb)
+    {
+	if  (!Require::IsAnyPackageInstalled (["heimdal-tools"]) &&
+	    !contains (packages, "heimdal-tools") &&
+		// yes/no popup
+		Popup::YesNo (_("To use Kerberos client services,
+package \"heimdal-tools\" could be useful.
+Install this package?")))
+		    packages = add (packages, "heimdal-tools");
+    }
+    if (result == `next || result == `advanced)
     {
         Kerberos::modified = true;
         Kerberos::default_domain = default_domain;
 	Kerberos::default_realm = default_realm;
 	Kerberos::kdc = kdc;
 
-	// TODO check for openssh package?
-	Kerberos::ssh_support = UI::QueryWidget (`id(`ssh), `Value);
+        if (use_pam_krb != Kerberos::use_pam_krb)
+        {
+            Kerberos::pam_modified = true;
+            Kerberos::use_pam_krb = use_pam_krb;
+        }
 
 	if (cell != Kerberos::afs_cell || afs_server != Kerberos::afs_server ||
 	    use_afs != Kerberos::use_afs)
@@ -297,11 +293,13 @@ authentiction on the ssh server.</p>") +
 	    Kerberos::afs_modified	= true;
 	    Kerberos::pam_modified	= true;
 	}
+	Kerberos::packages = union (Kerberos::packages, packages);
     }
     return result;
 }
 
 /**
+ * Kerberos advanced configuration
  * @return dialog result
  */
 global define symbol AdvancedDialog() ``{
@@ -314,14 +312,6 @@ in seconds as default. Alternatively, you can specify the time unit (<i>m</i>
 for minutes, <i>h</i> for hours and <i>d</i> for days) and use it as a value
 suffix (e.g. <i>1d</i> or <i>24h</i> for one day).</p>") +
 
-    /*
-    "If user's ticket is <b>Forwardable</b>, it can be used to
-authenticate this user on remote machines." +
-
-    "If a ticket is <b>Proxiable</b>, client services can use it to obtain
-a ticket for another (remote) services." +
-    */
-
     // help text
     _("<p><b>Forwardable tickets</b> let you transfer your complete identity
 (TGT) to another machine, while <b>proxiable tickets</b> only let you transfer
@@ -330,6 +320,11 @@ particular tickets.</p>") +
     // help text
     _("<p>If <b>Retain Tickets</b> is true, PAM module retains the tickets
 after closing the session.</p>") +
+
+    // help text
+    _("<p>To enable Kerberos support for your <b>openssh client</b>, check the
+appropriate checkbox. In such case, Kerberos ticket will be used for user
+authentiction on the ssh server.</p>") +
 
     // help text
     _("<p>When <b>Minimum UID</b> is greater than 0, authentication attempts by
@@ -346,9 +341,12 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
     boolean forw	= Kerberos::forwardable == "true";
     boolean prox	= Kerberos::proxiable == "true";
     boolean retain	= Kerberos::retain_after_close == "true";
+    boolean ssh		= Kerberos::ssh_support;
 
     integer max_skew	= 10000; // randomly choosed
     string clockskew	= Kerberos::clockskew;
+
+//    list packages = Kerberos::packages;
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (1),
@@ -369,6 +367,10 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
         `VSpacing (1),
+	`Left(`CheckBox (`id (`ssh),
+	    // checkbox label (leave 'openssh')
+	    _("Kerberos support for open&ssh client"), ssh)),
+        `VSpacing (0.5),
         // infield label
         `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
 	    tointeger (uid)),
@@ -380,8 +382,8 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
 
     Wizard::SetContentsButtons (
         // dialog title
-        _("Kerberos Client Configuration, Part 2"), con, help_text,
-        Label::BackButton (), Label::FinishButton ());
+        _("Advanced Kerberos Client Configuration"), con, help_text,
+        Label::BackButton (), Label::NextButton ());
 
     any result = nil;
     do
@@ -410,6 +412,31 @@ Try again."));
 		continue;
 	    }
             clockskew = sformat ("%1", UI::QueryWidget (`id(`skew), `Value));
+
+	    ssh = UI::QueryWidget (`id(`ssh), `Value);
+
+	    /*
+	    if (ssh)
+	    {
+		if  (!Require::IsAnyPackageInstalled (["openssh"]) &&
+		     !contains (packages, "openssh"))
+		{
+		    // yes/no pupup
+		    if (Popup::YesNo (_("Package \"openssh\" is necessary.
+Install it?")))
+			packages = add (packages, "openssh");
+		    else
+		    {
+			result = nil;
+			continue;
+		    }
+		}
+	    }
+	    else
+	    {
+		packages = filter (`p, packages, ``( p != "openssh"));
+	    }
+	    */
         }
 
     } while (!contains ([`back, `next, `cancel, `abort], result));
@@ -426,6 +453,12 @@ Try again."));
 	Kerberos::retain_after_close = UI::QueryWidget (`id(`retain), `Value) ?
 	    "true" : "false";
         Kerberos::clockskew = clockskew;
+
+	if (ssh != Kerberos::ssh_support)
+	{
+	    Kerberos::ssh_modified = true;
+	    Kerberos::ssh_support = ssh;
+	}
     }
     return result;
 }

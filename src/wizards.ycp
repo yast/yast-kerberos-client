@@ -47,16 +47,10 @@ global define symbol KerberosSequence() ``{
 	]
     ];
 
-    string caption = _("Kerberos Client Configuration");
-    term contents = `Label(_("Initializing ..."));
-
     Wizard::CreateDialog();
-    Wizard::SetContentsButtons(caption, contents, "",
-	    Label::BackButton(), Label::NextButton());
-
     any ret = WizardSequencer(aliases, sequence);
-
     UI::CloseDialog();
+
     return ret;
 }
 
@@ -86,27 +80,21 @@ global define symbol KerberosAutoSequence() ``{
 global define symbol MainSequence() ``{
 
     map aliases = $[
-	"pam"		: ``( PamDialog() ),
 	"configure"	: ``( ConfigureDialog() ),
 	"advanced"	: ``( AdvancedDialog() ),
 	"abort"		: ``( ReallyAbort()),
     ];
 
     map sequence = $[
-	"ws_start" : "pam",
-	"pam" : $[
-	    `abort	: "abort",
-	    `next	: "configure",
-	    `finish	: `next,
-	],
+	"ws_start" : "configure",
 	"configure" : $[
 	    `abort	: "abort",
-	    `next	: "advanced",
-//	    `next	: `next
+	    `advanced	: "advanced",
+	    `next	: `next
 	],
 	"advanced" : $[
 	    `abort	: "abort",
-	    `next	: `next,
+	    `next	: "configure",
 	],
 	"abort": $[
 	    `abort	: `abort,

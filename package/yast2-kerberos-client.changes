@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Aug 20 14:31:17 CEST 2003 - jsuchome@suse.cz
+
+- removed redundant "initialization dialog" (#28779)
+- dialogs rearanged ("client enabled" together with basic settings)
+- required/optional applications are installed at the end
+- added testsuite
+- 2.8.6
+
+-------------------------------------------------------------------
 Mon Aug 18 16:00:00 CEST 2003 - jsuchome@suse.cz
 
 - fixed agent for /etc/ssh/ssh_config ("Host" sections allowed)
@@ -51,7 +60,7 @@ Fri Jul 18 16:01:57 CEST 2003 - jsuchome@suse.de
 - pam_krb is now set via PamSettings interface, not into /etc/pam.d/*
 - 2.8.1
 
--------------------------------------------------------------------
+------------------------------------------------------------------
 Thu Jul 10 10:33:39 CEST 2003 - jsuchome@suse.de
 
 - ShortSummary

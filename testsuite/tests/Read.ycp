@@ -1,0 +1,96 @@
+/**
+ *  Read.ycp
+ *  Test of Kerberos::Read function (whole read process, many config files)
+ *  Jiri Suchomel <jsuchome@suse.cz>
+ *  $Id$
+ */
+
+{
+
+    include "testsuite.ycp";
+    import "Kerberos";
+
+    map READ = $[
+	"etc": $[
+	    // /etc/krb5.conf
+	    "krb5_conf" : $[
+		"v" : $[
+		    "libdefaults": $[
+			"default_realm": "SUSE.CZ",
+			"clockskew": "500"
+		    ],
+		    "SUSE.CZ": $[
+			"kdc": "chimera.suse.cz",
+			"default_domain": nil,
+		    ],
+		    "pam" : $[
+			"minimum_uid": "1",
+			"renew_lifetime": nil,
+			"ticket_lifetime": nil,
+			"forwardable": nil,
+			"proxiable": nil,
+			"retain_after_close": nil,
+		    ]
+		],
+	    ],
+	    // /etc/security/pam_*
+	    "security": $[
+		"section": $[
+		    "/etc/security/pam_unix2.conf": $[],
+		    "/etc/security/pam_pwcheck.conf": $[]
+		],
+		"v": $[
+		    "/etc/security/pam_unix2.conf": $[
+			"passwd" : "nullok use_ldap",
+			"auth"	: "nullok use_krb5"
+		    ],
+		]
+	    ],
+	    // /etc/ssh/ssh_config
+	    "ssh" : $[
+		"ssh_config": $[
+		    "s": $[
+			"*": $[]
+		    ],
+		    "v": $[
+			"*": $[
+			    "GSSAPIAuthentication" : "yes",
+			    "GSSAPIDelegateCredentials": "yes"
+			]
+		    ],
+		]
+	    ],
+	],
+	"sysconfig": $[
+	    "afs-client": nil
+	],
+    ];
+
+    map EX = $[
+	"target": $[
+	    "bash": 0,
+	    // call of ypdomainname
+	    "bash_output": $[
+		"stdout" : "suse.cz"
+	    ]
+	]
+    ];
+
+    DUMP ("==== reading... ============================");
+
+    TEST(``(Kerberos::Read ()), [ READ, [], EX ], 0);
+
+    DUMP ("============================================");
+
+    DUMP ( sformat ("kerberos used: %1", Kerberos::use_pam_krb) );
+    DUMP ( sformat ("AFS used: %1", Kerberos::use_afs) );
+
+    DUMP ( sformat ("\ndefault domain: %1", Kerberos::default_domain) );
+    DUMP ( sformat ("default realm: %1", Kerberos::default_realm) );
+    DUMP ( sformat ("kdc: %1", Kerberos::kdc) );
+
+    DUMP ( sformat ("\nssh support: %1", Kerberos::ssh_support) );
+    DUMP ("============================================");
+
+
+}

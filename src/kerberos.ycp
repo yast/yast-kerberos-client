@@ -50,7 +50,7 @@ else
     if (!Require::RequireAndConflict (["pam_krb5", "heimdal-lib"], [],
 	// install required packages (message popup)
 	_("<p>To configure Kerberos client,
-packages <b>%1</b> are required.<br>
+packages <b>pam_krb5</b> and <b>heimdal-lib</b> are required.<br>
 Install them now?</p>")))
 	ret = `auto;
     else

@@ -1,0 +1,89 @@
+/**
+ *  Read.ycp
+ *  Test of Kerberos::Write function
+ *  Jiri Suchomel <jsuchome@suse.cz>
+ *  $Id$
+ */
+
+{
+
+    include "testsuite.ycp";
+    import "Kerberos";
+
+    map READ = $[
+	"etc": $[
+	    // /etc/krb5.conf
+	    "krb5_conf" : $[
+		"s" : $[
+		    "libdefaults": $[],
+		    "SUSE.CZ": $[],
+		    "pam" : $[],
+		],
+	    ],
+	    // /etc/security/pam_*
+	    "security": $[
+		"section": $[
+		    "/etc/security/pam_unix2.conf": $[],
+		    "/etc/security/pam_pwcheck.conf": $[]
+		],
+		"v": $[
+		    "/etc/security/pam_unix2.conf": $[
+			"password" : "nullok use_ldap use_krb5",
+			"auth"	: "nullok use_krb5",
+			"account": "use_krb5"
+		    ],
+		]
+	    ],
+	]
+    ];
+
+    map WRITE = $[];
+
+    DUMP ("==== writing without any changes =================================");
+
+    TEST(``(Kerberos::Write ()), [ [], WRITE, [] ], 0);
+
+    DUMP ("==== ssh modified (enabled) ======================================");
+
+    Kerberos::ssh_modified = true;
+    Kerberos::ssh_support = true;
+
+    TEST(``(Kerberos::Write ()), [ [], WRITE, [] ], 0);
+
+    DUMP ("==== kerberos disabled, ssh support disabled, krb5.conf untouched=");
+
+    Kerberos::pam_modified = true;
+    Kerberos::use_pam_krb = false;
+    Kerberos::ssh_support = false;
+
+    TEST(``(Kerberos::Write ()), [ READ, WRITE, [] ], 0);
+
+    DUMP ("\nThe map with original values is always read again in");
+    DUMP ("PamSettings::RemoveValue() function, so the output is strange...\n");
+
+    DUMP ("==== only krb5.conf modified =====================================");
+    DUMP ("==== (all sections exist) ========================================");
+
+    Kerberos::pam_modified = false;
+    Kerberos::ssh_modified = false;
+    Kerberos::modified = true;
+
+    Kerberos::default_realm = "SUSE.CZ";
+    Kerberos::kdc = "chimera.suse.cz";
+
+    TEST(``(Kerberos::Write ()), [ READ, WRITE, [] ], 0);
+
+    DUMP ("==== (pam section doesn't exist) =================================");
+    READ = $[
+	"etc": $[
+	    "krb5_conf" : $[
+		"s" : $[
+		    "libdefaults": $[],
+		    "SUSE.CZ": $[],
+		],
+	    ]
+	]
+    ];
+
+    TEST(``(Kerberos::Write ()), [ READ, [], [] ], 0);
+}

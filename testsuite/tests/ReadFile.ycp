@@ -1,0 +1,50 @@
+/**
+ *  ReadFile.ycp
+ *  Test of Kerberos::ReadFile function
+ *  Jiri Suchomel <jsuchome@suse.cz>
+ *  $Id$
+ */
+
+{
+
+    include "testsuite.ycp";
+    import "Kerberos";
+
+    map READ = $[
+	"etc": $[
+	    // /etc/krb5.conf
+	    "krb5_conf" : $[
+		"v" : $[
+		    "libdefaults": $[
+			"default_realm": "SUSE.CZ",
+			"clockskew": "500"
+		    ],
+		    "SUSE.CZ": $[
+			"kdc": "chimera.suse.cz",
+			"default_domain": nil,
+		    ],
+		    "pam" : $[
+			"ticket_lifetime": nil,
+		    ],
+		    "SUSE.DE": nil
+		],
+	    ],
+	]
+    ];
+
+    path p = .etc.krb5_conf.v.libdefaults.default_realm;
+
+    string realm = TEST(``(Kerberos::ReadFile (p, "")), [ READ, [], [] ], 0);
+
+    p = add ( add (.etc.krb5_conf.v, realm), "kdc");
+
+    TEST(``(Kerberos::ReadFile (p, "test.suse.cz")), [ READ, [], [] ], 0);
+
+    p = add ( add (.etc.krb5_conf.v, "SUSE.DE"), "kdc");
+
+    TEST(``(Kerberos::ReadFile (p, "test.suse.de")), [ READ, [], [] ], 0);
+
+    p = .etc.krb5_conf.v.pam.ticket_lifetime;
+
+    TEST(``(Kerberos::ReadFile (p, "1d")), [ READ, [], [] ], 0);
+}

@@ -1,0 +1,37 @@
+Dump	==== reading... ============================
+Dir	.etc.security.section: ["/etc/security/pam_pwcheck.conf", "/etc/security/pam_unix2.conf"]
+Read	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5"
+Execute	.target.bash "/usr/bin/test -e /etc/krb5.conf" 0
+Dir	.etc.krb5_conf.s: []
+Read	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ"
+Read	.etc.krb5_conf.v.libdefaults.clockskew "500"
+Read	.etc.krb5_conf.v."SUSE.CZ"."kdc" "chimera.suse.cz"
+Read	.etc.krb5_conf.v."SUSE.CZ"."default_domain" nil
+Read	.etc.krb5_conf.v.pam.ticket_lifetime nil
+Read	.etc.krb5_conf.v.pam.renew_lifetime nil
+Read	.etc.krb5_conf.v.pam.forwardable nil
+Read	.etc.krb5_conf.v.pam.proxiable nil
+Read	.etc.krb5_conf.v.pam.retain_after_close nil
+Read	.etc.krb5_conf.v.pam.minimum_uid "1"
+Execute	.target.bash "/usr/bin/test -e /bin/ypdomainname" 0
+Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"suse.cz"]
+Read	.sysconfig.afs-client.THIS_CELL nil
+Read	.sysconfig.afs-client.THIS_CELL_SERVER nil
+Read	.sysconfig.afs-client.REGENERATE_CELL_INFO nil
+Dir	.etc.ssh.ssh_config.s: ["*"]
+Execute	.target.bash_output "/bin/hostname" $["stdout":"suse.cz"]
+Dir	.etc.ssh.ssh_config.s: ["*"]
+Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
+Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
+Read	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes"
+Return	true
+Dump	============================================
+Dump	kerberos used: true
+Dump	AFS used: false
+Dump	
+Dump	default domain: suse.cz
+Dump	default realm: SUSE.CZ
+Dump	kdc: chimera.suse.cz
+Dump	
+Dump	ssh support: true
+Dump	============================================

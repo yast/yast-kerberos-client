@@ -47,6 +47,7 @@ global string clockskew = "300";
 
 global boolean pam_modified = false;
 global boolean afs_modified = false;
+global boolean ssh_modified = false;
 global boolean modified = false;
 
 // afs cell name
@@ -67,6 +68,9 @@ global string minimum_uid = "0";
 
 // section in /etc/ssh/ssh_config file for storing krb support
 string ssh_section = "*";
+
+// packages to install (openssh, openafs, heimdal-* etc.)
+global list packages = [];
 
 /**
  * Data was modified?
@@ -250,12 +254,7 @@ global define boolean Read () ``{
 	    return;
 
 	list cont = SCR::Dir (add(.etc.ssh.ssh_config.v, sec));
-	y2internal ("section %1 contains: %2", sec, cont);
-
-	y2warning ("GSS: %1", SCR::Read (add (add (.etc.ssh.ssh_config.v, sec),
-	    "GSSAPIAuthentication")));
-	y2warning ("GSS: %1", SCR::Read (add (add (.etc.ssh.ssh_config.v, sec),
-	    "GSSAPIDelegateCredentials")));
+	y2debug ("section %1 contains: %2", sec, cont);
 
 	if ((sec == "*" || sec == hostname) &&
 	   (contains (cont, "GSSAPIAuthentication") &&
@@ -289,7 +288,8 @@ global define boolean Write () ``{
     // dialog caption
     string caption = _("Saving Kerberos Client Configuration");
 
-    Progress::New(caption, " ", 4, [
+    integer no_stages = 4;
+    list stages =  [
 	    // progress stage label
 	    _("Write PAM settings"),
 	    // progress stage label
@@ -298,7 +298,8 @@ global define boolean Write () ``{
 	    _("Write AFS settings"),
 	    // progress stage label
 	    _("Write openssh settings"),
-	], [
+    ];
+    list steps = [
 	    // progress step label
 	    _("Writing PAM settings..."),
 	    // progress step label
@@ -309,9 +310,25 @@ global define boolean Write () ``{
 	    _("Writing openssh settings..."),
 	    // final progress step label
 	    _("Finished")
-	],
-	""
-    );
+    ];
+    if (packages != [])
+    {
+	// progress stage label
+	stages = prepend (stages, _("Install required packages"));
+	// progress step label
+	steps = prepend (steps, _("Installing required packages..."));
+	no_stages = no_stages + 1;
+    }
+
+    Progress::New(caption, " ", no_stages, stages, steps, "");
+
+    if (packages != [])
+    {
+	y2debug ("packages to install: %1", packages);
+	Progress::NextStage ();
+	Require::DoInstallAndRemoveTarget (packages, []);
+    }
+
     Progress::NextStage ();
 
     // -- pam settings
@@ -432,16 +449,16 @@ global define boolean Write () ``{
 
     // -- write openssh settings
     Progress::NextStage ();
-    string write = ssh_support ? "yes": "no";
-    // FIXME which section use?
-    /*
-    SCR::Write (.etc.ssh.ssh_config.v."*".GSSAPIAuthentication, write);
-    SCR::Write (.etc.ssh.ssh_config.v."*".GSSAPIDelegateCredentials, write);
-    */
-    SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
-	"GSSAPIAuthentication"), write);
-    SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
-	"GSSAPIDelegateCredentials"), write);
+
+    if (ssh_modified)
+    {
+	string write = ssh_support ? "yes": "no";
+	SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
+	    "GSSAPIAuthentication"), write);
+	SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
+	    "GSSAPIDelegateCredentials"), write);
+	y2milestone ("/etc/ssh/ssh_config modified");
+    }
 
     // final stage
     Progress::NextStage ();
@@ -463,44 +480,6 @@ global define string ReadFile (path path_to_value, string def_value) ``{
 
     return value;
 }
-
-/**
- * Reads the contens of pam file
- * @param name name of the file in /etc/pam.d directory
- * @return string file contens
- */
-global define string ReadStringFile (string name) ``{
-
-    string ret = SCR::Read (.target.string, "/etc/pam.d/" + name);
-
-    if (findlastof (ret, "\n") < size (ret) - 1)
-        ret = ret + "\n";
-//    y2milestone ("file /etc/pam.d/%1: %2", name, ret);
-    return ret;
-
-}
-
-/**
- * Removes the old module used from authentication from pam file
- * @param file contens
- * @param old_module name of old module
- * @return modified file contens
- */
-define string RemoveOldEntry (string file, string old_module) ``{
-
-    list file_list = splitstring (file, "\n");
-    file_list = filter (`entry, file_list, ``{
-        if (findfirstof (entry, "#") != 0 &&
-            issubstring (entry, "auth") &&
-            issubstring (entry, old_module))
-            return false;
-        else return true;
-    });
-
-    file = mergestring (file_list, "\n");
-    return file;
-}
-
 
 /**
  * Check for file existence
