@@ -25,8 +25,10 @@ import "Kerberos";
 import "Wizard";
 import "Report";
 import "Require";
+import "RichText";
 
 include "kerberos-client/wizards.ycp";
+include "commandline/commandline.ycp";
 
 /* is this proposal or not? */
 boolean propose = false;
@@ -36,12 +38,126 @@ if(size(args) > 0) {
         y2milestone("Using PROPOSE mode");
         propose = true;
     }
-    else
-        y2error("Bad argument for kerberos-client: %1", WFM::Args(0));
 }
 
 /* main ui function */
 any ret = nil;
+
+// --------------------------------------------------------------------------
+// --------------------------------- cmd-line handlers
+
+/**
+ * Enable or disable Kerberos authentication
+ * @param options  a list of parameters passed as args
+ * @return boolean true on success
+ */
+global define boolean KerberosEnableHandler( map options ) ``{
+    // check the "command" to be present exactly once
+    string command = CommandLine::UniqueOption( options,
+	["enable", "disable" ] );
+    if( command == nil ) return false;
+
+    Kerberos::use_pam_krb = ( command == "enable" );
+    Kerberos::pam_modified = true;
+    return true;
+}
+
+/**
+ * Print summary of basic options
+ * @return boolean false
+ */
+global define boolean KerberosSummaryHandler (map options ) ``{
+
+    CommandLine::Print (RichText::Rich2Plain("<br>"+Kerberos::ShortSummary ()));
+    return false; // do not call Write...
+}
+
+/**
+ * Change basic configuration of Kerberos client (server, realm, domain)
+ * @param options  a list of parameters passed as args
+ * @return boolean true on success
+ */
+global define boolean KerberosChangeConfiguration (map options ) ``{
+
+    boolean ret = false;
+    if ( options ["kdc"]:nil != nil )
+    {
+	Kerberos::kdc = options ["kdc"]:nil;
+	ret = true;
+    }
+    if ( options ["domain"]:nil != nil )
+    {
+	Kerberos::default_domain = options ["domain"]:nil;
+	ret = true;
+    }
+    if ( options ["realm"]:nil != nil )
+    {
+	Kerberos::default_realm = options ["realm"]:nil;
+	ret = true;
+    }
+    if (ret)
+	Kerberos::modified = true;
+    return ret;
+}
+
+/* the command line description map */
+map cmdline = $[
+    "id"		: "kerberos",
+    // translators: command line help text for Kerberos client module
+    "help"		: _("Kerberos client configuration module."),
+    "guihandler"	: ``(KerberosSequence()),
+    "initialize"	: ``(Kerberos::Read()),
+    "finish"		: ``(Kerberos::Write()),
+    "actions"		: $[
+	"pam" :$[
+	    "handler"	: ``(KerberosEnableHandler()),
+	    // translators: command line help text for pam action
+	    "help"	: _("Enable or disable Kerberos authentication")
+	],
+	"summary" :$[
+	    "handler"	: ``(KerberosSummaryHandler()),
+	    // translators: command line help text for summary action
+	    "help"	: _("Configuration summary of Kerberos client")
+	],
+	"configure"	: $[
+	    "handler"	: ``(KerberosChangeConfiguration()),
+	    // translators: command line help text for configure action
+	    "help"	: _("Change the global settings of Kerberos client")
+	]
+    ],
+    "options"		: $[
+	"enable"	:$[
+	    // translators: command line help text for pam enable option
+	    "help"	: _("Enable the service")
+	],
+	"disable"	:$[
+	    // translators: command line help text for pam disable option
+	    "help"	: _("Disable the service")
+	],
+	"kdc"	:$[
+	    // translators: command line help text for the kdc option
+	    "help"	: _("The Key Distribution Center (KDC) address"),
+	    "type"	: "string"
+	],
+	"domain"	:$[
+	    // translators: command line help text for the domain option
+	    "help"	: _("Default Domain"),
+	    "type"	: "string"
+	],
+	"realm"	:$[
+	    // translators: command line help text for the domain option
+	    "help"	: _("Default Realm"),
+	    "type"	: "string"
+	],
+    ],
+    "mappings"		: $[
+	"pam"		: [ "enable", "disable" ],
+	"summary"	: [],
+	"configure"	: [ "kdc", "domain", "realm" ],
+    ]
+];
+
+// --------------------------------------------------------------------------
 
 if(propose)
     ret = KerberosAutoSequence();
@@ -54,7 +170,7 @@ packages <b>pam_krb5</b> and <b>heimdal-lib</b> are required.<br>
 Install them now?</p>")))
 	ret = `auto;
     else
-	ret = KerberosSequence();
+	ret = CommandLineRun( cmdline );
 }
 
 y2debug("ret == %1", ret);

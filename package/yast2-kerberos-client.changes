@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep  2 13:13:15 CEST 2003 - jsuchome@suse.cz
+
+- basic command-line interface (new texts)
+- ask before restarting/stopping afs-client
+- 2.8.8
+
+-------------------------------------------------------------------
 Mon Sep 01 12:13:07 CEST 2003 - arvin@suse.de
 
 - used Popup::ConfirmAbort

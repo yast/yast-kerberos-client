@@ -251,7 +251,7 @@ global define boolean Read () ``{
     // read ssh support
     y2debug ("ssh_config sections: %1", SCR::Dir (.etc.ssh.ssh_config.s));
     string hostname = "*";
-    map out = SCR::Execute (.target.bash_output, "/bin/hostname");
+    map out = SCR::Execute (.target.bash_output, "LANG=C /bin/hostname");
     if (out["stderr"]:nil == "")
 	hostname = deletechars(out["stdout"]:"", "\n");
 
@@ -459,14 +459,11 @@ global define boolean Write () ``{
 
     if (afs_modified)
     {
+	// Adjust runlevels in which service runs
 	if (use_afs)
 	    Runlevel::ServiceAdjust ("afs-client", "enable");
 	else
 	    Runlevel::ServiceAdjust ("afs-client", "disable");
-
-	// stop service
-	if (!Mode::config)
-	    Runlevel::RunInitScript ("afs-client", "stop");
 
 	SCR::Write (.sysconfig.afs-client.THIS_CELL, afs_cell);
 	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER, afs_serverip);
@@ -478,7 +475,7 @@ global define boolean Write () ``{
 	if (use_afs && SCR::Read (.target.stat, "/usr/bin/host") != $[])
 	{
 	    map out = SCR::Execute (.target.bash_output,
-		"LANG=en /usr/bin/host -W 5 " + afs_serverip);
+		"LANG=C /usr/bin/host -W 5 " + afs_serverip);
 	    if (out["stderr"]:"" == "")
 	    {
 		string host = deletechars (out["stdout"]:"", "\n");
@@ -500,8 +497,45 @@ global define boolean Write () ``{
 	// force saving before starting service
 	SCR::Write (.sysconfig.afs-client, nil);
 
-	if (use_afs && !Mode::config)
-	    Runlevel::RunInitScript ("afs-client", "start");
+	// stop service
+	if (!Mode::config)
+	{
+	    boolean running = Runlevel::ServiceStatus ("afs-client") == 0;
+	    // start service for first time
+	    if (use_afs && !running)
+		Runlevel::RunInitScript ("afs-client", "start");
+	    else if (running)
+	    {
+		string command = "restart";
+		// popup message: question, if service should be restarted
+		// do not translate command ('rcafs-client ...')
+		string message = _("AFS client is currently running, but needs to be restarted to activate changes.
+Do you want to do it now?
+
+Warning: restarting AFS client will stop all processes using AFS. In case you
+have '/home' directory exported via AFS, whole X session could be killed.
+You can restart AFS client later using 'rcafs-client restart' command.
+");
+
+		if (!use_afs)
+		{
+		    command = "stop";
+		    // popup message: question, if service should be stopped
+		    // do not translate command ('rcafs-client ...')
+		    message = _("AFS client is currently running, but you have choosed to stop it.
+Do you want to do it now?
+
+Warning: stopping AFS client will stop all processes using AFS. In case you
+have '/home' directory exported via AFS, whole X session could be killed.
+You can stop AFS client later using 'rcafs-client stop' command.
+");
+		}
+		// popup header
+		if (Popup::AnyQuestion (_("AFS settings changed"), message,
+		    Label::YesButton(), Label::NoButton(), `focus_no))
+		    Runlevel::RunInitScript ("afs-client", command);
+	    }
+	}
     }
 
     // -- write openssh settings
