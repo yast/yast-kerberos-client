@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep  9 16:54:55 CEST 2003 - jsuchome@suse.cz
+
+- do not require KDC and realm entries when Kerberos is not
+  enabled (#30323)
+
+-------------------------------------------------------------------
 Tue Sep  9 01:06:27 CEST 2003 - nashif@suse.de
 
 - #30291: return list of required packages

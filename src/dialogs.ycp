@@ -205,7 +205,7 @@ domain name is usually used.</p>
             cell = UI::QueryWidget (`id(`cell), `Value);
 	    use_afs = use_afs && use_pam_krb;
 
-            if (default_realm == "")
+            if (use_pam_krb && default_realm == "")
             {
 		// error popup label
 		Report::Error(_("Enter the default realm name."));
@@ -213,7 +213,7 @@ domain name is usually used.</p>
 		continue;
             }
 
-	    if (kdc == "")
+	    if (use_pam_krb && kdc == "")
             {
                 // error popup label
                 Report::Error(_("Enter the address of the KDC server."));
