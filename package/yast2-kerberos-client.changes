@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 30 02:47:50 CEST 2004 - nashif@suse.de
+
+- #37426: Disable NTP Configuration in config mode (autoyast)
+
+-------------------------------------------------------------------
 Thu Mar 11 08:48:39 CET 2004 - jsuchome@suse.cz
 
 - set icon for wizard
