@@ -143,8 +143,7 @@ global define boolean Read () ``{
     if (default_domain == "" && FileExists ("/bin/ypdomainname"))
     {
         map yp_domain = SCR::Execute (.target.bash_output, "/bin/ypdomainname");
-        default_domain = yp_domain["stdout"]:"\n";
-        default_domain = substring (default_domain, 0, size(default_domain)-1);
+        default_domain = deletechars (yp_domain["stdout"]:"", "\n");
     }
 
     if ((default_realm == "" || default_realm == "MY.REALM") &&
@@ -155,8 +154,7 @@ global define boolean Read () ``{
     if ((kdc == "" || kdc == "MY.COMPUTER") && FileExists ("/usr/bin/ypwhich"))
     {
         map yp_serv = SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
-        kdc = yp_serv["stdout"]:"\n";
-        kdc = substring (kdc,0 , size(kdc) - 1);
+        kdc = deletechars( yp_serv["stdout"]:"", "\n");
     }
 
     return true;
