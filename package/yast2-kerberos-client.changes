@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 18 16:00:00 CEST 2003 - jsuchome@suse.cz
+
+- fixed agent for /etc/ssh/ssh_config ("Host" sections allowed)
+
+-------------------------------------------------------------------
 Wed Aug 13 14:32:02 CEST 2003 - jsuchome@suse.de
 
 - do not ask for heimdal-tools in autoinst config (#28716)

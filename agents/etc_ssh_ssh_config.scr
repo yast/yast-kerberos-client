@@ -3,6 +3,7 @@
  *   etc_ssh_ssh_config.scr
  * Summary:
  *   SCR Agent for reading/writing /etc/ssh/ssh_config using the ini-agent
+ *   For the config file format, see man ssh (1).
  *
  * $Id$
  *
@@ -14,11 +15,16 @@
   IniAgent(
    "/etc/ssh/ssh_config",
     $[
-      "options" : [ "global_values", "flat" ],
+      "options" : [ "global_values"],
       "comments": [ "^[ \t]*#.*", "#.*", "^[ \t]*$" ],
+      "sections" : [
+        $[
+        "begin" : [ "^[ \t]*Host[ \t]*(.+)[ \t]*$", "Host %s" ],
+        ],
+      ],
       "params" : [
 	$[
-	  "match" : [ "^[ \t]*([a-zA-Z0-9_]+)[ \t]*(.+)[ \t]*$",
+	  "match" : [ "^[ \t]*([a-zA-Z0-9_]+)[ \t]*[=]*[ \t]*(.+)[ \t]*$",
 		      "%s %s" ]
 	]
       ]

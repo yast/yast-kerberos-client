@@ -65,6 +65,9 @@ global string retain_after_close = "false";
 global boolean ssh_support = false;
 global string minimum_uid = "0";
 
+// section in /etc/ssh/ssh_config file for storing krb support
+string ssh_section = "*";
+
 /**
  * Data was modified?
  * @return true if modified
@@ -234,8 +237,40 @@ global define boolean Read () ``{
 	regenerate_ci = "yes";
 
     // read ssh support
-    ssh_support = SCR::Read (.etc.ssh.ssh_config.GSSAPIAuthentication) == "yes"
-	|| SCR::Read (.etc.ssh.ssh_config.GSSAPIDelegateCredentials) == "yes";
+    y2debug ("ssh_config sections: %1", SCR::Dir (.etc.ssh.ssh_config.s));
+    string hostname = "*";
+    map out = SCR::Execute (.target.bash_output, "/bin/hostname");
+    if (out["stderr"]:nil == "")
+	hostname = deletechars(out["stdout"]:"", "\n");
+
+    ssh_support = nil;
+    foreach (string sec, SCR::Dir (.etc.ssh.ssh_config.s), ``{
+	// according to ssh man page, first value is taken:
+	if (ssh_support != nil)
+	    return;
+
+	list cont = SCR::Dir (add(.etc.ssh.ssh_config.v, sec));
+	y2internal ("section %1 contains: %2", sec, cont);
+
+	y2warning ("GSS: %1", SCR::Read (add (add (.etc.ssh.ssh_config.v, sec),
+	    "GSSAPIAuthentication")));
+	y2warning ("GSS: %1", SCR::Read (add (add (.etc.ssh.ssh_config.v, sec),
+	    "GSSAPIDelegateCredentials")));
+
+	if ((sec == "*" || sec == hostname) &&
+	   (contains (cont, "GSSAPIAuthentication") &&
+	    contains (cont, "GSSAPIDelegateCredentials")))
+	{
+	    ssh_support =
+		(SCR::Read (add (add (.etc.ssh.ssh_config.v, sec),
+		    "GSSAPIAuthentication")) == "yes") &&
+		(SCR::Read (add (add (.etc.ssh.ssh_config.v, sec),
+		    "GSSAPIDelegateCredentials")) == "yes");
+	    ssh_section = sec;
+	}
+    });
+    if (ssh_support == nil)
+	ssh_support = false;
 
     return true;
 }
@@ -398,8 +433,15 @@ global define boolean Write () ``{
     // -- write openssh settings
     Progress::NextStage ();
     string write = ssh_support ? "yes": "no";
-    SCR::Write (.etc.ssh.ssh_config.GSSAPIAuthentication, write);
-    SCR::Write (.etc.ssh.ssh_config.GSSAPIDelegateCredentials, write);
+    // FIXME which section use?
+    /*
+    SCR::Write (.etc.ssh.ssh_config.v."*".GSSAPIAuthentication, write);
+    SCR::Write (.etc.ssh.ssh_config.v."*".GSSAPIDelegateCredentials, write);
+    */
+    SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
+	"GSSAPIAuthentication"), write);
+    SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
+	"GSSAPIDelegateCredentials"), write);
 
     // final stage
     Progress::NextStage ();
