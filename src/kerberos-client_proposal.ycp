@@ -60,8 +60,8 @@ else if(func == "AskUser") {
 /* create titles */
 else if(func == "Description") {
     ret = $[
-	"rich_text_title" : _("Kerberos-client"),
-	"menu_title" : _("&Kerberos-client"),
+	"rich_text_title" : _("Kerberos Client"),
+	"menu_title" : _("&Kerberos Client"),
 	"id" : "kerberos-client",
     ];
 }

@@ -46,21 +46,24 @@ global define symbol PamDialog() ``{
 
     // help text 1/4
     string help_text = _("<p>
-<b>Autentication with Kerberos</b><br>
-You can update your PAM settings to enable the Kerberos autentication for your users. 
-</p>")+
+<b>Authentication with Kerberos</b><br>
+You can update your PAM settings to enable Kerberos authentication for your users. 
+</p>
+")+
 
     // help text 2/4
-_("<p><b>Authentication modes</b><br>
-If you choose <b>optional</b> mode, the primary authentication is with the existing framework, such as user entries in the <i>/etc/shadow</i> or NIS/LDAP database. The only difference is that, in addition, if there is a Kerberos principal associated with the user, PAM module will try to obtain a ticket on behalf of the user, using the previously suplied password.
-</p>") +
+_("<p><b>Authentication Modes</b><br>
+If you choose <b>optional</b> mode, the primary authentication is with the existing framework, such as user entries in the <i>/etc/shadow</i> or the NIS or LDAP database. The only difference is that, if there is a Kerberos principal associated with the user, the PAM module will additionally try to obtain a ticket on behalf of the user using the previously supplied password.
+</p>
+") +
 
     // help text 3/4
-_("<p>If you want to use Kerberos PAM module as a primary authentication mechanism, select <b>sufficient</b>. When user fails to log in (because there is no such principal in Kerberos database or the KDC is down), the system will try to authenticate the user with the entered password against the remaining defined database (local files, NIS, LDAP).
-</p>") +
+_("<p>To use the Kerberos PAM module as a primary authentication mechanism, select <b>sufficient</b>. When a user fails to log in (because there is no such principal in Kerberos database or the KDC is down), the system will try to authenticate the user with the entered password against the remaining defined database (local files, NIS, LDAP).
+</p>
+") +
 
     // help text 4/4
-_("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as primary one. But in this case no user who doesn't exist in Kerberos database will be able to login. If you want to login as a <i>root</i>, you have to use the <i>su</i> command from another user's session.</p>");
+_("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as the primary mechanism. However, in this case no user who does not exist in the Kerberos database can login. To login as <i>root</i>, the <i>su</i> command must be used from another user's session.</p>");
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
     string control = Kerberos::control;
@@ -76,18 +79,18 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
         `VBox (
         `VSpacing(1),
         // frame label
-        `Frame (_("PAM login"),
+        `Frame (_("PAM Login"),
             `VBox (
                 `VSpacing (0.5),
                 `RadioButtonGroup(`id(`rd),
                     `Left(`HVSquash(`VBox (
                         // radio button label
-                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do no&t use Kerberos"), !use_pam_krb)),
+                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do No&t Use Kerberos"), !use_pam_krb)),
                         // radio button label
                         `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))),
                 // text entry label
                 `ComboBox (`id (`auth_control), `opt(`hstretch),
-                    _("&Authentication mode"), controls),
+                    _("&Authentication Mode"), controls),
                 `VSpacing (0.5))
         ),
         `VSpacing(1)
@@ -141,12 +144,14 @@ global define symbol ConfigureDialog() ``{
 
     // help text 1/3
     string help_text = _("<p>
-<b>Setting up the Kerberos client</b><br>
-This is a confiuration of your client. Please enter your <b>domain</b>, <b>default realm</b> and the <b>host name</b> or <b>adress</b> of your Key Distribution Center (KDC)</p>") +
+<b>Setting up the Kerberos Client</b><br>
+This is a configuration of your client. Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>adress</b> of your Key Distribution Center (KDC).</p>
+") +
 
     // help text 2/3
     _("<p>
-It is common practice to use domain name in uppercase for your default realm name. But you can use what do you prefere.</p>") +
+It is common practice to use the domain name in uppercase as your default realm name. You can select freely, however.</p>
+") +
 
     // help text 3/3
     _("<p>
@@ -162,22 +167,22 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
         `VBox (
         `VSpacing(1),
         // frame label
-        `Frame (_("Kerberos client settings"),
+        `Frame (_("Kerberos Client Settings"),
             `VBox (
                 `VSpacing (0.5),
                 `HSquash(
                     // textentry label
-                    `TextEntry (`id (`domain), _("Default &domain"),
+                    `TextEntry (`id (`domain), _("Default &Domain"),
                          default_domain)),
                 `HSquash(
                     // textentry label
-                    `TextEntry (`id (`realm), _("Default real&m"),
+                    `TextEntry (`id (`realm), _("Default Real&m"),
                          default_realm)),
                 `HSquash(
                     // textentry label
-                    `TextEntry (`id (`kdc), _("&KDC server adress"), kdc)),
+                    `TextEntry (`id (`kdc), _("&KDC Server Address"), kdc)),
                 // infield label
-                `IntField (`id (`skew), _("&Clock skew"), 0, max_skew,
+                `IntField (`id (`skew), _("&Clock Skew"), 0, max_skew,
                     tointeger(clockskew)),
                 `VSpacing (0.5)
             )
@@ -213,7 +218,7 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
            if (kdc == "")
             {
                 // error popup label
-                Report::Error(_("Enter the address of KDC server."));
+                Report::Error(_("Enter the address of the KDC server."));
                 result = nil;
                 continue;
             }

@@ -185,9 +185,10 @@ global define boolean Write () ``{
             else
             {
                 // Popup text (required application):
-                if (UI::YesNoPopup(_("To configure PAM autentification with Kerberos,
+                if (UI::YesNoPopup(_("To configure PAM authentication with Kerberos,
 the package \"pam_krb5\" is necessary.
-Install this package now?")))
+Install this package now?
+")))
                 {
                     include "require.ycp"; // is it possible to have it here??
                     pam_installed = DoInstallAndRemove(["pam_krb5"], []);
@@ -406,9 +407,9 @@ global define list Summary() ``{
     // summary header
     summary = Summary::AddHeader(summary, _("PAM Login"));
 
-    summary = Summary::AddLine(summary, (use_pam_krb) ? _("Use Kerberos") : _("Do not use Kerberos"));
+    summary = Summary::AddLine(summary, (use_pam_krb) ? _("Use Kerberos") : _("Do Not Use Kerberos"));
 
-    summary = Summary::AddHeader(summary, _("Authentication mode"));
+    summary = Summary::AddHeader(summary, _("Authentication Mode"));
 
     summary = Summary::AddLine(summary, (control != "") ? control : nc);
 
@@ -418,7 +419,7 @@ global define list Summary() ``{
     summary = Summary::AddHeader(summary, _("Default Domain"));
     summary = Summary::AddLine(summary, (default_domain != "") ? default_domain : nc);
 
-    summary = Summary::AddHeader(summary, _("KDC server address"));
+    summary = Summary::AddHeader(summary, _("KDC Server Address"));
     summary = Summary::AddLine(summary, (kdc != "") ? kdc : nc);
 
     summary = Summary::AddHeader(summary, _("Clock Skew"));

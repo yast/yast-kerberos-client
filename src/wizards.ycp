@@ -47,7 +47,7 @@ global define symbol KerberosSequence() ``{
 	]
     ];
 
-    string caption = _("Kerberos-client configuration");
+    string caption = _("Kerberos Client Configuration");
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();
@@ -66,7 +66,7 @@ global define symbol KerberosSequence() ``{
  * @return sequence result
  */
 global define symbol KerberosAutoSequence() ``{
-    string caption = _("Kerberos-client configuration");
+    string caption = _("Kerberos Client Configuration");
     term contents = `Label(_("Initializing ..."));
 
     Wizard::CreateDialog();
