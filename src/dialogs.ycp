@@ -64,22 +64,17 @@ global define symbol WriteDialog() ``{
  */
 global define symbol PamDialog() ``{
 
-    // help text 1/3
+    // help text 1/2
     string help_text = _("<p>
 <b>Authentication with Kerberos</b><br>
 You can update your PAM settings to enable Kerberos authentication for your users. 
 </p>
 ") +
 
-    // help text 2/3
-    _("<p>To configure Kerberos client settings, click <b>Next</b>.</p>") +
-
-    // help text 3/3
-    _("<p>If you are using Kerberos authentication together with AFS file system, check <b>Kerberos for AFS</b> checkbox. To set cell name and AFS server for this cell, use <b>Configure</b> button. As the name of AFS cell, the DNS domain
-name is usually used.</p>");
+    // help text 2/2
+    _("<p>To configure Kerberos client settings, click <b>Next</b>.</p>");
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
-    boolean use_afs = Kerberos::use_afs;
 
     term con = `HVSquash(
         `VBox (
@@ -98,20 +93,6 @@ name is usually used.</p>");
                 `VSpacing (0.5)),
 	    `HSpacing (0.5))
         ),
-        `VSpacing (1),
-        // frame label
-        `Frame (_("AFS"), `HBox (
-	    `HSpacing (0.5),
-            `VBox (
-                `VSpacing (0.5),
-		// checkbox label
-		`Left(`CheckBox (`id(`afs), _("Kerberos for &AFS"), use_afs)),
-		// button label
-		`Left(`PushButton (`id(`afs_set), _("Configure..."))),
-                `VSpacing (0.5)
-	    ),
-	    `HSpacing (0.5))
-        ),
         `VSpacing(1)
     ));
 
@@ -119,9 +100,6 @@ name is usually used.</p>");
     Wizard::SetContentsButtons ( _("Authentication with Kerberos"), con,
 	help_text, Label::BackButton(), use_pam_krb ?
 	Label::NextButton (): Label::FinishButton());
-
-    UI::ChangeWidget (`id (`afs), `Enabled, use_pam_krb);
-    UI::ChangeWidget (`id (`afs_set), `Enabled, use_pam_krb);
 
     any result = nil;
     do
@@ -131,27 +109,18 @@ name is usually used.</p>");
         if (result == `pamyes || result == `pamno)
 	{
             use_pam_krb = (result == `pamyes);
-            UI::ChangeWidget (`id (`afs), `Enabled, use_pam_krb);
-            UI::ChangeWidget (`id (`afs_set), `Enabled, use_pam_krb);
 	    UI::ChangeWidget (`id (`next), `Label, use_pam_krb ?
 		Label::NextButton():Label::FinishButton());
         }
-	if (result == `afs_set)
-	    AFSSettingsPopup();
 
     } while (!contains ([`back, `cancel, `abort, `next], result));
 
     if (result == `next)
     {
-	use_afs = UI::QueryWidget (`id(`afs), `Value);
-
-        if (use_pam_krb != Kerberos::use_pam_krb || use_afs!=Kerberos::use_afs)
+        if (use_pam_krb != Kerberos::use_pam_krb)
         {
             Kerberos::pam_modified = true;
-	    if (use_afs!=Kerberos::use_afs)
-		Kerberos::afs_modified = true;
             Kerberos::use_pam_krb = use_pam_krb;
-            Kerberos::use_afs = use_afs;
         }
 	if (!use_pam_krb)
 	    result = `finish;
@@ -172,90 +141,136 @@ Install it now?</p>"), Label::YesButton(), Label::NoButton());
  */
 global define symbol ConfigureDialog() ``{
 
-    // help text 1/4
+    // help text 1/5
     string help_text = _("<p>
 <b>Setting up the Kerberos Client</b><br>
 This is a basic configuration of your client. Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>address</b> of your Key Distribution Center (KDC).</p>
 ") +
 
-    // help text 2/4
+    // help text 2/5
     _("<p>
 It is common practice to use the domain name in uppercase as your default realm name. You can select freely, however.</p>
 ") +
 
-    // help text 3/4
-    _("<p>
-The <b>clock skew</b> is the tolerance for the time stamps not exactly matching the host's system clock. It is usually set to 300 seconds.</p>") +
+    // help text 3/5
+    _("<p>If you are using Kerberos authentication together with AFS file
+system, check <b>Kerberos support for AFS</b> checkbox. As the name of
+<b>AFS cell</b>, the DNS domain name is usually used.</p>") +
 
-    // help text 4/4
+    // help text 4/5
+    _("<p>To enable Kerberos support for your <b>openssh client</b>, check the
+appropriate checkbox. In such case, Kerberos ticket will be used for user
+authentiction on the ssh server.</p>") +
+
+    // help text 5/5
     _("<p>To configure more settings, click <b>Next</b> button.</p>");
 
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
     string default_domain = Kerberos::default_domain;
-    string clockskew = Kerberos::clockskew;
-    integer max_skew = 10000; // randoly choosed
 
-    term con = `VBox (
-	`HSquash(`VBox (
-	`VSpacing(1),
-        // frame label
-        `Frame (_("Basic Settings"), `HBox (
-	    `HSpacing (0.5),
-            `VBox (
-                `VSpacing (0.5),
-                `HSquash(
-                    // textentry label
-                    `TextEntry (`id (`domain), _("Default &Domain"),
-                         default_domain)),
-                `HSquash(
-                    // textentry label
-                    `TextEntry (`id (`realm), _("Default Real&m"),
-                         default_realm)),
-                `HSquash(
-                    // textentry label
-                    `TextEntry (`id (`kdc), _("&KDC Server Address"), kdc)),
-                // infield label
-                `IntField (`id (`skew), _("&Clock Skew"), 0, max_skew,
-                    tointeger(clockskew)),
-                `VSpacing (0.5)
-            ),
-	    `HSpacing (0.5))
-        ),
-        `VSpacing(1)
+    string cell		= Kerberos::afs_cell;
+    string afs_server	= Kerberos::afs_server;
+    boolean use_afs	= Kerberos::use_afs;
+    boolean ssh		= Kerberos::ssh_support;
+
+    term con = `HBox (`HSpacing (3), `VBox (
+        `VSpacing (1),
+	// frame label
+	`Frame (_("Basic Kerberos Settings"), `HBox(`HSpacing (0.5), `VBox(
+	    `VSpacing (0.5),
+	    `HBox(
+		// textentry label
+		`TextEntry (`id (`domain), _("Default &Domain"),default_domain),
+		// textentry label
+		`TextEntry (`id (`realm), _("Default Real&m"), default_realm)
+	    ),
+	    // textentry label
+	    `TextEntry (`id (`kdc), _("&KDC Server Adress"), kdc),
+            // infield label
+	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-	`VSpacing (1)
-    );
+        `VSpacing (1),
+	// frame label
+	`Frame (_("AFS Settings"), `HBox(`HSpacing (0.5), `VBox(
+	    `VSpacing (0.5),
+	    `HBox (
+		// textentry label
+		`TextEntry (`id(`cell), _("AFS &Cell Name"), cell),
+		// textentry label
+		`TextEntry (`id(`afs_server), _("A&FS Server"), afs_server)
+	    ),
+	    `VSpacing (0.5),
+	    `Left(`CheckBox (`id(`afs),`opt(`notify),
+		// chekbox label
+		_("Kerberos support for &AFS"), use_afs)),
+	    `VSpacing (0.5)), `HSpacing (0.5)
+	)),
+        `VSpacing (1),
+	`Left(`CheckBox (`id (`ssh),
+	    // checkbox label (leave 'openssh')
+	    _("Kerberos support for open&ssh client"), ssh)),
+        `VSpacing (1)
+    ), `HSpacing(3));
+
 
     Wizard::SetContentsButtons (
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::NextButton ());
 
+    UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
+    UI::ChangeWidget (`id (`afs_server), `Enabled, use_afs);
+
     any result = nil;
     do
     {
         result = UI::UserInput ();
+	use_afs = UI::QueryWidget (`id(`afs), `Value);
+
+	if (result == `afs) {
+	    UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
+	    UI::ChangeWidget (`id (`afs_server), `Enabled, use_afs);
+	}
 
         if (result == `next) {
 
             default_realm = UI::QueryWidget (`id(`realm), `Value);
             default_domain = UI::QueryWidget (`id(`domain), `Value);
             kdc = UI::QueryWidget (`id(`kdc), `Value);
-            clockskew = sformat ("%1", UI::QueryWidget (`id(`skew), `Value));
+            afs_server = UI::QueryWidget (`id(`afs_server), `Value);
+            cell = UI::QueryWidget (`id(`cell), `Value);
 
             if (default_realm == "")
             {
-               // error popup label
-               Report::Error(_("Enter the default realm name."));
-               result = nil;
-               continue;
+		// error popup label
+		Report::Error(_("Enter the default realm name."));
+		UI::SetFocus (`id(`realm));
+		result = nil;
+		continue;
             }
 
-           if (kdc == "")
+	    if (kdc == "")
             {
                 // error popup label
                 Report::Error(_("Enter the address of the KDC server."));
+		UI::SetFocus (`id(`kdc));
+		result = nil;
+                continue;
+            }
+	    if (use_afs && afs_server == "")
+            {
+                // error popup label
+                Report::Error(_("Enter the address of the AFS server."));
+		UI::SetFocus (`id(`afs_server));
+                result = nil;
+                continue;
+            }
+	    if (use_afs && cell == "")
+            {
+                // error popup label
+                Report::Error(_("Enter the AFS cell name."));
+		UI::SetFocus (`id(`cell));
                 result = nil;
                 continue;
             }
@@ -265,11 +280,23 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
 
     if (result == `next)
     {
+        Kerberos::modified = true;
         Kerberos::default_domain = default_domain;
 	Kerberos::default_realm = default_realm;
 	Kerberos::kdc = kdc;
-        Kerberos::clockskew = clockskew;
-        Kerberos::modified = true;
+
+	// TODO check for openssh package?
+	Kerberos::ssh_support = UI::QueryWidget (`id(`ssh), `Value);
+
+	if (cell != Kerberos::afs_cell || afs_server != Kerberos::afs_server ||
+	    use_afs != Kerberos::use_afs)
+	{
+	    Kerberos::use_afs		= use_afs;
+	    Kerberos::afs_cell		= cell;
+	    Kerberos::afs_server	= afs_server;
+	    Kerberos::afs_modified	= true;
+	    Kerberos::pam_modified	= true;
+	}
     }
     return result;
 }
@@ -279,7 +306,6 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
  */
 global define symbol AdvancedDialog() ``{
 
-    // help text
     string help_text =
 
     // help text (do not transl. values "m","h", "d")
@@ -288,33 +314,41 @@ in seconds as default. Alternatively, you can specify the time unit (<i>m</i>
 for minutes, <i>h</i> for hours and <i>d</i> for days) and use it as a value
 suffix (e.g. <i>1d</i> or <i>24h</i> for one day).</p>") +
 
-    // FIXME missing: forwardable/prox
     /*
-    _("<p>With a <b>Forwardable Ticket</b>, user can get credentials on remote
-machines.") +
+    "If user's ticket is <b>Forwardable</b>, it can be used to
+authenticate this user on remote machines." +
+
+    "If a ticket is <b>Proxiable</b>, client services can use it to obtain
+a ticket for another (remote) services." +
     */
+
+    // help text
+    _("<p><b>Forwardable tickets</b> let you transfer your complete identity
+(TGT) to another machine, while <b>proxiable tickets</b> only let you transfer
+particular tickets.</p>") +
 
     // help text
     _("<p>If <b>Retain Tickets</b> is true, PAM module retains the tickets
 after closing the session.</p>") +
 
-    // help text (do not translate root)
+    // help text
     _("<p>When <b>Minimum UID</b> is greater than 0, authentication attempts by
 users with UIDs below the specified number will be ignored. It is useful for
 disabling Kerberos authentication for system administrator (<i>root</i>).</p>")+
 
     // help text
-    _("To enable Kerberos support for your openssh client, check the
-appropriate checkbox. In such case, Kerberos ticket will be used for user
-authentiction on the ssh server.");
+    _("<p>
+The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching the host's system clock. The value is in seconds.</p>");
 
     string uid		= Kerberos::minimum_uid;
     string ticket	= Kerberos::ticket_lifetime;
     string renew	= Kerberos::renew_lifetime;
-    boolean ssh		= Kerberos::ssh_support;
     boolean forw	= Kerberos::forwardable == "true";
     boolean prox	= Kerberos::proxiable == "true";
     boolean retain	= Kerberos::retain_after_close == "true";
+
+    integer max_skew	= 10000; // randomly choosed
+    string clockskew	= Kerberos::clockskew;
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (1),
@@ -338,10 +372,9 @@ authentiction on the ssh server.");
         // infield label
         `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
 	    tointeger (uid)),
-        `VSpacing (1),
-	`Left(`CheckBox (`id (`ssh),
-	    // checkbox label (leave 'openssh')
-	    _("Enable Kerberos support for open&ssh client"), ssh)),
+	// infield label
+	`IntField (`id (`skew), _("&Clock Skew"), 0, max_skew,
+	    tointeger (clockskew)),
         `VSpacing (1)
     ), `HSpacing(3));
 
@@ -376,6 +409,7 @@ Try again."));
 		UI::SetFocus (`id(`renew));
 		continue;
 	    }
+            clockskew = sformat ("%1", UI::QueryWidget (`id(`skew), `Value));
         }
 
     } while (!contains ([`back, `next, `cancel, `abort], result));
@@ -391,74 +425,10 @@ Try again."));
 	    "true" : "false";
 	Kerberos::retain_after_close = UI::QueryWidget (`id(`retain), `Value) ?
 	    "true" : "false";
-	// TODO check for openssh package?
-	Kerberos::ssh_support = UI::QueryWidget (`id(`ssh), `Value);
+        Kerberos::clockskew = clockskew;
     }
     return result;
 }
-
-
-global define symbol AFSSettingsPopup () ``{
-
-    // help text 1/3
-    /* FIXME remove
-    string help_text = _("<p><b>AFS Settings</b></p>") +
-
-    _("<p><b>Cell Name</b><br>
-The name of cell</p>") +
-
-    _("<p><b>AFS Server</b><br>
-AFS server for this cell</p>");
-    */
-
-    string cell		= Kerberos::afs_cell;
-    string afs_server	= Kerberos::afs_server;
-
-    UI::OpenDialog( `opt(`decorated), `HBox(
-	`HSpacing(1),
-	`VBox(
-	    // textentry label
-	    `TextEntry (`id(`cell), _("&AFS Cell Name"), cell),
-	    // textentry label
-	    `TextEntry (`id(`server), _("AFS &Server"), afs_server),
-	    `HBox (
-		`PushButton(`id(`ok),`opt(`key_F10,`default),Label::OKButton()),
-		`PushButton(`id(`cancel),`opt (`key_F9), Label::CancelButton())
-//		`PushButton(`id(`help),`opt (`key_F2), Label::HelpButton())
-	    )
-	),
-	`HSpacing(1)
-    ));
-
-    symbol ret = UI::UserInput();
-    /*
-    do
-    {
-	ret = UI::UserInput();
-	if (ret == `help)
-	    Wizard::ShowHelp( help_text );
-
-    } while (!contains ([`back, `ok, `cancel, `abort], ret));
-    */
-
-    if (ret == `ok)
-    {
-	cell		= UI::QueryWidget (`id(`cell), `Value);
-	afs_server	= UI::QueryWidget (`id(`server), `Value);
-	if (cell != Kerberos::afs_cell || afs_server != Kerberos::afs_server)
-	{
-	    Kerberos::afs_cell		= cell;
-	    Kerberos::afs_server	= afs_server;
-	    Kerberos::afs_modified	= true;
-	    Kerberos::modified		= true;
-	}
-    }
-
-    UI::CloseDialog();
-
-    return ret;
-}
-
 
 /* EOF */
 }

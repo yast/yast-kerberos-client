@@ -36,9 +36,6 @@ list auth_modules = [];
 // if pam_unix is in /etc/pam.d/login
 boolean pam_unix_present = false;
 
-// argumets to pam module
-global string arguments = "";
-
 // default realm and domain name
 global string default_realm = "";
 global string default_domain = "";
@@ -451,7 +448,7 @@ global define boolean FileExists (string path_to_file) ``{
  */
 global define list Summary() ``{
 
-    // TODO update for new client?
+    // TODO update for new client
 
     string summary = "";
     string nc = Summary::NotConfigured ();
@@ -459,12 +456,6 @@ global define list Summary() ``{
     summary = Summary::AddHeader(summary, _("PAM Login"));
 
     summary = Summary::AddLine(summary, (use_pam_krb) ? _("Use Kerberos") : _("Do Not Use Kerberos"));
-
-    /*
-    summary = Summary::AddHeader(summary, _("Authentication Mode"));
-
-    summary = Summary::AddLine(summary, (control != "") ? control : nc);
-    */
 
     summary = Summary::AddHeader(summary, _("Default Realm"));
     summary = Summary::AddLine(summary, (default_realm != "") ? default_realm : nc);
