@@ -305,6 +305,8 @@ Install them?
 package \"heimdal-tools\" could be useful.
 Install this package?")))
 		    packages = add (packages, "heimdal-tools");
+	if (Mode::config)
+	    Require::DoInstallAndRemoveTarget (packages, []);
     }
     if (result == `next || result == `advanced)
     {

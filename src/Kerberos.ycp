@@ -337,7 +337,13 @@ global define boolean Write () ``{
     {
 	y2debug ("packages to install: %1", packages);
 	Progress::NextStage ();
-	Require::DoInstallAndRemoveTarget (packages, []);
+	list to_install = [];
+	// check if packages are avialable...
+	foreach (string p, packages, ``{
+	    if (Require::IsPackageAvailable (p))
+		to_install = add (to_install, p);
+	});
+	Require::DoInstallAndRemoveTarget (to_install, []);
 
 	if (use_afs && !Require::AreAllPackagesInstalledTarget (["openafs",
 	    "openafs-client"]))
