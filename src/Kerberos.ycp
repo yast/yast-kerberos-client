@@ -346,6 +346,7 @@ global define boolean Write () ``{
 	    Popup::Error (_("Packages for AFS were not successfully installed.
     AFS will not be enabled."));
 	    use_afs = false;
+	    afs_modified = false;
 	}
     }
 
@@ -512,12 +513,11 @@ global define boolean Write () ``{
 		string command = "restart";
 		// popup message: question, if service should be restarted
 		// do not translate command ('rcafs-client ...')
-		string message = _("AFS client is currently running, but needs to be restarted to activate changes.
-Do you want to do it now?
+		string message = _("AFS client is currently running, but must be restarted to activate changes.
+Restart it now?
 
-Warning: restarting AFS client will stop all processes using AFS. In case you
-have '/home' directory exported via AFS, whole X session could be killed.
-You can restart AFS client later using 'rcafs-client restart' command.
+Warning: Restarting the AFS client will stop all processes using AFS. If the '/home' directory is exported via AFS, entire X sessions could be killed.
+You can restart the AFS client later using the 'rcafs-client restart' command.
 ");
 
 		if (!use_afs)
@@ -525,16 +525,15 @@ You can restart AFS client later using 'rcafs-client restart' command.
 		    command = "stop";
 		    // popup message: question, if service should be stopped
 		    // do not translate command ('rcafs-client ...')
-		    message = _("AFS client is currently running, but you have choosed to stop it.
-Do you want to do it now?
+		    message = _("The AFS client is currently running, but you have chosen to stop it.
+Stop it now?
 
-Warning: stopping AFS client will stop all processes using AFS. In case you
-have '/home' directory exported via AFS, whole X session could be killed.
-You can stop AFS client later using 'rcafs-client stop' command.
+Warning: Stopping the AFS client will stop all processes using AFS. If the '/home' directory is exported via AFS, entire X sessions could be killed.
+You can stop the AFS client later using the 'rcafs-client stop' command.
 ");
 		}
 		// popup header
-		if (Popup::AnyQuestion (_("AFS settings changed"), message,
+		if (Popup::AnyQuestion (_("AFS Settings Changed"), message,
 		    Label::YesButton(), Label::NoButton(), `focus_no))
 		    Runlevel::RunInitScript ("afs-client", command);
 	    }

@@ -165,7 +165,7 @@ else
 {
     if (!Require::RequireAndConflict (Kerberos::required_packages, [],
 	// install required packages (message popup)
-	_("<p>To configure Kerberos client,
+	_("<p>To configure a Kerberos client,
 packages <b>pam_krb5</b> and <b>heimdal-lib</b> are required.<br>
 Install them now?</p>")))
 	ret = `auto;

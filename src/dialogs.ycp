@@ -85,13 +85,14 @@ It is common practice to use the domain name in uppercase as your default realm 
 ") +
 
     // help text 4/5
-    _("<p>If you are using Kerberos authentication together with AFS file
-system, check <b>Kerberos support for AFS</b> checkbox. You have to enter an IP
-address for the <b>AFS server</b>. As the name of <b>AFS cell</b>, the DNS
-domain name is usually used.</p>") +
+    _("<p>If you are using Kerberos authentication together with the AFS file
+system, check <b>Kerberos Support for AFS</b>. Enter an IP
+address for the <b>AFS Server</b>. As the name of <b>AFS Cell</b>, the DNS
+domain name is usually used.</p>
+") +
 
     // help text 5/5
-    _("<p>To configure more settings, click <b>Advanced Settings</b> button.</p>");
+    _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
 
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
@@ -135,13 +136,13 @@ domain name is usually used.</p>") +
 	    `VSpacing (0.5),
 	    `Left(`CheckBox (`id(`afs),`opt(`notify),
 		// chekbox label
-		_("Kerberos support for &AFS"), use_afs)),
+		_("Kerberos Support for &AFS"), use_afs)),
 	    `VSpacing (0.5),
 	    `HBox (
 		// textentry label
 		`TextEntry (`id(`cell), _("AFS &Cell Name"), cell),
 		// textentry label
-		`TextEntry (`id(`afs_serverip), _("IP Adress of A&FS Server"),
+		`TextEntry (`id(`afs_serverip), _("IP Address of A&FS Server"),
 		    afs_serverip)
 	    ),
 	    `VSpacing (0.5)), `HSpacing (0.5)
@@ -250,8 +251,9 @@ domain name is usually used.</p>") +
 		    if (!Mode::config && !Require::IsPackageAvailableTarget ("openafs"))
 		    {
 			// error message, %1 is package name
-			Popup::Error (sformat (_("Package \"%1\" is not available for installation!
-AFS cannot be enabled."), "openafs"));
+			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
+AFS cannot be enabled.
+"), "openafs"));
 			afs_available = false;
 			UI::ChangeWidget (`id (`afs), `Value, false);
 			UI::ChangeWidget (`id (`afs), `Enabled, false);
@@ -262,8 +264,9 @@ AFS cannot be enabled."), "openafs"));
 		    if (!Mode::config && !Require::IsPackageAvailableTarget ("openafs-client"))
 		    {
 			// error message, %1 is package name
-			Popup::Error (sformat (_("Package \"%1\" is not available for installation!
-AFS cannot be enabled."), "openafs-client"));
+			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
+AFS cannot be enabled.
+"), "openafs-client"));
 			afs_available = false;
 			UI::ChangeWidget (`id (`afs), `Value, false);
 			UI::ChangeWidget (`id (`afs), `Enabled, false);
@@ -274,7 +277,8 @@ AFS cannot be enabled."), "openafs-client"));
 		    // yes/no pupup
 		    if (Popup::YesNo (_("Packages \"openafs\" and \"openafs-client\"
 are necessary for using AFS.
-Intall them?")))
+Install them?
+")))
 			packages = union(packages,["openafs","openafs-client"]);
 		    else
 		    {
@@ -339,28 +343,33 @@ global define symbol AdvancedDialog() ``{
 
     // help text (do not transl. values "m","h", "d")
     _("<p>Values of <b>Ticket Lifetime</b> and <b>Renewable Lifetime</b> are
-in seconds as default. Alternatively, you can specify the time unit (<i>m</i>
-for minutes, <i>h</i> for hours and <i>d</i> for days) and use it as a value
-suffix (e.g. <i>1d</i> or <i>24h</i> for one day).</p>") +
+in seconds as default. Alternatively, specify the time unit (<i>m</i>
+for minutes, <i>h</i> for hours, or <i>d</i> for days) and use it as a value
+suffix (e.g., <i>1d</i> or <i>24h</i> for one day).</p>
+") +
 
     // help text
     _("<p><b>Forwardable tickets</b> let you transfer your complete identity
-(TGT) to another machine, while <b>proxiable tickets</b> only let you transfer
-particular tickets.</p>") +
+(TGT) to another machine. <b>Proxiable tickets</b> only let you transfer
+particular tickets.</p>
+") +
 
     // help text
-    _("<p>If <b>Retain Tickets</b> is true, PAM module retains the tickets
-after closing the session.</p>") +
+    _("<p>If <b>Retain Tickets</b> is true, a PAM module retains the tickets
+after closing the session.</p>
+") +
 
     // help text
     _("<p>To enable Kerberos support for your <b>openssh client</b>, check the
-appropriate checkbox. In such case, Kerberos ticket will be used for user
-authentiction on the ssh server.</p>") +
+appropriate check box. In such a case, Kerberos tickets are used for user
+authentiction on the ssh server.</p>
+") +
 
     // help text
     _("<p>When <b>Minimum UID</b> is greater than 0, authentication attempts by
-users with UIDs below the specified number will be ignored. It is useful for
-disabling Kerberos authentication for system administrator (<i>root</i>).</p>")+
+users with UIDs below the specified number are ignored. This is useful for
+disabling Kerberos authentication for the system administrator (<i>root</i>).</p>
+")+
 
     // help text
     _("<p>
@@ -400,7 +409,7 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
         `VSpacing (1),
 	`Left(`CheckBox (`id (`ssh),
 	    // checkbox label (leave 'openssh')
-	    _("Kerberos support for open&ssh client"), ssh)),
+	    _("Kerberos Support for open&ssh Client"), ssh)),
         `VSpacing (0.5),
         // infield label
         `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
