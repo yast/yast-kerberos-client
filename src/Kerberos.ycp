@@ -182,9 +182,9 @@ global define boolean Write () ``{
 	        // In autoinst mode  we install needed packages in initial mode
             pam_installed = (write_only || Require::RequireAndConflict(["pam_krb5"], [],
 // popup text, %1 is required aplication
-_("To use PAM authentication with Kerberos,
-the package <b>%1</b> is required.
-Install this package now?")));
+_("<p>To use PAM authentication with Kerberos,
+the package <b>%1</b> is required.<br>
+Install this package now?</p>")));
             if (pam_installed)
             {
                 // -- write to /etc/pam.d/*
@@ -440,7 +440,7 @@ global define string ShortSummary() ``{
 	default_realm : nc) +
     // summary text (yes/no follows)
     sformat(_("<b>Kerberos Authentication Enabled</b>: %1<br>"),
-        deletechars (use_pam_krb ? Label::YesButton(): Label::NoButton(),"&"));
+        use_pam_krb ? _("Yes") : _("No"));
 
     return summary;
 }
