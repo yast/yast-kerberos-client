@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 25 13:44:52 CEST 2003 - jsuchome@suse.cz
+
+- changed button label in Advanced dialog: Next to Ok
+- 2.9.0
+
+-------------------------------------------------------------------
 Thu Sep 11 12:33:08 CEST 2003 - jsuchome@suse.cz
 
 - save value of kpasswd_server to /etc/krb5.conf (#30485)

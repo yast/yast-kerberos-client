@@ -499,6 +499,7 @@ AFS will not be enabled."));
 	// get the name via 'host ip_addr' call
 	if (use_afs && SCR::Read (.target.stat, "/usr/bin/host") != $[])
 	{
+	    // TODO use 'getent hosts ip' instead of host (see ag_hostnames)
 	    map out = SCR::Execute (.target.bash_output,
 		"LANG=C /usr/bin/host -W 5 " + afs_serverip);
 	    if (out["stderr"]:"" == "")

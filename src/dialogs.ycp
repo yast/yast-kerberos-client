@@ -425,7 +425,7 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
     Wizard::SetContentsButtons (
         // dialog title
         _("Advanced Kerberos Client Configuration"), con, help_text,
-        Label::BackButton (), Label::NextButton ());
+        Label::BackButton (), Label::OKButton ());
 
     any result = nil;
     do
