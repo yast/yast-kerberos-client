@@ -48,7 +48,7 @@ if(func == "Import") {
 }
 /* create a  summary*/
 else if(func == "Summary") {
-    ret  select(Kerberos::Summary(),0, "");
+    ret = select(Kerberos::Summary(),0, "");
 }
 else if (func == "Reset") {
     Kerberos::Import($[]);
