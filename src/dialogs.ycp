@@ -19,7 +19,8 @@ import "Report";
 include "ui/common_popups.ycp";
 include "ui/common_messages.ycp";
 
-
+// FIXME: add ReallyAbort!!
+// FIXME: change Next to Finish when disabling
 /**
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
@@ -96,10 +97,10 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
         `VSpacing(1)
     ));
 
-    Wizard::SetContentsButtons (
-        // dialog title
-        _("Authentication with Kerberos"), con, help_text,
-        UI::BackButtonLabel (), UI::NextButtonLabel ());
+    // dialog title
+    Wizard::SetContentsButtons ( _("Authentication with Kerberos"), con,
+	help_text, UI::BackButtonLabel(), use_pam_krb ?
+	UI::NextButtonLabel (): UI::FinishButtonLabel());
 
     UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
 
@@ -111,9 +112,12 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
     {
         result = UI::UserInput ();
 
-        if (result == `pamyes || result == `pamno) {
+        if (result == `pamyes || result == `pamno)
+	{
             use_pam_krb = (result == `pamyes);
             UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
+	    UI::ChangeWidget (`id (`next), `Label, use_pam_krb ?
+		UI::NextButtonLabel():UI::FinishButtonLabel());
         }
 
         control = UI::QueryWidget (`id (`auth_control), `Value);

@@ -108,7 +108,7 @@ global define boolean Read () ``{
         {
             if (issubstring (line["module"]:"", "pam_unix"))
                 pam_unix_present = true;
-            if (issubstring (line["module"]:"", "pam_krb5.so"))
+            if (issubstring (line["module"]:"", "pam_krb5"))
             {
                 use_pam_krb = true;
                 // only the first is taken
@@ -313,12 +313,12 @@ global define boolean UpdatePamFiles (list files) ``{
              !use_pam_krb)
         {
             // remove the previously used entry
-            content = RemoveOldEntry (content, "pam_krb5.so");
-        }
+            content = RemoveOldEntry (content, "pam_krb5");
+       }
 
         if (use_pam_krb)
         {
-            // add the new entry is:
+            // add the new entry is: TODO: module name? (pam_krb5afs?)
             string entry = "auth " + control + " pam_krb5.so missing_keytab_ok";
             if (control == "sufficient")
             {
@@ -369,6 +369,9 @@ global define boolean UpdatePamFiles (list files) ``{
             if (!pam_unix_present)
                 content = unix2_entry + "\n" + content;
             SCR::Write (.target.string, file_path, content);
+	    // remove *_first_pass from pam_unix2
+            SCR::Write (unix2_path, "-use_first_pass");
+            SCR::Write (unix2_path, "-try_first_pass");
         }
     });
     return true;
@@ -419,5 +422,27 @@ global define list Summary() ``{
     return [ summary, [] ];
 }
 
+/**
+ * Create a short textual summary
+ * @return summary of the current configuration
+ */
+global define string ShortSummary() ``{
+
+    string summary = "";
+    string nc = Summary::NotConfigured ();
+    // summary text
+    summary = sformat(_("<b>KDC Server</b>: %1<br>"), (kdc != "") ? kdc : nc) +
+    // summary text
+    sformat (_("<b>Default Domain</b>: %1<br>"), (default_domain != "") ?
+	default_domain : nc) +
+    // summary text
+    sformat (_("<b>Default Realm</b>: %1<br>"), (default_realm != "") ?
+	default_realm : nc) +
+    // summary text (yes/no follows)
+    sformat(_("<b>Kerberos Authentication Enabled</b>: %1<br>"),
+        deletechars (use_pam_krb ? Label::YesButton(): Label::NoButton(),"&"));
+
+    return summary;
+}
 /* EOF */
 }
