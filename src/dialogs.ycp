@@ -144,12 +144,7 @@ domain name is usually used.</p>") +
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
         `VSpacing (0.2),
-	/*
-	`Left(`CheckBox (`id (`ssh),
-	    // checkbox label (leave 'openssh')
-	    _("Kerberos support for open&ssh client"), ssh)),
-	*/
-	`Right(`PushButton (`id(`advanced), _("Advanced Settings..."))),
+	`Right(`PushButton (`id(`advanced), _("Ad&vanced Settings..."))),
         `VSpacing (0.2)
     ), `HSpacing(3));
 

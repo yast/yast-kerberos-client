@@ -20,6 +20,8 @@ import "Require";
 import "Progress";
 import "PamSettings";
 import "Runlevel";
+import "Popup";
+import "Mode";
 
 /**
  * Required packages for this module to operate
