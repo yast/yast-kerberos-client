@@ -23,7 +23,7 @@ Icon=kerberos-client
 Exec=/sbin/yast2 kerberos-client 
 
 Name=Kerberos Client
-GenericName=Configure a Kerberos Client
+GenericName=Configure Kerberos client
 Name[cs]=Klient Kerberos
 GenericName[cs]=Konfigurovat Kerberos klienta
 Name[de]=Kerberos-Client
