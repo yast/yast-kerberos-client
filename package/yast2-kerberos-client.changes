@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug  4 13:34:59 CEST 2004 - jsuchome@suse.cz
+
+- use Package instead of Require
+- provide AFS texts for translation
+- 2.10.2
+
+-------------------------------------------------------------------
 Mon Jun 28 16:02:23 CEST 2004 - jsuchome@suse.cz
 
 - adapted to current yast2-pam behaviour

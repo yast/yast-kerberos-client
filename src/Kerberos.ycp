@@ -13,17 +13,17 @@
 {
 
 module "Kerberos";
+
 textdomain "kerberos";
 
-import "Summary";
-import "Require";
-import "Progress";
-import "PamSettings";
-import "Runlevel";
-import "Popup";
-import "Mode";
-
 import "Label";
+import "Mode";
+import "Package";
+import "PamSettings";
+import "Popup";
+import "Progress";
+import "Runlevel";
+import "Summary";
 
 /**
  * Required packages for this module to operate
@@ -106,15 +106,17 @@ global define boolean Import (map settings) ``{
     kdc = client["kdc_server"]:"";
     clockskew = client["clockskew"]:clockskew;
 
-    /* AFS not supported
+    /* ----- AFS not supported */
+    if (false)
+    {
     afs_serverip = client["afs_serverip"]:"";
     afs_cell = client["afs_cell"]:"";
-	if (size(afs_serverip) > 0 )
-		use_afs = true;
-	else
-		use_afs = false;
+    if (size(afs_serverip) > 0)
+	use_afs = true;
+    else
+	use_afs = false;
     afs_modified = true;
-    */
+    }
 
     ssh_support = client["ssh_support"]:false;
     ticket_lifetime = client["ticket_lifetime"]:"1d";
@@ -148,7 +150,7 @@ global define map Export () ``{
 		"default_realm"		: default_realm,
 		"kdc_server"		: kdc,
 		"clockskew"		: clockskew,
-		/*
+		/* --  AFS not supported
 		"afs_serverip"		: afs_serverip,
 		"afs_cell"	        : afs_cell,
 		*/
@@ -213,7 +215,7 @@ global define boolean Read () ``{
 	    if (contains (auth_modules, "krb5afs"))
 	    {
 		use_pam_krb = true;
-//		use_afs	= true;
+//		use_afs	= true;  --- AFS not supported
 	    }
 	}
     });
@@ -332,14 +334,20 @@ global define boolean Write () ``{
     // dialog caption
     string caption = _("Saving Kerberos Client Configuration");
 
+    if (false) // ---- AFS not supported
+    {
+	// progress stage label
+	string stage	= _("Write AFS settings");
+	// progress step label
+	string step	= _("Writing AFS settings...");
+    }
+
     integer no_stages = 3;
     list<string> stages =  [
 	    // progress stage label
 	    _("Write PAM settings"),
 	    // progress stage label
 	    _("Write Kerberos client settings"),
-	    // progress stage label
-//	    _("Write AFS settings"), ---- AFS not supported
 	    // progress stage label
 	    _("Write openssh settings"),
     ];
@@ -348,8 +356,6 @@ global define boolean Write () ``{
 	    _("Writing PAM settings..."),
 	    // progress step label
 	    _("Writing Kerberos client settings..."),
-	    // progress step label
-//	    _("Writing AFS settings..."),---- AFS not supported
 	    // progress step label
 	    _("Writing openssh settings..."),
 	    // final progress step label
@@ -373,14 +379,15 @@ global define boolean Write () ``{
 	list<string> to_install = [];
 	// check if packages are avialable...
 	foreach (string p, packages, ``{
-	    if (Require::IsPackageAvailable (p))
+	    if (Package::Available (p))
 		to_install = add (to_install, p);
 	});
-	Require::DoInstallAndRemoveTarget (to_install, []);
+	Package::DoInstallAndRemove (to_install, []);
 
-	/* ---- AFS not supported
-	if (use_afs && !Require::AreAllPackagesInstalledTarget (["openafs",
-	    "openafs-client"]))
+	/* ---- AFS not supported */
+	if (false)
+	{
+	if (use_afs && !Package::InstalledAll (["openafs", "openafs-client"]))
 	{
 	    // error popup
 	    Popup::Error (_("Packages for AFS were not successfully installed.
@@ -388,7 +395,7 @@ AFS will not be enabled."));
 	    use_afs = false;
 	    afs_modified = false;
 	}
-	*/
+	}
 	packages = [];
     }
 
@@ -413,8 +420,8 @@ AFS will not be enabled."));
 			    "call_modules=%1", mergestring (auth_modules,",")));
 		});
 	    }
-	    /* ---- AFS not supported
-	    else
+	    /* ---- AFS not supported */
+	    else if (false)
 	    {
 		auth_modules = (list<string>) union (auth_modules, ["krb5afs"]);
 		foreach (string type, [ "account", "auth", "password" ], ``{
@@ -424,7 +431,6 @@ AFS will not be enabled."));
 			"call_modules=%1", mergestring (auth_modules,",")));
 		});
 	    }
-	    */
         }
         else
         {
@@ -510,7 +516,7 @@ AFS will not be enabled."));
 	SCR::Write (add (pam_sect, "retain_after_close"), retain_after_close);
 	SCR::Write (add (pam_sect, "minimum_uid"), minimum_uid);
 
-	/*
+	/* AFS not supported
 	if (afs_modified)
 	    SCR::Write (add (pam_sect, "afs_cells"), afs_cell);
 	*/
@@ -523,7 +529,9 @@ AFS will not be enabled."));
 	SCR::UnmountAgent (.etc.krb5_conf);
     }
 
-    /* AFS not supported
+    /* AFS not supported */
+    if (false)
+    {
     // -- write AFS settings
     Progress::NextStage ();
 
@@ -605,7 +613,7 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 	    }
 	}
     }
-    */
+    }
 
     // -- write openssh settings
     Progress::NextStage ();
@@ -633,7 +641,7 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
  */
 global define list Summary() ``{
 
-    // TODO update for new client
+    // TODO add AFS!
 
     string summary = "";
     string nc = Summary::NotConfigured ();
@@ -685,7 +693,6 @@ global define string ShortSummary() ``{
  */
 global define map AutoPackages() ``{
 	return ($["install": required_packages, "remove": []]);
-
 }
 
 

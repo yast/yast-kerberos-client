@@ -11,16 +11,14 @@
 
 textdomain "kerberos";
 
-import "Wizard";
-
-import "Kerberos";
-import "Report";
-import "Mode";
-import "Require";
 import "IP";
-
-import "Popup";
+import "Kerberos";
 import "Label";
+import "Mode";
+import "Package";
+import "Popup";
+import "Report";
+import "Wizard";
 
 /**
  * The dialog that appears when the [Abort] button is pressed.
@@ -85,17 +83,20 @@ Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>a
 It is common practice to use the domain name in uppercase as your default realm name. You can select freely, however.</p>
 ") +
 
-    /* ---- AFS not supported
+    // help text 5/5
+    _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
+
+    /* ---- AFS not supported */
+    if (false)
+    {
+	help_text = help_text +
     // help text 4/5
     _("<p>If you are using Kerberos authentication together with the AFS file
 system, check <b>Kerberos Support for AFS</b>. Enter an IP
 address for the <b>AFS Server</b>. As the name of <b>AFS Cell</b>, the DNS
 domain name is usually used.</p>
-") +
-    */
-
-    // help text 5/5
-    _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
+");
+    }
 
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
@@ -105,7 +106,7 @@ domain name is usually used.</p>
     string afs_serverip	= Kerberos::afs_serverip;
     boolean use_afs	= Kerberos::use_afs;
     boolean use_pam_krb = Kerberos::use_pam_krb;
-    boolean afs_available = false;
+    boolean afs_available = false; // ---- AFS not supported
 
     list<string> packages = Kerberos::packages;
 
@@ -133,8 +134,9 @@ domain name is usually used.</p>
             // infield label
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-	/* ---- AFS not supported
+	/* ---- AFS not supported */
         `VSpacing (0.2),
+	afs_available ?
 	// frame label
 	`Frame (_("AFS Settings"), `HBox(`HSpacing (0.5), `VBox(
 	    `VSpacing (0.5),
@@ -150,23 +152,23 @@ domain name is usually used.</p>
 		    afs_serverip)
 	    ),
 	    `VSpacing (0.5)), `HSpacing (0.5)
-	)),
-	*/
+	))
+	: `Empty (),
         `VSpacing (),
 	`Right(`PushButton (`id(`advanced), _("Ad&vanced Settings..."))),
         `VSpacing (0.2)
     ), `HSpacing(3));
-
 
     Wizard::SetContentsButtons (
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::FinishButton ());
 
-    /* ---- AFS not supported
-    UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
-    UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
-    */
+    if (afs_available)
+    {
+	UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
+	UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
+    }
 
 //    foreach (symbol widget, [`realm, `domain, `kdc, `afs, `advanced], ``{
     foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
@@ -236,7 +238,9 @@ domain name is usually used.</p>
 		result = `not_next;
                 continue;
             }
-	    /* ---- AFS not supported
+	    /* ---- AFS not supported */
+	    if (false)
+	    {
 	    if (use_afs && afs_serverip == "")
             {
                 // error popup label
@@ -264,11 +268,10 @@ domain name is usually used.</p>
 	    // check for openafs* packages
 	    if (use_afs)
 	    {
-		if (!Require::AreAllPackagesInstalledTarget (["openafs",
-		    "openafs-client"]) &&
+		if (!Package::InstalledAll (["openafs", "openafs-client"]) &&
 		     !contains (packages, "openafs"))
 		{
-		    if (!Mode::config && !Require::IsPackageAvailable ("openafs"))
+		    if (!Mode::config && !Package::Available ("openafs"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
@@ -282,7 +285,7 @@ AFS cannot be enabled.
 			result = `not_next;
 			continue;
 		    }
-		    if (!Mode::config && !Require::IsPackageAvailable ("openafs-client"))
+		    if (!Mode::config && !Package::Available ("openafs-client"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
@@ -311,25 +314,25 @@ Install them?
 	    }
 	    else
 	    {
-		packages = filter (`p, packages, ``( !contains (
+		packages = filter (string p, packages, ``( !contains (
 		    ["openafs", "openafs-client"], p)));
 	    }
-	    */
+	    }
         }
 
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
 
     if (result == `next && use_pam_krb)
     {
-	if  (!Require::IsAnyPackageInstalledTarget (["heimdal-tools"]) &&
-	    !contains (packages, "heimdal-tools") &&
-		// yes/no popup
-		Popup::YesNo (_("To use Kerberos client services,
+	if  (!Package::Installed ("heimdal-tools") &&
+	     !contains (packages, "heimdal-tools") &&
+	     // yes/no popup
+	     Popup::YesNo (_("To use Kerberos client services,
 package \"heimdal-tools\" could be useful.
 Install this package?")))
-		    packages = add (packages, "heimdal-tools");
+		packages = add (packages, "heimdal-tools");
 	if (Mode::config)
-	    Require::DoInstallAndRemoveTarget (packages, []);
+	    Package::DoInstallAndRemove (packages, []);
     }
     if (result == `next || result == `advanced)
     {
@@ -344,7 +347,9 @@ Install this package?")))
             Kerberos::use_pam_krb = use_pam_krb;
         }
 
-	/* ---- AFS not supported
+	/* ---- AFS not supported ------------------ */
+	if (false)
+	{
 	if (cell != Kerberos::afs_cell || use_afs != Kerberos::use_afs ||
 	    afs_serverip != Kerberos::afs_serverip)
 	{
@@ -354,7 +359,7 @@ Install this package?")))
 	    Kerberos::afs_modified	= true;
 	    Kerberos::pam_modified	= true;
 	}
-	*/
+	}
 	Kerberos::packages = (list<string>) union (Kerberos::packages, packages);
     }
     return result;
@@ -474,10 +479,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 
 	if (result == `ntp) {
 
-	    if ( Require::RequireAndConflictTarget ( ["yast2-ntp-client"], [],
-		// popup label (%1 is package to install)
-		_("Package %1 is not installed.
-Install it now?")))
+	    if (Package::InstallAll ( ["yast2-ntp-client"]))
 	    {
 		WFM::CallFunction ("ntp-client", []);
 	    }
