@@ -11,7 +11,7 @@ Name = _("Kerberos-client configuration")
 
 ; "raw" group name to which this module belongs
 ; see /usr/share/YaST2/config/y2cc.groups for valid values
-Group = Misc
+Group = Net_advanced
 
 ; icon displayed in y2cc
 Icon = kerberos-client.png
@@ -35,9 +35,9 @@ SortKey =
 Textdomain = kerberos
 
 ; Autoinstall features
-Autoinst = 
+Autoinst = all
 
-; Resource in control file
-AutoinstResource = 
+; Resource in Control file
+AutoinstResource = kerberos
 
 ; vim:syntax=dosini

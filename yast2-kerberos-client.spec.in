@@ -23,6 +23,9 @@ Summary:	Configuration of kerberos-client
 %defattr(-,root,root)
 @clientdir@/kerberos.ycp
 @clientdir@/kerberos-client.ycp
+@clientdir@/kerberos-client_auto.ycp
 @moduledir@/Kerberos.ycp
 @configdir@/kerberos.y2cc
+%dir @yncludedir@/kerberos-client
+@yncludedir@/kerberos-client/dialogs.ycp
 %doc @docdir@

@@ -11,87 +11,144 @@
 
 textdomain "kerberos";
 
-import "Kerberos";
-
-include "ui/common_popups.ycp";
-include "ui/common_messages.ycp";
-
-include "kerberos-client/helps.ycp";
-include "kerberos-client/routines.ycp";
 
 /**
- * Configure1 dialog
- * @return dialog result
+ * The only dialog
+ * @return  `back or `next
  */
-global define symbol Configure1Dialog () ``{
+global define symbol KerberosDialog () ``{
 
-    /* Kerberos-client configure1 dialog caption */
-    string caption = _("Kerberos-client configuration");
+    // help text
+    string help_text = _("<p>
+<b>Autentication with Kerberos</b><br>
+You can update your PAM settings to enable the Kerberos autentication for your users. 
+</p>")+
 
-    /* XXPkg configure1 dialog contents */
-    term contents = `Label (_("First part of configuration of kerberos-client"));
+_("<p><b>Authentication modes</b><br>
+If you choose <b>optional</b> mode, the primary authentication is with the existing framework, such as user entries in the <i>/etc/shadow</i> or NIS/LDAP database. The only difference is that, in addition, if there is a Kerberos principal associated with the user, PAM module will try to obtain a ticket on behalf of the user, using the previously suplied password.
+<br>
+Otherwise, when you want to use Kerberos PAM module as a primary authentication mechanism, select <b>sufficient</b>. When user fails to log in (because there is no such principal in Kerberos database or the KDC is down), the system will try to authenticate the user with the entered password against the remaining defined database (local files, NIS, LDAP). 
+</p>");
 
-    Wizard::SetContentsButtons(caption, contents, HELPS["c1"]:"",
-	    BackButtonLabel(), NextButtonLabel());
+    help_text = help_text + _("<p>
+<b>Setting the Kerberos client</b><br>
+This is just a simple confiuration of your client. Please enter your <b>domain</b>, <b>default realm</b> and the <b>host name</b> or <b>address</b> of your Key Distribution Center (KDC)");
 
-    any ret = nil;
-    while(true) {
+    boolean use_pam_krb = Kerberos::use_pam_krb;
+    string default_realm = Kerberos::default_realm;
+    string kdc = Kerberos::kdc;
+    string control = Kerberos::control;
+    string default_domain = Kerberos::default_domain;
+//    string arguments = Kerberos::argumets;
 
-	ret = UI::UserInput();
+    list controls = [
+        `item (`id ("optional"), "optional", false),
+        `item (`id ("sufficient"), "sufficient", false)
+    ];
 
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
+    term con = `HVSquash(
+        `VBox (
+        `VSpacing(1),
+        // frame label
+        `Frame (_("PAM login"),
+            `VBox (
+                `VSpacing (0.5),
+                `RadioButtonGroup(`id(`rd),
+                    `Left(`HVSquash(`VBox (
+                        // radio button label
+                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do &not use Kerberos"), !use_pam_krb)),
+                        // radio button label
+                        `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))),
+                // text entry label
+                `ComboBox (`id (`auth_control), `opt(`hstretch),
+                    _("&Authentication mode"), controls),
+                `VSpacing (0.5))
+        ),
+        `VSpacing(1),
+        // frame label
+        `Frame (_("Kerberos client settings"),
+            `VBox (
+                `VSpacing (0.5),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`realm), _("Default &realm"),
+                         default_realm)),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`domain), _("Default &domain"),
+                         default_domain)),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`kdc), _("&KDC server address"), kdc)),
+                `VSpacing (0.5)
+            )
+        ),
+        `VSpacing(1)
+    ));
+
+    Wizard::SetContentsButtons (
+        // dialog title
+        _("Kerberos Client Configuration"), con, help_text,
+        UI::BackButtonLabel (), UI::FinishButtonLabel ());
+
+    UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
+
+    if (control != "")
+        UI::ChangeWidget (`id(`auth_control), `Value, control);
+
+    any result = nil;
+    do
+    {
+        result = UI::UserInput ();
+
+        if (result == `pamyes || result == `pamno) {
+            use_pam_krb = (result == `pamyes);
+            UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
         }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
+
+        default_realm = UI::QueryWidget (`id(`realm), `Value);
+        default_domain = UI::QueryWidget (`id(`domain), `Value);
+        kdc = UI::QueryWidget (`id(`kdc), `Value);
+        control = UI::QueryWidget (`id (`auth_control), `Value);
+
+        if (result == `next) {
+
+            if (default_realm == "")
+            {
+               // error popup label
+               Report::Error(_("Enter the default realm name."));
+               result = nil;
+               continue;
+            }
+
+           if (kdc == "")
+            {
+                // error popup label
+                Report::Error(_("Enter the address of KDC server."));
+                result = nil;
+                continue;
+            }
         }
+
+    } while (result != `back && result != `next && result != `cancel);
+
+    if (result == `next)
+    {
+        if (use_pam_krb != Kerberos::use_pam_krb ||
+            control != Kerberos::control)
+        {
+            Kerberos::use_pam_krb = use_pam_krb;
+            Kerberos::control = control;
+            Kerberos::pam_modified = true;
+        }
+        Kerberos::default_domain = default_domain;
+        Kerberos::default_realm = default_realm;
+        Kerberos::kdc = kdc;
     }
 
-    return ret;
+    return result;
 }
 
-/**
- * Configure2 dialog
- * @return dialog result
- */
-global define symbol Configure2Dialog () ``{
-
-    /* Kerberos-client configure2 dialog caption */
-    string caption = _("Kerberos-client configuration");
-
-    /* XXPkg configure2 dialog contents */
-    term contents = `Label (_("Second part of configuration of kerberos-client"));
-
-    Wizard::SetContentsButtons(caption, contents, HELPS["c2"]:"",
-	    BackButtonLabel(), NextButtonLabel());
-
-    any ret = nil;
-    while(true) {
-
-	ret = UI::UserInput();
-
-	/* abort? */
-	if(ret == `abort || ret == `cancel) {
-	    if(ReallyAbort()) break;
-	    else continue;
-	}
-        else if(ret == `next || ret == `back) {
-            break;
-        }
-        else {
-            y2error("unexpected retcode: %1", ret);
-            continue;
-        }
-    }
-
-    return ret;
-}
 
 /* EOF */
 }

@@ -19,7 +19,7 @@ import "Summary";
 
 
 //global boolean proposal_valid = false;
-//global boolean write_only = false;
+global boolean write_only = false;
 
 // if pam_krb5 module is used for login
 global boolean use_pam_krb = false;
@@ -58,24 +58,33 @@ global define boolean Modified() ``{
  * @return	success
  */
 global define boolean Import (map settings) ``{
-	return true;
+    use_pam_krb = settings["pam_login", "use_kerberos"]:false;
+    control	= settings["pam_login", "authentication_mode"]:"";
+    default_domain = settings["kerberos_client", "default_domain"]:"";
+    default_realm = settings["kerberos_client", "default_realm"]:"";
+    kdc = settings["kerberos_client", "kdc_server"]:"";
+    
+    return true;
 }
 
-/**
- * Only set variables, without checking anything
- * @return: void
- */
-global define void Set(map settings)  ``{
-
-	return;
-}
 
 /**
  * Dump the Kerberos settings to a map, for autoinstallation use.
  * @return map with settings
  */
 global define map Export () ``{
-	return $[];
+    
+    return $[
+	     "pam_login": 	$[
+				  "use_kerberos" 		: use_pam_krb,
+				  "authentication_mode" 	: control 			    
+	     ],
+	     "kerberos_client":	$[
+				  "default_domain"		: default_domain,
+				  "default_realm"		: default_realm,
+				  "kdc_server"			: kdc				   
+	     ]
+    ];
 }
 
 /**
@@ -143,6 +152,7 @@ global define boolean Read () ``{
     return true;
 }
 
+
 /**
  * Saves Kerberos configuration.
  * (No parameters because it is too short to abort)
@@ -155,11 +165,12 @@ global define boolean Write () ``{
     list pam_files = ["login", "xlock", "xdm"];
 
     // -- pam settings
-    if (pam_modified)
+    if (pam_modified || write_only)
     {
         if (use_pam_krb)
         {
-            if (SCR::Execute(.target.bash, "rpm -q pam_krb5") ==0)
+	    // In autoinst mode  we install needed packages in initial mode
+            if (SCR::Execute(.target.bash, "rpm -q pam_krb5") ==0 || write_only)
                pam_installed = true;
             else
             {
@@ -355,7 +366,28 @@ global define boolean FileExists (string path_to_file) ``{
  * @return summary of the current configuration
  */
 global define list Summary() ``{
-    return [ _("Configuration summary ..."), [] ];
+    
+    string summary = "";
+    string nc = Summary::NotConfigured ();
+    // summary header
+    summary = Summary::AddHeader(summary, _("PAM Login"));
+    
+    summary = Summary::AddLine(summary, (use_pam_krb) ? _("Use Kerberos") : _("Do not use Kerberos"));
+
+    summary = Summary::AddHeader(summary, _("Authentication mode"));
+
+    summary = Summary::AddLine(summary, (control != "") ? control : nc);
+
+    summary = Summary::AddHeader(summary, _("Default Realm"));
+    summary = Summary::AddLine(summary, (default_realm != "") ? default_realm : nc);
+    
+    summary = Summary::AddHeader(summary, _("Default Domain"));
+    summary = Summary::AddLine(summary, (default_domain != "") ? default_domain : nc);
+    
+    summary = Summary::AddHeader(summary, _("KDC server address"));
+    summary = Summary::AddLine(summary, (kdc != "") ? kdc : nc);
+    
+    return [ summary, [] ];
 }
 
 /**

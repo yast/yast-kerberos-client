@@ -26,31 +26,45 @@ y2milestone("----------------------------------------");
 y2milestone("Kerberos-client auto started");
 
 import "Kerberos";
-include "kerberos-client/ui.ycp";
+include "kerberos-client/dialogs.ycp";
+string func = WFM::Args(0);
+map param = WFM::Args(1);
 
-list args = WFM::Args();
-if(size(args) <= 0) {
-    y2error("Did not get the settings, probably some mistake...");
+/* create a  summary*/
+if(func == "Summary") {
+    Kerberos::Import(param);
+    return ( select(Kerberos::Summary(),0, ""));
+}
+else if (func == "Reset") {
+    Kerberos::Import($[]);
+	return $[];
+}
+else if (func == "Change") {
+    Kerberos::Import(param);
+    Wizard::CreateDialog ();
+    Wizard::ReplaceAbortButton(`Empty ());
+    any res = KerberosDialog();
+    UI::CloseDialog();
+    return res;
+}
+else if (func == "Result") {
+    return(Kerberos::Export());
+}
+else if (func == "Write") {
+	Kerberos::Import(param);
+	Kerberos::write_only = true;
+	boolean ret = Kerberos::Write();
+	return ret;
+}
+/* unknown function */
+else {
+    y2error("unknown function: %1", func);
     return false;
 }
-if(!is(WFM::Args(0), map)) {
-    y2error("Bad argument for kerberos-client_auto: %1", WFM::Args(0));
-    return false;
-}
-
-/* The settings are in the first argument */
-map settings = select(args, 0, $[]);
-y2milestone("Imported: (%1)", settings);
-
-Kerberos::Import(settings);
-symbol ret = KerberosAutoSequence();
-y2debug("ret=%1", ret);
 
 y2milestone("Kerberos-client auto finished");
 y2milestone("----------------------------------------");
 
-if(ret == `next) return Kerberos::Export();
-return $[];
 
 /* EOF */
 }
