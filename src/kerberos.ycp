@@ -41,8 +41,8 @@ if(size(args) > 0) {
 any ret = nil;
 
 /*
-if(propose) ret = Kerberos-clientAutoSequence();
-else ret = Kerberos-clientSequence();
+if(propose) ret = KerberosAutoSequence();
+else ret = KerberosSequence();
 */
 
 /**

@@ -11,9 +11,9 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
-import "Kerberos-client";
+import "Kerberos";
 import "Progress";
 
 /* The main () */
@@ -31,12 +31,12 @@ if(func == "MakeProposal") {
     symbol warning_level = nil;
     boolean force_reset = param["force_reset"]:false;
 
-    if(force_reset || !Kerberos-client::proposal_valid) {
-        Kerberos-client::proposal_valid = true;
+    if(force_reset || !Kerberos::proposal_valid) {
+        Kerberos::proposal_valid = true;
 	Progress::off();
-	Kerberos-client::Read();
+	Kerberos::Read();
     }
-    list sum = Kerberos-client::Summary(false);
+    list sum = Kerberos::Summary(false);
     proposal = select(sum, 0, "");
     Progress::on();
 
@@ -48,9 +48,9 @@ if(func == "MakeProposal") {
 }
 /* run the module */
 else if(func == "AskUser") {
-    map stored = Kerberos-client::Export();
+    map stored = Kerberos::Export();
     symbol seq = WFM::CallFunction(`kerberos-client(.propose));
-    if(seq != `next) Kerberos-client::Import(stored);
+    if(seq != `next) Kerberos::Import(stored);
     y2debug("stored=%1",stored);
     y2debug("seq=%1",seq);
     ret = $[
@@ -67,7 +67,7 @@ else if(func == "Description") {
 }
 /* write the proposal */
 else if(func == "Write") {
-    Kerberos-client::Write();
+    Kerberos::Write();
 }
 /* unknown function */
 else {

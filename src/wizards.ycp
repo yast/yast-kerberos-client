@@ -9,7 +9,7 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
 import "Wizard";
 
@@ -24,7 +24,7 @@ include "kerberos-client/dialogs.ycp";
  * Whole configuration of kerberos-client
  * @return sequence result
  */
-global define symbol Kerberos-clientSequence() ``{
+global define symbol KerberosSequence() ``{
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
@@ -66,7 +66,7 @@ global define symbol Kerberos-clientSequence() ``{
  * For use with autoinstallation.
  * @return sequence result
  */
-global define symbol Kerberos-clientAutoSequence() ``{
+global define symbol KerberosAutoSequence() ``{
     string caption = _("Kerberos-client configuration");
     term contents = `Label(_("Initializing ..."));
 

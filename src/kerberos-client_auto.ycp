@@ -20,12 +20,12 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
 y2milestone("----------------------------------------");
 y2milestone("Kerberos-client auto started");
 
-import "Kerberos-client";
+import "Kerberos";
 include "kerberos-client/ui.ycp";
 
 list args = WFM::Args();
@@ -42,14 +42,14 @@ if(!is(WFM::Args(0), map)) {
 map settings = select(args, 0, $[]);
 y2milestone("Imported: (%1)", settings);
 
-Kerberos-client::Import(settings);
-symbol ret = Kerberos-clientAutoSequence();
+Kerberos::Import(settings);
+symbol ret = KerberosAutoSequence();
 y2debug("ret=%1", ret);
 
 y2milestone("Kerberos-client auto finished");
 y2milestone("----------------------------------------");
 
-if(ret == `next) return Kerberos-client::Export();
+if(ret == `next) return Kerberos::Export();
 return $[];
 
 /* EOF */

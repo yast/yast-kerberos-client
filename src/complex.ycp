@@ -9,12 +9,12 @@
 
 {
 
-textdomain "kerberos-client";
+textdomain "kerberos";
 
 import "Wizard";
 import "Wizard_hw";
 
-import "Kerberos-client";
+import "Kerberos";
 
 include "ui/common_popups.ycp";
 include "ui/common_messages.ycp";
@@ -27,7 +27,7 @@ include "kerberos-client/routines.ycp";
  * @return true if data was modified
  */
 global define boolean Modified() ``{
-    return Kerberos-client::Modified();
+    return Kerberos::Modified();
 }
 
 
@@ -37,8 +37,8 @@ global define boolean Modified() ``{
  */
 global define symbol ReadDialog() ``{
     Wizard::RestoreHelp(HELPS["read"]:"");
-    Kerberos-client::AbortFunction = ``{ return PollAbort();};
-    boolean ret = Kerberos-client::Read();
+    Kerberos::AbortFunction = ``{ return PollAbort();};
+    boolean ret = Kerberos::Read();
     return ret ? `next : `abort;
 }
 
@@ -48,8 +48,8 @@ global define symbol ReadDialog() ``{
  */
 global define symbol WriteDialog() ``{
     Wizard::RestoreHelp(HELPS["write"]:"");
-    Kerberos-client::AbortFunction = ``{ return PollAbort();};
-    boolean ret = Kerberos-client::Write();
+    Kerberos::AbortFunction = ``{ return PollAbort();};
+    boolean ret = Kerberos::Write();
     return ret ? `next : `abort;
 }
 
@@ -59,16 +59,16 @@ global define symbol WriteDialog() ``{
  */
 global define symbol SummaryDialog() ``{
 
-    /* Kerberos-client summary dialog caption */
-    string caption = _("Kerberos-client configuration");
+    /* Kerberos summary dialog caption */
+    string caption = _("Kerberos configuration");
 
     /* FIXME */
-    list summary = Kerberos-client::Summary();
+    list summary = Kerberos::Summary();
     list unconfigured = summary[1]:[];
     string configured = summary[0]:"";
 
     /* Frame label */
-    term contents = Wizard_hw::DetectedContent(_("Kerberos-client to configure"),
+    term contents = Wizard_hw::DetectedContent(_("Kerberos to configure"),
 	    unconfigured, false, configured);
 
     Wizard::SetContentsButtons(caption, contents, HELPS["summary"]:"",
@@ -119,15 +119,15 @@ global define symbol SummaryDialog() ``{
  */
 global define symbol OverviewDialog() ``{
 
-    /* Kerberos-client overview dialog caption */
-    string caption = _("Kerberos-client overview");
+    /* Kerberos overview dialog caption */
+    string caption = _("Kerberos overview");
 
-    list overview = Kerberos-client::Overview();
+    list overview = Kerberos::Overview();
 
     /* FIXME table header */
     term contents = Wizard_hw::ConfiguredContent(
 	/* Table header */
-	`header(_("Number"), _("Kerberos-client")),
+	`header(_("Number"), _("Kerberos")),
 	overview, nil, nil, nil, nil );
 
     contents = Wizard_hw::SpacingAround(contents, 1.5, 1.5, 1.0, 1.0);

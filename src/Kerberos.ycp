@@ -204,35 +204,28 @@ global define string ReadFile (string name) ``{
 
     if (findlastof (ret, "\n") < size (ret) - 1)
         ret = ret + "\n";
-    y2milestone ("file /etc/pam.d/%1: %2", name, ret);
+//    y2milestone ("file /etc/pam.d/%1: %2", name, ret);
     return ret;
 
 }
 
-global define string RemoveOldEntry (string file, string old) ``{
+/*
+ * Removes the old module used from authentication from pam file
+ * @param file contens
+ * @param old_module name of old module
+ */
+define string RemoveOldEntry (string file, string old_module) ``{
 
-    y2milestone ("file : %1", file);
     list file_list = splitstring (file, "\n");
     file_list = filter (`entry, file_list, ``{
-
-//        list entry_list = splitstring (entry, " "); // what about \t ?
-//    y2milestone ("entry_list : %1", entry_list);
-/*
-        if (contains (entry_list, "auth") &&
-            contains (entry_list, "pam_krb5.so") &&
-            contains (entry_list, old))
-            return false;
-*/
         if (findfirstof (entry, "#") != 0 &&
             issubstring (entry, "auth") &&
-            issubstring (entry, "pam_krb5.so") &&
-            issubstring (entry, old))
+            issubstring (entry, old_module))
             return false;
         else return true;
     });
 
     file = mergestring (file_list, "\n");
-    y2milestone ("file : %1", file);
     return file;
 }
 
@@ -248,7 +241,7 @@ global define boolean UpdatePamFiles (list files) ``{
              !use_pam_krb)
         {
             // remove the previously used entry
-            content = RemoveOldEntry (content, saved_control);
+            content = RemoveOldEntry (content, "pam_krb5.so");
         }
 
         if (use_pam_krb)
@@ -271,6 +264,14 @@ global define boolean UpdatePamFiles (list files) ``{
                 SCR::Write (.target.string, file_path, content);
                 // change params for pam_unix
                 SCR::Write (unix2_path, "-use_first_pass");
+            }
+            else if (control == "required")
+            {
+                // remove pam_unix2 - only kerberos authentication
+                // will be possible !!
+                content = RemoveOldEntry (content, "pam_unix2.so");
+                content = entry + "\n" + content;
+                SCR::Write (.target.string, file_path, content);
             }
         }
         else
