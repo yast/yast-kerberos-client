@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Nov 28 14:07:49 CET 2003 - jsuchome@suse.cz
+
+- syntax fixes for new interpreter
+- 2.9.1
+
+-------------------------------------------------------------------
+Tue Nov 25 14:24:19 CET 2003 - jsuchome@suse.cz
+
+- added possibility to run NTP client (new button in Advanced dialog)
+
+-------------------------------------------------------------------
 Tue Nov 18 14:22:07 CET 2003 - jsuchome@suse.cz
 
 - adapted to new Network types interface

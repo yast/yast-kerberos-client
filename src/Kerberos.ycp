@@ -91,12 +91,6 @@ global define boolean Modified() ``{
     return (modified || pam_modified || afs_modified);
 };
 
-/**
- * Abort function
- * return boolean return true if abort
- */
-global block AbortFunction = nil;
-
 
 /**
  * Get all the Kerberos configuration from a map.

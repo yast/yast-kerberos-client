@@ -26,6 +26,7 @@ import "Wizard";
 import "Report";
 import "Require";
 import "RichText";
+import "CommandLine";
 
 include "kerberos-client/wizards.ycp";
 include "commandline/commandline.ycp";

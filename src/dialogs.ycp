@@ -17,6 +17,8 @@ import "Kerberos";
 import "Report";
 import "Mode";
 import "Require";
+import "Call";
+import "IP";
 
 import "Popup";
 import "Label";
@@ -59,18 +61,6 @@ global define symbol WriteDialog() ``{
     Wizard::RestoreHelp(_("Writing Kerberos Client Settings"));
     boolean ret = Kerberos::Write();
     return ret ? `next : `abort;
-}
-
-/**
- * Check syntax of IPv4 address
- * @param ip IPv4 address
- * @return true if correct
- */
-global define boolean check_ip4(string ip) ``{
-    if(ip == nil || ip == "") return false;
-    string num = "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])";
-    string ipv4 = "^" + num + "(\\." + num + "){3}$";
-    return regexpmatch(ip, ipv4);
 }
 
 /**
@@ -177,11 +167,11 @@ domain name is usually used.</p>
 	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
     });
 
-    any result = nil;
+    symbol result = nil;
     do
     {
-        result = UI::UserInput ();
-	use_afs = UI::QueryWidget (`id(`afs), `Value) && afs_available;
+        result	= (symbol) UI::UserInput ();
+	use_afs = (boolean)UI::QueryWidget (`id(`afs), `Value) && afs_available;
 
 	if (result == `afs) {
 	    UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
@@ -356,10 +346,10 @@ global define symbol AdvancedDialog() ``{
     string help_text =
 
     // help text (do not transl. values "m","h", "d")
-    _("<p>Values of <b>Ticket Lifetime</b> and <b>Renewable Lifetime</b> are
-in seconds as default. Alternatively, specify the time unit (<i>m</i>
-for minutes, <i>h</i> for hours, or <i>d</i> for days) and use it as a value
-suffix (e.g., <i>1d</i> or <i>24h</i> for one day).</p>
+    _("<p>Values of <b>Ticket Lifetime</b>, <b>Renewable Lifetime</b> and
+<b>Clock Skew</b> are in seconds as default. Alternatively, specify the time
+unit (<i>m</i> for minutes, <i>h</i> for hours, or <i>d</i> for days) and use
+it as a value suffix (e.g., <i>1d</i> or <i>24h</i> for one day).</p>
 ") +
 
     // help text
@@ -387,7 +377,13 @@ disabling Kerberos authentication for the system administrator (<i>root</i>).</p
 
     // help text
     _("<p>
-The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching the host's system clock. The value is in seconds.</p>");
+The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching the host's system clock. The value is in seconds.</p>") +
+
+    //helptext
+    _("<p>
+If you want to synchronize your time with NTP server, configure your computer
+as NTP client. You can configure it by pushing <b>NTP Configuration</b> button.
+</p>");
 
     string uid		= Kerberos::minimum_uid;
     string ticket	= Kerberos::ticket_lifetime;
@@ -397,10 +393,7 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
     boolean retain	= Kerberos::retain_after_close == "true";
     boolean ssh		= Kerberos::ssh_support;
 
-    integer max_skew	= 10000; // randomly choosed
     string clockskew	= Kerberos::clockskew;
-
-//    list packages = Kerberos::packages;
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (1),
@@ -428,9 +421,16 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
         // infield label
         `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
 	    tointeger (uid)),
-	// infield label
-	`IntField (`id (`skew), _("&Clock Skew"), 0, max_skew,
-	    tointeger (clockskew)),
+	`HBox (
+	    // textentry label
+	    `TextEntry (`id (`skew), _("&Clock Skew"), clockskew),
+
+	    `VBox (
+		`Label (""),
+		// button label (run YaST client for NTP)
+		`PushButton (`id(`ntp), _("&NTP Configuration..."))
+	    )
+	),
         `VSpacing (1)
     ), `HSpacing(3));
 
@@ -439,14 +439,25 @@ The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching 
         _("Advanced Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::OKButton ());
 
-    any result = nil;
+    symbol result = nil;
     do
     {
-        result = UI::UserInput ();
+        result = (symbol) UI::UserInput ();
+
+	if (result == `ntp) {
+
+	    if ( Require::RequireAndConflictTarget ( ["yast2-ntp-client"], [],
+		// popup label (%1 is package to install)
+		_("Package %1 is not installed.
+Install it now?")))
+	    {
+		WFM::CallFunction ("ntp-client", []);
+	    }
+	}
 
         if (result == `next) {
 	    // check the values (lifetimes: d/m/h)
-            ticket = UI::QueryWidget (`id(`ticket), `Value);
+            ticket = (string) UI::QueryWidget (`id(`ticket), `Value);
 	    if (!regexpmatch (ticket, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (ticket, "^([0-9]+)$"))
 	    {
@@ -456,7 +467,7 @@ Try again."));
 		UI::SetFocus (`id(`ticket));
 		continue;
 	    }
-            renew = UI::QueryWidget (`id(`renew), `Value);
+            renew = (string) UI::QueryWidget (`id(`renew), `Value);
 	    if (!regexpmatch (renew, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (renew, "^([0-9]+)$"))
 	    {
@@ -465,32 +476,18 @@ Try again."));
 		UI::SetFocus (`id(`renew));
 		continue;
 	    }
-            clockskew = sformat ("%1", UI::QueryWidget (`id(`skew), `Value));
-
-	    ssh = UI::QueryWidget (`id(`ssh), `Value);
-
-	    /*
-	    if (ssh)
+            clockskew = (string) UI::QueryWidget (`id(`skew), `Value);
+	    if (!regexpmatch (clockskew, "^([0-9]+)[dmh]$") &&
+		!regexpmatch (clockskew, "^([0-9]+)$"))
 	    {
-		if  (!Require::IsAnyPackageInstalled (["openssh"]) &&
-		     !contains (packages, "openssh"))
-		{
-		    // yes/no pupup
-		    if (Popup::YesNo (_("Package \"openssh\" is necessary.
-Install it?")))
-			packages = add (packages, "openssh");
-		    else
-		    {
-			result = nil;
-			continue;
-		    }
-		}
+		Popup::Error (_("Invalid format of Clock Skew entry.
+Try again."));
+		UI::SetFocus (`id(`skew));
+		continue;
 	    }
-	    else
-	    {
-		packages = filter (`p, packages, ``( p != "openssh"));
-	    }
-	    */
+
+	    ssh = (boolean) UI::QueryWidget (`id(`ssh), `Value);
+
         }
 
     } while (!contains ([`back, `next, `cancel, `abort], result));
@@ -500,13 +497,13 @@ Install it?")))
         Kerberos::minimum_uid = sformat("%1",UI::QueryWidget(`id(`uid),`Value));
 	Kerberos::ticket_lifetime = ticket;
 	Kerberos::renew_lifetime = renew;
-	Kerberos::forwardable = UI::QueryWidget (`id(`forw), `Value) ?
-	    "true" : "false";
-	Kerberos::proxiable = UI::QueryWidget (`id(`prox), `Value) ?
-	    "true" : "false";
-	Kerberos::retain_after_close = UI::QueryWidget (`id(`retain), `Value) ?
-	    "true" : "false";
         Kerberos::clockskew = clockskew;
+	Kerberos::forwardable = (boolean)UI::QueryWidget (`id(`forw), `Value) ?
+	    "true" : "false";
+	Kerberos::proxiable = (boolean) UI::QueryWidget (`id(`prox), `Value) ?
+	    "true" : "false";
+	Kerberos::retain_after_close =
+	    (boolean) UI::QueryWidget (`id(`retain), `Value) ? "true" : "false";
 
 	if (ssh != Kerberos::ssh_support)
 	{
