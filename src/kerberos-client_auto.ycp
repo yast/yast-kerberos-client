@@ -68,7 +68,7 @@ else if (func == "Write") {
 	ret = Kerberos::Write();
 }
 else if (func == "Packages") {
-        ret = Kerberos::required_packages;
+        ret = Kerberos::AutoPackages();
 }
 /* unknown function */
 else {

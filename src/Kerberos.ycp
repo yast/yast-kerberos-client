@@ -644,5 +644,16 @@ global define string ShortSummary() ``{
 
     return summary;
 }
+/**
+ * Return required packages for auto-installation
+ * @return map of packages to be installed and to be removed
+ */
+global define map AutoPackages() ``{
+	return ($["install": required_packages, "remove": []]);
+
+}
+
+
+
 /* EOF */
 }
