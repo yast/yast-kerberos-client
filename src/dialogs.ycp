@@ -124,8 +124,8 @@ You can update your PAM settings to enable Kerberos authentication for your user
         }
 	if (!use_pam_krb)
 	    result = `finish;
-	else if (!Mode::config)
-	    Require::RequireAndConflictButtons (["heimdal-tools"], [],
+	else
+	    Require::RequireAndConflictTargetButtons (["heimdal-tools"], [],
 	        // install required packages (message popup)
 		_("<p>To configure Kerberos client services,
 package <b>%1</b> could be useful.<br>
