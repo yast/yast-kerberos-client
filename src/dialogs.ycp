@@ -186,7 +186,7 @@ authentiction on the ssh server.</p>") +
 		`TextEntry (`id (`realm), _("Default Real&m"), default_realm)
 	    ),
 	    // textentry label
-	    `TextEntry (`id (`kdc), _("&KDC Server Adress"), kdc),
+	    `TextEntry (`id (`kdc), _("&KDC Server Address"), kdc),
             // infield label
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
