@@ -16,6 +16,7 @@ module "Kerberos";
 textdomain "kerberos";
 
 import "Summary";
+import "Require";
 
 
 //global boolean proposal_valid = false;
@@ -170,6 +171,7 @@ global define boolean Write () ``{
 
     boolean pam_installed = false;
     boolean ret = true;
+    // TODO: update list of files! (su)
     list pam_files = ["login", "xlock", "xdm"];
 
     // -- pam settings
@@ -177,21 +179,12 @@ global define boolean Write () ``{
     {
         if (use_pam_krb)
         {
-	    // In autoinst mode  we install needed packages in initial mode
-            if (SCR::Execute(.target.bash, "rpm -q pam_krb5") ==0 || write_only)
-               pam_installed = true;
-            else
-            {
-                // Popup text (required application):
-                if (UI::YesNoPopup(_("To configure PAM authentication with Kerberos,
-the package \"pam_krb5\" is required.
-Install this package now?
-")))
-                {
-                    include "require.ycp"; // is it possible to have it here??
-                    pam_installed = DoInstallAndRemove(["pam_krb5"], []);
-                }
-            }
+	        // In autoinst mode  we install needed packages in initial mode
+            pam_installed = (write_only || Require::RequireAndConflict(["pam_krb5"], [],
+// popup text, %1 is required aplication
+_("To use PAM authentication with Kerberos,
+the package <b>%1</b> is required.
+Install this package now?")));
             if (pam_installed)
             {
                 // -- write to /etc/pam.d/*
@@ -424,15 +417,6 @@ global define list Summary() ``{
     summary = Summary::AddLine(summary, (clockskew != "") ? clockskew : nc);
 
     return [ summary, [] ];
-}
-
-/**
- * Create an overview table
- * @return table items
- */
-global define list Overview() ``{
-    // TODO FIXME: your code here...
-    return [];
 }
 
 /* EOF */

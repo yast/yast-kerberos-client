@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 25 11:36:50 CET 2003 - jsuchome@suse.de
+
+- adapted to Require interface
+- 2.8.0
+
+-------------------------------------------------------------------
 Tue Feb 18 01:46:56 CET 2003 - nashif@suse.de
 
 - replaced functions in auto client: Result -> Export
