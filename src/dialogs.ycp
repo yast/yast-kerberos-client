@@ -53,7 +53,7 @@ global define symbol ReadDialog() ``{
  */
 global define symbol WriteDialog() ``{
     // help text
-    Wizard::RestoreHelp(_("Writing Kerberos Client settings"));
+    Wizard::RestoreHelp(_("Writing Kerberos Client Settings"));
     boolean ret = Kerberos::Write();
     return ret ? `next : `abort;
 }
@@ -75,7 +75,7 @@ You can update your PAM settings to enable Kerberos authentication for your user
     _("<p>If you are using Kerberos authentication together with AFS file system, check <b>Kerberos for AFS</b> checkbox. To set cell name and AFS server for this cell, use <b>Configure</b> button.</p>") +
 
     // help text 3/3
-    _("<p>For configuration of Kerberos client settings, click <b>Next</b> button.</p>");
+    _("<p>To configure Kerberos client settings, click <b>Next</b>.</p>");
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
     boolean use_afs = Kerberos::use_afs;

@@ -225,7 +225,7 @@ global define boolean Write () ``{
     boolean ret = true;
 
     // dialog caption
-    string caption = _("Saving Kerberos Client configuration");
+    string caption = _("Saving Kerberos Client Configuration");
 
     Progress::New(caption, " ", 4, [
 	    // progress stage label
