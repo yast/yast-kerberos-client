@@ -344,7 +344,7 @@ global define boolean Write () ``{
 	{
 	    // error popup
 	    Popup::Error (_("Packages for AFS were not successfully installed.
-    AFS will not be enabled."));
+AFS will not be enabled."));
 	    use_afs = false;
 	    afs_modified = false;
 	}
