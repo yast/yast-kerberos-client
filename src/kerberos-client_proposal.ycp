@@ -20,8 +20,8 @@ import "Progress";
 y2milestone("----------------------------------------");
 y2milestone("Kerberos-client proposal started");
 
-string func = WFM::Args(0);
-map param = WFM::Args(1);
+string func = (string) WFM::Args(0);
+map param = (map) WFM::Args(1);
 map ret = $[];
 
 /* create a textual proposal */
@@ -31,11 +31,12 @@ if(func == "MakeProposal") {
     symbol warning_level = nil;
     boolean force_reset = param["force_reset"]:false;
 
-    if(force_reset || !Kerberos::proposal_valid) {
+/* CAUSE proposal_valid IS NOT DEFINED in Kerberos module
+   if(force_reset || !Kerberos::proposal_valid) {
         Kerberos::proposal_valid = true;
 	Progress::off();
 	Kerberos::Read();
-    }
+    }*/
     list sum = Kerberos::Summary(false);
     proposal = select(sum, 0, "");
     Progress::on();

@@ -23,6 +23,8 @@ import "Runlevel";
 import "Popup";
 import "Mode";
 
+import "Label";
+
 /**
  * Required packages for this module to operate
  */
@@ -37,7 +39,7 @@ global boolean use_afs = false;
 
 // current pam modules called by pam_unix (value of call_modules=... in
 // /etc/security/pam_unix2)
-list auth_modules = [];
+list<string> auth_modules = [];
 
 // if pam_unix is in /etc/pam.d/login
 boolean pam_unix_present = false;
@@ -167,15 +169,42 @@ global define map Export () ``{
 }
 
 /**
+ * Reads the item value from the /etc/krb5.conf via ini agent
+ * If the item doesn't exist, returns empty string (not nil)
+ * @param path_to_value path for agent (.etc.krb5_conf)
+ * @return string the value
+ */
+global define string ReadFile (path path_to_value, string def_value) ``{
+
+    string value = (string) SCR::Read (path_to_value);
+    if (value == nil)
+        value = def_value;
+
+    return value;
+}
+
+/**
+ * Check for file existence
+ * @param path_to_file the path
+ * @return the answer
+ */
+global define boolean FileExists (string path_to_file) ``{
+
+    return (SCR::Execute (.target.bash,
+        sformat ("/usr/bin/test -e %1", path_to_file)) == 0);
+}
+
+
+/**
  * Reads Kerberos settings from the SCR
  * @return success
  */
 global define boolean Read () ``{
 
     // check only "auth"?
-    list auth_settings = PamSettings::GetValues ("pam_unix2", "auth");
+    list<string> auth_settings = PamSettings::GetValues ("pam_unix2", "auth");
     boolean comment = false;
-    foreach (`val, auth_settings, ``{
+    foreach (string val, auth_settings, ``{
 	if (substring (val, 0, 1) == "#")
 	    comment = true;
 	if (comment)
@@ -227,7 +256,7 @@ global define boolean Read () ``{
     // what if user _wants_ to have MY.REALM?
     if (default_domain == "" && FileExists ("/bin/ypdomainname"))
     {
-        map yp_domain = SCR::Execute (.target.bash_output, "/bin/ypdomainname");
+        map yp_domain = (map) SCR::Execute (.target.bash_output, "/bin/ypdomainname");
         default_domain = deletechars (yp_domain["stdout"]:"", "\n");
     }
 
@@ -238,17 +267,17 @@ global define boolean Read () ``{
     }
     if ((kdc == "" || kdc == "MY.COMPUTER") && FileExists ("/usr/bin/ypwhich"))
     {
-        map yp_serv = SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
+        map yp_serv = (map) SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
         kdc = deletechars( yp_serv["stdout"]:"", "\n");
     }
 
     if (SCR::Read (.target.stat, "/etc/sysconfig/afs-client") != $[])
     {
 	// read AFS related values
-	afs_cell = SCR::Read (.sysconfig.afs-client.THIS_CELL);
-	afs_server = SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER_NAME);
-	afs_serverip  = SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER);
-	regenerate_ci = SCR::Read (.sysconfig.afs-client.REGENERATE_CELL_INFO);
+	afs_cell = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL);
+	afs_server = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER_NAME);
+	afs_serverip  = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER);
+	regenerate_ci = (string) SCR::Read (.sysconfig.afs-client.REGENERATE_CELL_INFO);
     }
 
     // propose AFS defaults
@@ -262,7 +291,7 @@ global define boolean Read () ``{
     // read ssh support
     y2debug ("ssh_config sections: %1", SCR::Dir (.etc.ssh.ssh_config.s));
     string hostname = "*";
-    map out = SCR::Execute (.target.bash_output, "LANG=C /bin/hostname");
+    map out = (map) SCR::Execute (.target.bash_output, "LANG=C /bin/hostname");
     if (out["stderr"]:nil == "")
 	hostname = deletechars(out["stdout"]:"", "\n");
 
@@ -375,8 +404,8 @@ AFS will not be enabled."));
 	    // either ususal pam_krb (via use_krb5 option) or krb5afs
 	    if (!use_afs)
 	    {
-		auth_modules = filter (`m, auth_modules,``(m != "krb5afs"));
-		foreach (`type, [ "account", "auth", "password" ], ``{
+		auth_modules = filter (string m, auth_modules,``(m != "krb5afs"));
+		foreach (string type, [ "account", "auth", "password" ], ``{
 		    PamSettings::AddValue ("unix2", type, "use_krb5");
 		    // TODO use Pam::RemoveModule!
 		    PamSettings::RemoveValue ("unix2", type,"call_modules");
@@ -388,8 +417,8 @@ AFS will not be enabled."));
 	    else
 	    {
 		// TODO use Pam::AddModule!
-		auth_modules = union (auth_modules, ["krb5afs"]);
-		foreach (`type, [ "account", "auth", "password" ], ``{
+		auth_modules = (list<string>) union (auth_modules, ["krb5afs"]);
+		foreach (string type, [ "account", "auth", "password" ], ``{
 		    PamSettings::RemoveValue ("unix2", type, "use_krb5");
 		    PamSettings::RemoveValue ("unix2", type,"call_modules");
 		    PamSettings::AddValue ("unix2", type, sformat (
@@ -400,7 +429,7 @@ AFS will not be enabled."));
         else
         {
 	    auth_modules = filter (`m, auth_modules,``(m != "krb5afs"));
-	    foreach (`type, [ "account", "auth", "password" ], ``{
+	    foreach (string type, [ "account", "auth", "password" ], ``{
 		PamSettings::RemoveValue ("unix2", type, "use_krb5");
 		PamSettings::RemoveValue ("unix2", type, "call_modules");
 		if (auth_modules != [])
@@ -500,7 +529,7 @@ AFS will not be enabled."));
 	if (use_afs && SCR::Read (.target.stat, "/usr/bin/host") != $[])
 	{
 	    // TODO use 'getent hosts ip' instead of host (see ag_hostnames)
-	    map out = SCR::Execute (.target.bash_output,
+	    map out = (map) SCR::Execute (.target.bash_output,
 		"LANG=C /usr/bin/host -W 5 " + afs_serverip);
 	    if (out["stderr"]:"" == "")
 	    {
@@ -580,33 +609,6 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 
     return ret;
 }
-
-/**
- * Reads the item value from the /etc/krb5.conf via ini agent
- * If the item doesn't exist, returns empty string (not nil)
- * @param path_to_value path for agent (.etc.krb5_conf)
- * @return string the value
- */
-global define string ReadFile (path path_to_value, string def_value) ``{
-
-    string value = SCR::Read (path_to_value);
-    if (value == nil)
-        value = def_value;
-
-    return value;
-}
-
-/**
- * Check for file existence
- * @param path_to_file the path
- * @return the answer
- */
-global define boolean FileExists (string path_to_file) ``{
-
-    return (SCR::Execute (.target.bash,
-        sformat ("/usr/bin/test -e %1", path_to_file)) == 0);
-}
-
 
 /**
  * Create a textual summary

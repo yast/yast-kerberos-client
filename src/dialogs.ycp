@@ -62,6 +62,18 @@ global define symbol WriteDialog() ``{
 }
 
 /**
+ * Check syntax of IPv4 address
+ * @param ip IPv4 address
+ * @return true if correct
+ */
+global define boolean check_ip4(string ip) ``{
+    if(ip == nil || ip == "") return false;
+    string num = "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])";
+    string ipv4 = "^" + num + "(\\." + num + "){3}$";
+    return regexpmatch(ip, ipv4);
+}
+
+/**
  * Dialog for configuring Kerberos client (values in /etc/krb5.conf)
  * @return dialog result
  */
@@ -198,11 +210,11 @@ domain name is usually used.</p>
 
         if (result == `next || result == `advanced) {
 
-            default_realm = UI::QueryWidget (`id(`realm), `Value);
-            default_domain = UI::QueryWidget (`id(`domain), `Value);
-            kdc = UI::QueryWidget (`id(`kdc), `Value);
-            afs_serverip = UI::QueryWidget (`id(`afs_serverip), `Value);
-            cell = UI::QueryWidget (`id(`cell), `Value);
+            default_realm = (string) UI::QueryWidget (`id(`realm), `Value);
+            default_domain = (string) UI::QueryWidget (`id(`domain), `Value);
+            kdc = (string) UI::QueryWidget (`id(`kdc), `Value);
+            afs_serverip = (string) UI::QueryWidget (`id(`afs_serverip), `Value);
+            cell = (string) UI::QueryWidget (`id(`cell), `Value);
 	    use_afs = use_afs && use_pam_krb;
 
             if (use_pam_krb && default_realm == "")
@@ -503,18 +515,6 @@ Install it?")))
 	}
     }
     return result;
-}
-
-/**
- * Check syntax of IPv4 address
- * @param ip IPv4 address
- * @return true if correct
- */
-global define boolean check_ip4(string ip) ``{
-    if(ip == nil || ip == "") return false;
-    string num = "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])";
-    string ipv4 = "^" + num + "(\\." + num + "){3}$";
-    return regexpmatch(ip, ipv4);
 }
 
 
