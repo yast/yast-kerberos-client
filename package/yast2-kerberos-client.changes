@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Jan 17 13:39:11 CET 2003 - jsuchome@suse.de
+
+- fixes: agent added to package, global keys enabled in agent
+- added "required" control mode
+- heimdal-lib is required package
+- 2.7.2
+
+-------------------------------------------------------------------
 Mon Jan  6 17:12:27 CET 2003 - jsuchome@suse.de
 
 - splited to two dialogs: pam and klient configuration

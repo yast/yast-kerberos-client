@@ -46,28 +46,6 @@ if(propose)
 else
     ret = KerberosSequence();
 
-
-/*
-// -- main
-
-Wizard::CreateDialog ();
-Wizard::ReplaceAbortButton(`Empty ());
-
-Kerberos::Read ();
-
-symbol result = KerberosDialog ();
-
-
-if (result == `next)
-{
-    if (Kerberos::Write (false))
-        UI::MessagePopup(_("The configuration of the Kerberos client
-was saved and can be used."));
-}
-
-UI::CloseDialog();
-*/
-
 y2debug("ret == %1", ret);
 
 /* Finish */

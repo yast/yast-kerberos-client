@@ -2,7 +2,7 @@
 # neededforbuild yast2-devel-packages
 
 @HEADER@
-Requires:	yast2
+Requires:	yast2 heimdal-lib
 
 BuildArchitectures:	noarch
 
@@ -26,6 +26,7 @@ Summary:	Configuration of kerberos-client
 @clientdir@/kerberos-client_auto.ycp
 @moduledir@/Kerberos.ycp
 @configdir@/kerberos.y2cc
+@scrconfdir@/*.scr
 %dir @yncludedir@/kerberos-client
 @yncludedir@/kerberos-client/dialogs.ycp
 @yncludedir@/kerberos-client/wizards.ycp

@@ -44,18 +44,23 @@ global define symbol WriteDialog() ``{
  */
 global define symbol PamDialog() ``{
 
-    // help text 1/2
+    // help text 1/4
     string help_text = _("<p>
 <b>Autentication with Kerberos</b><br>
 You can update your PAM settings to enable the Kerberos autentication for your users. 
 </p>")+
 
-    // help text 2/2
+    // help text 2/4
 _("<p><b>Authentication modes</b><br>
 If you choose <b>optional</b> mode, the primary authentication is with the existing framework, such as user entries in the <i>/etc/shadow</i> or NIS/LDAP database. The only difference is that, in addition, if there is a Kerberos principal associated with the user, PAM module will try to obtain a ticket on behalf of the user, using the previously suplied password.
-<br>
-Otherwise, when you want to use Kerberos PAM module as a primary authentication mechanism, select <b>sufficient</b>. When user fails to log in (because there is no such principal in Kerberos database or the KDC is down), the system will try to authenticate the user with the entered password against the remaining defined database (local files, NIS, LDAP). 
-</p>");
+</p>") +
+
+    // help text 3/4
+_("<p>If you want to use Kerberos PAM module as a primary authentication mechanism, select <b>sufficient</b>. When user fails to log in (because there is no such principal in Kerberos database or the KDC is down), the system will try to authenticate the user with the entered password against the remaining defined database (local files, NIS, LDAP).
+</p>") +
+
+    // help text 4/4
+_("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as primary one. But in this case no user who doesn't exist in Kerberos database will be able to login. If you want to login as a <i>root</i>, you have to use the <i>su</i> command from another user's session.</p>");
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
     string control = Kerberos::control;
@@ -63,7 +68,8 @@ Otherwise, when you want to use Kerberos PAM module as a primary authentication 
 
     list controls = [
         `item (`id ("optional"), "optional", false),
-        `item (`id ("sufficient"), "sufficient", false)
+        `item (`id ("sufficient"), "sufficient", false),
+        `item (`id ("required"), "required", false)
     ];
 
     term con = `HVSquash(
@@ -144,7 +150,7 @@ It is common practice to use domain name in uppercase for your default realm nam
 
     // help text 3/3
     _("<p>
-The <b>clock skew</b> is the tolerance for the time stapms not exactly matching the host's system clock. It is usually set to 300 seconds.</p>");
+The <b>clock skew</b> is the tolerance for the time stamps not exactly matching the host's system clock. It is usually set to 300 seconds.</p>");
 
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
@@ -182,7 +188,7 @@ The <b>clock skew</b> is the tolerance for the time stapms not exactly matching 
     Wizard::SetContentsButtons (
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
-        UI::BackButtonLabel (), UI::NextButtonLabel ());
+        UI::BackButtonLabel (), UI::FinishButtonLabel ());
 
     any result = nil;
     do

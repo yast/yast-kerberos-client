@@ -4,7 +4,7 @@
   IniAgent(
    "/etc/krb5.conf",
     $[
-      "options" : [ ],
+      "options" : [ "global_values" ],
       "comments": [ "^[ \t]*#.*", "#.*", "^[ \t]*$" ],
       "sections" : [
         $[

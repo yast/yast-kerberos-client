@@ -24,6 +24,9 @@ global boolean write_only = false;
 // if pam_krb5 module is used for login
 global boolean use_pam_krb = false;
 
+// if pam_unix is in /etc/pam.d/login
+boolean pam_unix_present = false;
+
 // required/optional/sufficient
 global string control = "";
 string saved_control = "";
@@ -100,15 +103,19 @@ global define boolean Read () ``{
     // currently, only /etc/pam.d/login is checked
     list pam_login = SCR::Read(.pam.login);
     foreach (`line, pam_login, ``{
-        if ( line["type"]:"" == "auth" &&
-             issubstring (line["module"]:"", "pam_krb5.so"))
+        if ( line["type"]:"" == "auth" )
         {
-            use_pam_krb = true;
-            // only the first is taken
-            if (control == "")
-                control = line["control"]:"";
-            if (arguments == "")
-                arguments = line["arguments"]:"";
+            if (issubstring (line["module"]:"", "pam_unix"))
+                pam_unix_present = true;
+            if (issubstring (line["module"]:"", "pam_krb5.so"))
+            {
+                use_pam_krb = true;
+                // only the first is taken
+                if (control == "")
+                    control = line["control"]:"";
+                if (arguments == "")
+                    arguments = line["arguments"]:"";
+            }
         }
     });
 
@@ -261,7 +268,7 @@ global define string ReadFile (path path_to_value) ``{
  * @param name name of the file in /etc/pam.d directory
  * @return string file contens
  */
-global define string ReadFile (string name) ``{
+global define string ReadStringFile (string name) ``{
 
     string ret = SCR::Read (.target.string, "/etc/pam.d/" + name);
 
@@ -300,13 +307,15 @@ define string RemoveOldEntry (string file, string old_module) ``{
  */
 global define boolean UpdatePamFiles (list files) ``{
 
+    // TODO: better handling with pam_unix2.so
     foreach (`filename, files, ``{
 
         string file_path = "/etc/pam.d/" + filename;
         if (! FileExists (file_path))
             return false;
-        string content = ReadFile(filename);
+        string content = ReadStringFile(filename);
         path unix2_path = add( add( add (.pam, filename), "auth"), "pam_unix2");
+        string unix2_entry = "auth requisite pam_unix2.so\tnullok";
 
         if ((saved_control != "" && saved_control != control) ||
              !use_pam_krb)
@@ -322,32 +331,51 @@ global define boolean UpdatePamFiles (list files) ``{
             if (control == "sufficient")
             {
                 //sufficient - 1st line
-                content = entry + "\n" + content;
-                SCR::Write (.target.string, file_path, content);
-                // change params for pam_unix
-                SCR::Write (unix2_path, "+use_first_pass");
+                if (pam_unix_present)
+                {
+                    content = entry + "\n" + content;
+                    SCR::Write (.target.string, file_path, content);
+                    // change params for pam_unix
+                    SCR::Write (unix2_path, "+use_first_pass");
+                }
+                else
+                {
+                    content = entry + "\n" + unix2_entry + " use_first_pass\n"
+                        + content;
+                    SCR::Write (.target.string, file_path, content);
+                }
             }
             else if (control == "optional")
             {
                 entry = entry + " try_first_pass";
                 //optional - last line
-                content = content + entry;
-                SCR::Write (.target.string, file_path, content);
-                // change params for pam_unix
-                SCR::Write (unix2_path, "-use_first_pass");
+                if (pam_unix_present)
+                {
+                    content = content + entry;
+                    SCR::Write (.target.string, file_path, content);
+                    // change params for pam_unix
+                    SCR::Write (unix2_path, "-use_first_pass");
+                }
+                else
+                {
+                    content = unix2_entry + "\n" + content + entry;
+                    SCR::Write (.target.string, file_path, content);
+                }
             }
             else if (control == "required")
             {
                 // remove pam_unix2 - only kerberos authentication
                 // will be possible !!
-                content = RemoveOldEntry (content, "pam_unix2.so");
-                content = entry + "\n" + content;
+                content = RemoveOldEntry (content, "pam_unix");
+                content = entry + " rootok\n" + content;
                 SCR::Write (.target.string, file_path, content);
             }
         }
         else
         {
             // remove pam_krb5 from /etc/pam.d
+            if (!pam_unix_present)
+                content = unix2_entry + "\n" + content;
             SCR::Write (.target.string, file_path, content);
         }
     });
