@@ -52,7 +52,7 @@ else if(func == "Summary") {
 }
 // ShortSummary is used by Users module
 else if(func == "ShortSummary") {
-    ret = Kerberos::ShortSummary()
+    ret = Kerberos::ShortSummary();
 }
 else if (func == "Reset") {
     Kerberos::Import($[]);
