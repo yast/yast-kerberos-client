@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 11 12:33:08 CEST 2003 - jsuchome@suse.cz
+
+- save value of kpasswd_server to /etc/krb5.conf (#30485)
+- do not try to read from non-existent /etc/sysconfig/afs-client
+
+-------------------------------------------------------------------
 Thu Sep 11 09:44:51 CEST 2003 - jsuchome@suse.cz
 
 - there is no Require::IsPackageAvailableTarget function (#30459)

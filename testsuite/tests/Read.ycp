@@ -21,6 +21,7 @@
 		    ],
 		    "SUSE.CZ": $[
 			"kdc": "chimera.suse.cz",
+			"kpasswd_server": nil,
 			"default_domain": nil,
 		    ],
 		    "pam" : $[
@@ -64,6 +65,9 @@
 	"sysconfig": $[
 	    "afs-client": nil
 	],
+	"target": $[
+	    "stat": $[]
+	]
     ];
 
     map EX = $[

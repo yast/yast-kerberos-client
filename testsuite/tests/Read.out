@@ -6,6 +6,7 @@ Dir	.etc.krb5_conf.s: []
 Read	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ"
 Read	.etc.krb5_conf.v.libdefaults.clockskew "500"
 Read	.etc.krb5_conf.v."SUSE.CZ"."kdc" "chimera.suse.cz"
+Read	.etc.krb5_conf.v."SUSE.CZ"."kpasswd_server" nil
 Read	.etc.krb5_conf.v."SUSE.CZ"."default_domain" nil
 Read	.etc.krb5_conf.v.pam.ticket_lifetime nil
 Read	.etc.krb5_conf.v.pam.renew_lifetime nil
@@ -15,10 +16,7 @@ Read	.etc.krb5_conf.v.pam.retain_after_close nil
 Read	.etc.krb5_conf.v.pam.minimum_uid "1"
 Execute	.target.bash "/usr/bin/test -e /bin/ypdomainname" 0
 Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"suse.cz"]
-Read	.sysconfig.afs-client.THIS_CELL nil
-Read	.sysconfig.afs-client.THIS_CELL_SERVER_NAME nil
-Read	.sysconfig.afs-client.THIS_CELL_SERVER nil
-Read	.sysconfig.afs-client.REGENERATE_CELL_INFO nil
+Read	.target.stat "/etc/sysconfig/afs-client" $[]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"suse.cz"]
 Dir	.etc.ssh.ssh_config.s: ["*"]

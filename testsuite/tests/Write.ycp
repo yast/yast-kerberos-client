@@ -84,6 +84,7 @@
 	    ]
 	]
     ];
+    Kerberos::kpasswd_server = "user_defined"; // -> won't be written
 
     TEST(``(Kerberos::Write ()), [ READ, [], [] ], 0);
 }
