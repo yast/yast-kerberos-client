@@ -67,6 +67,9 @@ else if (func == "Write") {
 	Kerberos::write_only = true;
 	ret = Kerberos::Write();
 }
+else if (func == "Packages") {
+        ret = Kerberos::required_packages;
+}
 /* unknown function */
 else {
     y2error("unknown function: %1", func);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 22 09:38:37 CEST 2003 - jsuchome@suse.cz
+
+- Add variable for required packages and return them in auto client
+
+-------------------------------------------------------------------
 Wed Aug 20 14:31:17 CEST 2003 - jsuchome@suse.cz
 
 - removed redundant "initialization dialog" (#28779)

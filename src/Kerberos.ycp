@@ -20,6 +20,10 @@ import "Require";
 import "Progress";
 import "PamSettings";
 
+/**
+ * Required packages for this module to operate
+ */
+global list required_packages = ["pam_krb5", "heimdal-lib"];
 
 //global boolean proposal_valid = false;
 global boolean write_only = false;
