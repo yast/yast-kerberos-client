@@ -80,7 +80,7 @@ else if (func == "Packages") {
  * return boolean
  */
 else if (func == "GetModified") {
-    ret = Kerberos::modified;
+    ret = Kerberos::Modified ();
 }
 /**
  * Set modified flag

@@ -88,7 +88,7 @@ global list<string> packages = [];
  */
 global define boolean Modified() ``{
     y2debug("modified=%1",modified);
-    return (modified || pam_modified || afs_modified);
+    return (modified || pam_modified || afs_modified || ssh_modified);
 };
 
 
