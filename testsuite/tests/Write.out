@@ -3,6 +3,7 @@ Return	true
 Dump	==== ssh modified (enabled) ======================================
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes" true
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes" true
+Write	.etc.ssh.ssh_config nil true
 Return	true
 Dump	==== kerberos disabled, ssh support disabled, krb5.conf untouched=
 Dir	.etc.security.section: ["/etc/security/pam_pwcheck.conf", "/etc/security/pam_unix2.conf"]
@@ -18,8 +19,10 @@ Read	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap 
 Write	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap" true
 Read	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap use_krb5"
 Write	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap use_krb5" true
+Write	.etc.security nil true
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "no" true
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "no" true
+Write	.etc.ssh.ssh_config nil true
 Return	true
 Dump	
 Dump	The map with original values is always read again in
@@ -39,6 +42,7 @@ Write	.etc.krb5_conf.v.pam."forwardable" "true" true
 Write	.etc.krb5_conf.v.pam."proxiable" "false" true
 Write	.etc.krb5_conf.v.pam."retain_after_close" "false" true
 Write	.etc.krb5_conf.v.pam."minimum_uid" "0" true
+Write	.etc.krb5_conf nil true
 Return	true
 Dump	==== (pam section doesn't exist) =================================
 Write	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ" true
@@ -53,4 +57,5 @@ Write	.etc.krb5_conf.v.appdefaults.pam."forwardable" "true" true
 Write	.etc.krb5_conf.v.appdefaults.pam."proxiable" "false" true
 Write	.etc.krb5_conf.v.appdefaults.pam."retain_after_close" "false" true
 Write	.etc.krb5_conf.v.appdefaults.pam."minimum_uid" "0" true
+Write	.etc.krb5_conf nil true
 Return	true
