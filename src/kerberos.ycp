@@ -52,7 +52,7 @@ any ret = nil;
  * @param options  a list of parameters passed as args
  * @return boolean true on success
  */
-global define boolean KerberosEnableHandler( map options ) ``{
+define boolean KerberosEnableHandler( map options ) ``{
     // check the "command" to be present exactly once
     string command = CommandLine::UniqueOption( options,
 	["enable", "disable" ] );
@@ -67,7 +67,7 @@ global define boolean KerberosEnableHandler( map options ) ``{
  * Print summary of basic options
  * @return boolean false
  */
-global define boolean KerberosSummaryHandler (map options ) ``{
+define boolean KerberosSummaryHandler (map options ) ``{
 
     CommandLine::Print (RichText::Rich2Plain("<br>"+Kerberos::ShortSummary ()));
     return false; // do not call Write...
@@ -78,7 +78,7 @@ global define boolean KerberosSummaryHandler (map options ) ``{
  * @param options  a list of parameters passed as args
  * @return boolean true on success
  */
-global define boolean KerberosChangeConfiguration (map options ) ``{
+define boolean KerberosChangeConfiguration (map options ) ``{
 
     boolean ret = false;
     if ( options ["kdc"]:nil != nil )

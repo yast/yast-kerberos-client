@@ -23,7 +23,7 @@ include "kerberos-client/dialogs.ycp";
  * Main workflow of the kerberos-client configuration
  * @return sequence result
  */
-global define symbol MainSequence() ``{
+define symbol MainSequence() ``{
 
     map aliases = $[
 	"configure"	: ``( ConfigureDialog() ),
@@ -58,7 +58,7 @@ global define symbol MainSequence() ``{
  * Whole configuration of kerberos-client
  * @return sequence result
  */
-global define symbol KerberosSequence() ``{
+define symbol KerberosSequence() ``{
 
     map aliases = $[
 	"read"	: [ ``( ReadDialog() ), true ],
@@ -94,7 +94,7 @@ global define symbol KerberosSequence() ``{
  * For use with autoinstallation.
  * @return sequence result
  */
-global define symbol KerberosAutoSequence() ``{
+define symbol KerberosAutoSequence() ``{
     string caption = _("Kerberos Client Configuration");
     term contents = `Label(_("Initializing ..."));
 

@@ -41,14 +41,14 @@
 
     DUMP ("==== writing without any changes =================================");
 
-    TEST(``(Kerberos::Write ()), [ [], WRITE, [] ], 0);
+    TEST(``(Kerberos::Write ()), [ $[], WRITE, $[] ], 0);
 
     DUMP ("==== ssh modified (enabled) ======================================");
 
     Kerberos::ssh_modified = true;
     Kerberos::ssh_support = true;
 
-    TEST(``(Kerberos::Write ()), [ [], WRITE, [] ], 0);
+    TEST(``(Kerberos::Write ()), [ $[], WRITE, $[] ], 0);
 
     DUMP ("==== kerberos disabled, ssh support disabled, krb5.conf untouched=");
 
@@ -56,7 +56,7 @@
     Kerberos::use_pam_krb = false;
     Kerberos::ssh_support = false;
 
-    TEST(``(Kerberos::Write ()), [ READ, WRITE, [] ], 0);
+    TEST(``(Kerberos::Write ()), [ READ, WRITE, $[] ], 0);
 
     DUMP ("\nThe map with original values is always read again in");
     DUMP ("PamSettings::RemoveValue() function, so the output is strange...\n");
@@ -71,7 +71,7 @@
     Kerberos::default_realm = "SUSE.CZ";
     Kerberos::kdc = "chimera.suse.cz";
 
-    TEST(``(Kerberos::Write ()), [ READ, WRITE, [] ], 0);
+    TEST(``(Kerberos::Write ()), [ READ, WRITE, $[] ], 0);
 
     DUMP ("==== (pam section doesn't exist) =================================");
     READ = $[
@@ -86,5 +86,5 @@
     ];
     Kerberos::kpasswd_server = "user_defined"; // -> won't be written
 
-    TEST(``(Kerberos::Write ()), [ READ, [], [] ], 0);
+    TEST(``(Kerberos::Write ()), [ READ, $[], $[] ], 0);
 }

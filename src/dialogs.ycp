@@ -26,7 +26,7 @@ import "Label";
  * The dialog that appears when the [Abort] button is pressed.
  * @return `abort if user really wants to abort, `back otherwise
  */
-global define symbol ReallyAbort () ``{
+define symbol ReallyAbort () ``{
 
     boolean ret = true;
     if (!Mode::cont)
@@ -46,7 +46,7 @@ global define symbol ReallyAbort () ``{
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
  */
-global define symbol ReadDialog() ``{
+define symbol ReadDialog() ``{
     boolean ret = Kerberos::Read();
     return ret ? `next : `abort;
 }
@@ -55,7 +55,7 @@ global define symbol ReadDialog() ``{
  * Write settings dialog
  * @return `abort if aborted and `next otherwise
  */
-global define symbol WriteDialog() ``{
+define symbol WriteDialog() ``{
     // help text
     Wizard::RestoreHelp(_("Writing Kerberos Client Settings"));
     boolean ret = Kerberos::Write();
@@ -66,7 +66,7 @@ global define symbol WriteDialog() ``{
  * Dialog for configuring Kerberos client (values in /etc/krb5.conf)
  * @return dialog result
  */
-global define symbol ConfigureDialog() ``{
+define symbol ConfigureDialog() ``{
 
     // help text 1/5
     string help_text = _("<p>
@@ -340,7 +340,7 @@ Install this package?")))
  * Kerberos advanced configuration
  * @return dialog result
  */
-global define symbol AdvancedDialog() ``{
+define symbol AdvancedDialog() ``{
 
     string help_text =
 

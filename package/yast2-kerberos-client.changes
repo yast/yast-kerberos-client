@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 30 14:04:36 CET 2004 - jsuchome@suse.cz
+
+- fixed testsuite
+- 2.9.2
+
+-------------------------------------------------------------------
 Fri Nov 28 14:07:49 CET 2003 - jsuchome@suse.cz
 
 - syntax fixes for new interpreter

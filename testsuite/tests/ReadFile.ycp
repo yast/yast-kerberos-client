@@ -34,17 +34,17 @@
 
     path p = .etc.krb5_conf.v.libdefaults.default_realm;
 
-    string realm = TEST(``(Kerberos::ReadFile (p, "")), [ READ, [], [] ], 0);
+    string realm = (string)TEST(``(Kerberos::ReadFile (p, "")), [ READ, $[], $[] ], 0);
 
     p = add ( add (.etc.krb5_conf.v, realm), "kdc");
 
-    TEST(``(Kerberos::ReadFile (p, "test.suse.cz")), [ READ, [], [] ], 0);
+    TEST(``(Kerberos::ReadFile (p, "test.suse.cz")), [ READ, $[], $[] ], 0);
 
     p = add ( add (.etc.krb5_conf.v, "SUSE.DE"), "kdc");
 
-    TEST(``(Kerberos::ReadFile (p, "test.suse.de")), [ READ, [], [] ], 0);
+    TEST(``(Kerberos::ReadFile (p, "test.suse.de")), [ READ, $[], $[] ], 0);
 
     p = .etc.krb5_conf.v.pam.ticket_lifetime;
 
-    TEST(``(Kerberos::ReadFile (p, "1d")), [ READ, [], [] ], 0);
+    TEST(``(Kerberos::ReadFile (p, "1d")), [ READ, $[], $[] ], 0);
 }
