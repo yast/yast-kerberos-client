@@ -16,6 +16,7 @@ Read	.etc.krb5_conf.v.pam.minimum_uid "1"
 Execute	.target.bash "/usr/bin/test -e /bin/ypdomainname" 0
 Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"suse.cz"]
 Read	.sysconfig.afs-client.THIS_CELL nil
+Read	.sysconfig.afs-client.THIS_CELL_SERVER_NAME nil
 Read	.sysconfig.afs-client.THIS_CELL_SERVER nil
 Read	.sysconfig.afs-client.REGENERATE_CELL_INFO nil
 Dir	.etc.ssh.ssh_config.s: ["*"]

@@ -47,7 +47,7 @@ if(propose)
     ret = KerberosAutoSequence();
 else
 {
-    if (!Require::RequireAndConflict (["pam_krb5", "heimdal-lib"], [],
+    if (!Require::RequireAndConflict (Kerberos::required_packages, [],
 	// install required packages (message popup)
 	_("<p>To configure Kerberos client,
 packages <b>pam_krb5</b> and <b>heimdal-lib</b> are required.<br>

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 25 17:06:18 CEST 2003 - jsuchome@suse.cz
+
+- fixed AFS support
+- stop/start afs-client
+
+-------------------------------------------------------------------
 Fri Aug 22 09:38:37 CEST 2003 - jsuchome@suse.cz
 
 - Add variable for required packages and return them in auto client

@@ -19,13 +19,13 @@ import "Summary";
 import "Require";
 import "Progress";
 import "PamSettings";
+import "Runlevel";
 
 /**
  * Required packages for this module to operate
  */
 global list required_packages = ["pam_krb5", "heimdal-lib"];
 
-//global boolean proposal_valid = false;
 global boolean write_only = false;
 
 // if pam_krb5 module is used for login
@@ -56,7 +56,8 @@ global boolean modified = false;
 
 // afs cell name
 global string afs_cell = "";
-// afs server
+// afs server (IP adress)
+global string afs_serverip = "";
 global string afs_server = "";
 // regenerate cell info (value in sysconfig/afs-client)
 global string regenerate_ci = "yes";
@@ -107,9 +108,9 @@ global define boolean Import (map settings) ``{
     kdc = client["kdc_server"]:"";
     clockskew = client["clockskew"]:clockskew;
 
-    afs_server = client["afs_server"]:"";
+    afs_serverip = client["afs_serverip"]:"";
     afs_cell = client["afs_cell"]:"";
-	if (size(afs_server) > 0 )
+	if (size(afs_serverip) > 0 )
 		use_afs = true;
 	else
 		use_afs = false;
@@ -145,7 +146,7 @@ global define map Export () ``{
 			    "default_realm"		: default_realm,
 			    "kdc_server"		: kdc,
 			    "clockskew"			: clockskew,
-				"afs_server"	    : afs_server,
+				"afs_serverip"	    : afs_serverip,
 				"afs_cell"	        : afs_cell,
 				"ssh_support"       : ssh_support,
 				"ticket_lifetime"   : ticket_lifetime,
@@ -233,14 +234,15 @@ global define boolean Read () ``{
 
     // read AFS related values
     afs_cell	= SCR::Read (.sysconfig.afs-client.THIS_CELL);
-    afs_server	= SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER);
+    afs_server	= SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER_NAME);
+    afs_serverip  = SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER);
     regenerate_ci = SCR::Read (.sysconfig.afs-client.REGENERATE_CELL_INFO);
 
     // propose AFS defaults
     if (afs_cell == nil || afs_cell == "")
 	afs_cell = tolower (default_realm);
-    if (afs_server == nil || afs_server == "")
-	afs_server = kdc;
+    if (afs_serverip == nil)
+	afs_serverip = "";//FIXME check KDC?
     if (regenerate_ci == nil || regenerate_ci == "")
 	regenerate_ci = "yes";
 
@@ -331,6 +333,15 @@ global define boolean Write () ``{
 	y2debug ("packages to install: %1", packages);
 	Progress::NextStage ();
 	Require::DoInstallAndRemoveTarget (packages, []);
+
+	if (use_afs && !Require::AreAllPackagesInstalledTarget (["openafs",
+	    "openafs-client"]))
+	{
+	    // error popup
+	    Popup::Error (_("Packages for AFS were not successfully installed.
+    AFS will not be enabled."));
+	    use_afs = false;
+	}
     }
 
     Progress::NextStage ();
@@ -446,9 +457,49 @@ global define boolean Write () ``{
 
     if (afs_modified)
     {
+	if (use_afs)
+	    Runlevel::ServiceAdjust ("afs-client", "enable");
+	else
+	    Runlevel::ServiceAdjust ("afs-client", "disable");
+
+	// stop service
+	if (!Mode::config)
+	    Runlevel::RunInitScript ("afs-client", "stop");
+
 	SCR::Write (.sysconfig.afs-client.THIS_CELL, afs_cell);
-	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER, afs_server);
+	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER, afs_serverip);
+	if (use_afs)
+	    regenerate_ci = "yes";
 	SCR::Write (.sysconfig.afs-client.REGENERATE_CELL_INFO, regenerate_ci);
+	afs_server = afs_cell;
+	// get the name via 'host ip_addr' call
+	if (use_afs && SCR::Read (.target.stat, "/usr/bin/host") != $[])
+	{
+	    map out = SCR::Execute (.target.bash_output,
+		"LANG=en /usr/bin/host -W 5 " + afs_serverip);
+	    if (out["stderr"]:"" == "")
+	    {
+		string host = deletechars (out["stdout"]:"", "\n");
+		if (!issubstring (host, "not found"))
+		{
+		    list lh = splitstring (host, " ");
+		    if (lh[ size(lh) - 2]:"" == "pointer")
+			afs_server = lh [ size(lh) -1 ]:afs_server;
+		    // remove the last dot
+		    if (substring (afs_server, size (afs_server) - 1, 1) == ".")
+			afs_server = substring(afs_server,0,size(afs_server)-1);
+		}
+	    }
+	    else
+		y2error ("/usr/bin/host' returned error: %1", out["stderr"]:"");
+	}
+	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER_NAME, afs_server);
+
+	// force saving before starting service
+	SCR::Write (.sysconfig.afs-client, nil);
+
+	if (use_afs && !Mode::config)
+	    Runlevel::RunInitScript ("afs-client", "start");
     }
 
     // -- write openssh settings
