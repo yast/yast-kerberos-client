@@ -120,10 +120,13 @@ global define boolean Import (map settings) ``{
     ssh_support = client["ssh_support"]:false;
     ticket_lifetime = client["ticket_lifetime"]:"1d";
     renew_lifetime = client["renew_lifetime"]:"1d";
-	forwardable = client["forwardable"]:true;
-	proxiable = client["proxiable"]:false;
-    retain_after_close = client["retain_after_close"]:false;
-    minimum_uid = client["minimum_uid"]:0;
+	boolean tmp_forwardable = client["forwardable"]:true;
+	forwardable= (tmp_forwardable) ? "true": "false";
+	boolean tmp_proxiable = client["proxiable"]:false;
+	proxiable = (tmp_proxiable) ?   "true" :  "false";
+    boolean tmp_retain_after_close = client["retain_after_close"]:false;
+	retain_after_close = (tmp_retain_after_close) ? "true" : "false";
+    minimum_uid = client["minimum_uid"]:"0";
 
     pam_modified = true;
     afs_modified = true;
@@ -153,9 +156,9 @@ global define map Export () ``{
 				"ssh_support"       : ssh_support,
 				"ticket_lifetime"   : ticket_lifetime,
                 "renew_lifetime"    : renew_lifetime,
-				"forwardable"       : forwardable,
-                "proxiable"         : proxiable,
-                "retain_after_close": retain_after_close,
+				"forwardable"       : ( forwardable == "true" ) ? true : false,
+                "proxiable"         : ( proxiable == "true") ? true: false,
+                "retain_after_close": ( retain_after_close == "true") ? true: false ,
                 "minimum_uid"       : minimum_uid
 
 	]
