@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jun 16 16:59:41 CEST 2004 - jsuchome@suse.cz
+
+- updated testsuite (use Testsuite:: module, set testedfiles)
+- 2.10.0
+
+-------------------------------------------------------------------
 Thu Apr 22 17:23:02 CEST 2004 - jsuchome@suse.cz
 
 - fix of #39286 (configuration not saved during installation)

@@ -7,7 +7,8 @@
 
 {
 
-    include "testsuite.ycp";
+    // testedfiles: Kerberos.ycp PamSettings.ycp
+    import "Testsuite";
     import "Kerberos";
 
     map READ = $[
@@ -80,21 +81,21 @@
 	]
     ];
 
-    DUMP ("==== reading... ============================");
+    Testsuite::Dump ("==== reading... ============================");
 
-    TEST(``(Kerberos::Read ()), [ READ, $[], EX ], 0);
+    Testsuite::Test(``(Kerberos::Read ()), [ READ, $[], EX ], 0);
 
-    DUMP ("============================================");
+    Testsuite::Dump ("============================================");
 
-    DUMP ( sformat ("kerberos used: %1", Kerberos::use_pam_krb) );
-    DUMP ( sformat ("AFS used: %1", Kerberos::use_afs) );
+    Testsuite::Dump ( sformat ("kerberos used: %1", Kerberos::use_pam_krb) );
+    Testsuite::Dump ( sformat ("AFS used: %1", Kerberos::use_afs) );
 
-    DUMP ( sformat ("\ndefault domain: %1", Kerberos::default_domain) );
-    DUMP ( sformat ("default realm: %1", Kerberos::default_realm) );
-    DUMP ( sformat ("kdc: %1", Kerberos::kdc) );
+    Testsuite::Dump ( sformat ("\ndefault domain: %1", Kerberos::default_domain) );
+    Testsuite::Dump ( sformat ("default realm: %1", Kerberos::default_realm) );
+    Testsuite::Dump ( sformat ("kdc: %1", Kerberos::kdc) );
 
-    DUMP ( sformat ("\nssh support: %1", Kerberos::ssh_support) );
-    DUMP ("============================================");
+    Testsuite::Dump ( sformat ("\nssh support: %1", Kerberos::ssh_support) );
+    Testsuite::Dump ("============================================");
 
 
 }
