@@ -18,6 +18,7 @@ import "Mode";
 import "Package";
 import "Popup";
 import "Report";
+import "Stage";
 import "Wizard";
 
 /**
@@ -27,7 +28,7 @@ import "Wizard";
 define symbol ReallyAbort () ``{
 
     boolean ret = true;
-    if (!Mode::cont)
+    if (!Stage::cont ())
     {
 	ret = Popup::ReallyAbort (Kerberos::Modified());;
     }
@@ -256,7 +257,7 @@ domain name is usually used.</p>
 		if (!Package::InstalledAll (["openafs", "openafs-client"]) &&
 		     !contains (packages, "openafs"))
 		{
-		    if (!Mode::config && !Package::Available ("openafs"))
+		    if (!Mode::config () && !Package::Available ("openafs"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
@@ -270,7 +271,7 @@ AFS cannot be enabled.
 			result = `not_next;
 			continue;
 		    }
-		    if (!Mode::config && !Package::Available ("openafs-client"))
+		    if (!Mode::config () && !Package::Available ("openafs-client"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
@@ -315,7 +316,7 @@ Install them?
 package \"heimdal-tools\" could be useful.
 Install this package?")))
 		packages = add (packages, "heimdal-tools");
-	if (Mode::config)
+	if (Mode::config ())
 	    Package::DoInstallAndRemove (packages, []);
     }
     if (result == `next || result == `advanced)
@@ -447,7 +448,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
         // dialog title
         _("Advanced Kerberos Client Configuration"), con, help_text,
         Label::BackButton (), Label::OKButton ());
-    if (Mode::config)
+    if (Mode::config ())
     {
         UI::ChangeWidget(`id(`ntp), `Enabled, false);
     }

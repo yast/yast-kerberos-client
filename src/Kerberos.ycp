@@ -553,7 +553,7 @@ AFS will not be enabled."));
 	SCR::Write (.sysconfig.afs-client, nil);
 
 	// stop service
-	if (!Mode::config)
+	if (!Mode::config ())
 	{
 	    boolean running = Service::Status ("afs-client") == 0;
 	    // start service for first time
