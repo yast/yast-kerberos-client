@@ -15,12 +15,28 @@ import "Wizard";
 
 import "Kerberos";
 import "Report";
+import "Mode";
 
-include "ui/common_popups.ycp";
-include "ui/common_messages.ycp";
+import "Popup";
+import "Label";
 
-// FIXME: add ReallyAbort!!
-// FIXME: change Next to Finish when disabling
+/**
+ * The dialog that appears when the [Abort] button is pressed.
+ * @return `abort if user really wants to abort, `back otherwise
+ */
+global define symbol ReallyAbort () ``{
+
+    boolean ret = true;
+    if (!Mode::cont)
+    {
+	ret = Popup::ReallyAbort (Kerberos::Modified());;
+    }
+    else
+	ret = CallFunction(`inst_confirm_abort(`incomplete));
+    if ( ret )	return `abort;
+    else	return `back;
+}
+
 /**
  * Read settings dialog
  * @return `abort if aborted and `next otherwise
@@ -35,6 +51,8 @@ global define symbol ReadDialog() ``{
  * @return `abort if aborted and `next otherwise
  */
 global define symbol WriteDialog() ``{
+    // help text
+    Wizard::RestoreHelp(_("Writing Kerberos Client settings"));
     boolean ret = Kerberos::Write();
     return ret ? `next : `abort;
 }
@@ -52,7 +70,10 @@ You can update your PAM settings to enable Kerberos authentication for your user
 </p>
 ")+
 
-    // help text 2/4
+_("<p>For configuration of Kerberos client settings, click <b>Next</b> button.</p>");
+
+    /*FIXME not changable now?
+     // help text 2/4
 _("<p><b>Authentication Modes</b><br>
 If you choose <b>optional</b> mode, the primary authentication is with the existing framework, such as user entries in the <i>/etc/shadow</i> or the NIS or LDAP database. The only difference is that, if there is a Kerberos principal associated with the user, the PAM module will additionally try to obtain a ticket on behalf of the user using the previously supplied password.
 </p>
@@ -65,10 +86,11 @@ _("<p>To use the Kerberos PAM module as a primary authentication mechanism, sele
 
     // help text 4/4
 _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as the primary mechanism. However, in this case no user who does not exist in the Kerberos database can login. To login as <i>root</i>, the <i>su</i> command must be used from another user's session.</p>");
+*/
 
     boolean use_pam_krb = Kerberos::use_pam_krb;
+    boolean use_afs = Kerberos::use_afs;
     string control = Kerberos::control;
-//    string arguments = Kerberos::argumets;
 
     list controls = [
         `item (`id ("optional"), "optional", false),
@@ -76,11 +98,13 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
         `item (`id ("required"), "required", false)
     ];
 
+    /*
     term con = `HVSquash(
         `VBox (
         `VSpacing(1),
         // frame label
-        `Frame (_("PAM Login"),
+        `Frame (_("PAM Login"), `HBox (
+	    `HSpacing (0.5),
             `VBox (
                 `VSpacing (0.5),
                 `RadioButtonGroup(`id(`rd),
@@ -92,20 +116,41 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
                 // text entry label
                 `ComboBox (`id (`auth_control), `opt(`hstretch),
                     _("&Authentication Mode"), controls),
-                `VSpacing (0.5))
+                `VSpacing (0.5)),
+	    `HSpacing (0.5))
         ),
+        `VSpacing(1)
+    ));
+    */
+    term con = `HVSquash(
+        `VBox (
+        `VSpacing(1),
+        // frame label
+        `Frame (_("Authentication"), `HBox (
+	    `HSpacing (0.5),
+            `VBox (
+                `VSpacing (0.5),
+                `RadioButtonGroup(`id(`rd),
+                    `Left(`HVSquash(`VBox (
+                        // radio button label
+                        `Left (`RadioButton(`id(`pamno), `opt (`notify), _("Do No&t Use Kerberos"), !use_pam_krb)),
+                        // radio button label
+                        `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))),
+                `VSpacing (0.5)),
+	    `HSpacing (0.5))
+        ),
+//        `VSpacing (0.5),
+	// checkbox label
+//	`CheckBox (`id(`afs), _("Use module for &AFS"), use_afs),
         `VSpacing(1)
     ));
 
     // dialog title
     Wizard::SetContentsButtons ( _("Authentication with Kerberos"), con,
-	help_text, UI::BackButtonLabel(), use_pam_krb ?
-	UI::NextButtonLabel (): UI::FinishButtonLabel());
+	help_text, Label::BackButton(), use_pam_krb ?
+	Label::NextButton (): Label::FinishButton());
 
-    UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
-
-    if (control != "")
-        UI::ChangeWidget (`id(`auth_control), `Value, control);
+//    UI::ChangeWidget (`id (`afs), `Enabled, use_pam_krb);
 
     any result = nil;
     do
@@ -115,26 +160,23 @@ _("<p>Selecting mode as <b>required</b> will also set Kerberos authentication as
         if (result == `pamyes || result == `pamno)
 	{
             use_pam_krb = (result == `pamyes);
-            UI::ChangeWidget (`id (`auth_control), `Enabled, use_pam_krb);
+//            UI::ChangeWidget (`id (`afs), `Enabled, use_pam_krb);
 	    UI::ChangeWidget (`id (`next), `Label, use_pam_krb ?
-		UI::NextButtonLabel():UI::FinishButtonLabel());
+		Label::NextButton():Label::FinishButton());
         }
-
-        control = UI::QueryWidget (`id (`auth_control), `Value);
-
-
-    } while
-    (result != `back && result != `next && result !=`cancel && result !=`abort);
+    } while (!contains ([`back, `cancel, `abort, `next], result));
 
     if (result == `next)
     {
-        if (use_pam_krb != Kerberos::use_pam_krb ||
-            control != Kerberos::control)
+        if (use_pam_krb != Kerberos::use_pam_krb || use_afs!=Kerberos::use_afs)
         {
             Kerberos::use_pam_krb = use_pam_krb;
-            Kerberos::control = control;
+            Kerberos::use_afs = use_afs;
             Kerberos::pam_modified = true;
+            Kerberos::modified = true;
         }
+	if (!use_pam_krb)
+	    result = `finish;
     }
 
     return result;
@@ -167,11 +209,13 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
     string clockskew = Kerberos::clockskew;
     integer max_skew = 10000; // randoly choosed
 
+    /*
     term con = `HVSquash(
         `VBox (
         `VSpacing(1),
         // frame label
-        `Frame (_("Kerberos Client Settings"),
+        `Frame (_("Kerberos Client Settings"), `HBox (
+	    `HSpacing (0.5),
             `VBox (
                 `VSpacing (0.5),
                 `HSquash(
@@ -189,15 +233,51 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
                 `IntField (`id (`skew), _("&Clock Skew"), 0, max_skew,
                     tointeger(clockskew)),
                 `VSpacing (0.5)
-            )
+            ),
+	    `HSpacing (0.5))
         ),
         `VSpacing(1)
     ));
+    */
+    term con = `VBox (
+	`HSquash(`VBox (
+	`VSpacing(1),
+        // frame label
+        `Frame (_("Basic Settings"), `HBox (
+	    `HSpacing (0.5),
+            `VBox (
+                `VSpacing (0.5),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`domain), _("Default &Domain"),
+                         default_domain)),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`realm), _("Default Real&m"),
+                         default_realm)),
+                `HSquash(
+                    // textentry label
+                    `TextEntry (`id (`kdc), _("&KDC Server Address"), kdc)),
+                // infield label
+                `IntField (`id (`skew), _("&Clock Skew"), 0, max_skew,
+                    tointeger(clockskew)),
+                `VSpacing (0.5)
+            ),
+	    `HSpacing (0.5))
+        ),
+        `VSpacing(1)
+	)),
+	`HBox (
+	    `PushButton (`id(`afs), _("AF&S Client Support")),
+	    `PushButton (`id(`adv), _("&Advanced Settings"))
+	),
+	`VSpacing (1)
+    );
 
     Wizard::SetContentsButtons (
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
-        UI::BackButtonLabel (), UI::FinishButtonLabel ());
+        Label::BackButton (), Label::FinishButton ());
 
     any result = nil;
     do
@@ -233,10 +313,16 @@ The <b>clock skew</b> is the tolerance for the time stamps not exactly matching 
 
     if (result == `next)
     {
-        Kerberos::default_domain = default_domain;
-        Kerberos::default_realm = default_realm;
-        Kerberos::kdc = kdc;
-        Kerberos::clockskew = clockskew;
+	if (default_domain != Kerberos::default_domain ||
+	    kdc != Kerberos::kdc || default_realm != Kerberos::default_realm ||
+	    clockskew != Kerberos::clockskew)
+        {
+            Kerberos::default_domain = default_domain;
+	    Kerberos::default_realm = default_realm;
+	    Kerberos::kdc = kdc;
+            Kerberos::clockskew = clockskew;
+            Kerberos::modified = true;
+	}
     }
     return result;
 }

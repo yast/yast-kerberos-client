@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 18 16:01:57 CEST 2003 - jsuchome@suse.de
+
+- pam_krb is now set via PamSettings interface, not into /etc/pam.d/*
+- 2.8.1
+
+-------------------------------------------------------------------
 Thu Jul 10 10:33:39 CEST 2003 - jsuchome@suse.de
 
 - ShortSummary

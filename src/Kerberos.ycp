@@ -17,6 +17,8 @@ textdomain "kerberos";
 
 import "Summary";
 import "Require";
+import "Progress";
+import "PamSettings";
 
 
 //global boolean proposal_valid = false;
@@ -24,6 +26,8 @@ global boolean write_only = false;
 
 // if pam_krb5 module is used for login
 global boolean use_pam_krb = false;
+// if pam_krb5afs module is used for login
+global boolean use_afs = false;
 
 // if pam_unix is in /etc/pam.d/login
 boolean pam_unix_present = false;
@@ -47,6 +51,8 @@ global string clockskew = "300";
 
 global boolean pam_modified = false;
 
+global boolean modified = false;
+
 /**
  * Data was modified?
  * @return true if modified
@@ -55,6 +61,12 @@ global define boolean Modified() ``{
     y2debug("modified=%1",modified);
     return modified;
 };
+
+/**
+ * Abort function
+ * return boolean return true if abort
+ */
+global block AbortFunction = nil;
 
 
 /**
@@ -81,16 +93,16 @@ global define boolean Import (map settings) ``{
 global define map Export () ``{
 
     return $[
-	     "pam_login":   $[
-				  "use_kerberos"        : use_pam_krb,
-				  "authentication_mode"	: control
-	     ],
-	     "kerberos_client":	$[
-				  "default_domain"		: default_domain,
-				  "default_realm"		: default_realm,
-				  "kdc_server"			: kdc,
-                  "clockskew"           : clockskew
-	     ]
+	"pam_login": $[
+			    "use_kerberos"		: use_pam_krb,
+			    "authentication_mode"	: control
+	],
+	"kerberos_client": $[
+			    "default_domain"		: default_domain,
+			    "default_realm"		: default_realm,
+			    "kdc_server"		: kdc,
+			    "clockskew"			: clockskew
+	]
     ];
 }
 
@@ -100,27 +112,12 @@ global define map Export () ``{
  */
 global define boolean Read () ``{
 
-    // first, read the pam settings
-    // currently, only /etc/pam.d/login is checked
-    list pam_login = SCR::Read(.pam.login);
-    foreach (`line, pam_login, ``{
-        if ( line["type"]:"" == "auth" )
-        {
-            if (issubstring (line["module"]:"", "pam_unix"))
-                pam_unix_present = true;
-            if (issubstring (line["module"]:"", "pam_krb5"))
-            {
-                use_pam_krb = true;
-                // only the first is taken
-                if (control == "")
-                    control = line["control"]:"";
-                if (arguments == "")
-                    arguments = line["arguments"]:"";
-            }
-        }
-    });
+    // FIXME check if kerberos is enabled in /etc/pam.d/* ?
 
-    saved_control = control;
+    // check only "auth"?
+    list pam_sett = PamSettings::GetValues ("pam_unix2", "auth");
+    if (contains (PamSettings::GetValues ("pam_unix2", "auth"), "use_krb5"))
+	use_pam_krb = true;
 
     // now read the settings from /etc/krb5.conf
     if (FileExists ("/etc/krb5.conf"))
@@ -171,36 +168,60 @@ global define boolean Write () ``{
 
     boolean pam_installed = false;
     boolean ret = true;
-    // TODO: update list of files! (su)
-    list pam_files = ["login", "xlock", "xdm"];
+
+    // dialog caption
+    string caption = _("Saving Kerberos Client configuration");
+
+    Progress::New(caption, " ", 2, [
+	    // progress stage label
+	    _("Write PAM settings"),
+	    // progress stage label
+	    _("Write /etc/krb5.conf"),
+	], [
+	    // progress step label
+	    _("Writing PAM settings..."),
+	    // progress step label
+	    _("Writing /etc/krb5.conf..."),
+	    // final progress step label
+	    _("Finished")
+	],
+	""
+    );
+    Progress::NextStage ();
 
     // -- pam settings
     if (pam_modified || write_only)
     {
         if (use_pam_krb)
         {
-	        // In autoinst mode  we install needed packages in initial mode
-            pam_installed = (write_only || Require::RequireAndConflict(["pam_krb5"], [],
+	    // In autoinst mode  we install needed packages in initial mode
+            if (write_only || Require::RequireAndConflict(["pam_krb5"], [],
 // popup text, %1 is required aplication
 _("<p>To use PAM authentication with Kerberos,
 the package <b>%1</b> is required.<br>
-Install this package now?</p>")));
-            if (pam_installed)
-            {
-                // -- write to /etc/pam.d/*
-                UpdatePamFiles (pam_files);
-            }
+Install this package now?</p>")))
+	    {
+		// pam settigs -- TODO use Pam::AddModule?
+		string option = (!use_afs) ? "use_krb5" : "call_module=krb5afs";
+		foreach (`type, [ "account", "auth", "password" ], ``{
+		    PamSettings::AddValue ("unix2", type, "use_krb5");
+		});
+	    }
             else
                 // instalation not succesful ?
                 ret = false;
         }
         else
         {
-            UpdatePamFiles (pam_files);
+	    foreach (`type, [ "account", "auth", "password" ], ``{
+		PamSettings::RemoveValue ("unix2", type, "use_krb5");
+		PamSettings::RemoveValue ("unix2", type, "call_module=krb5afs");
+	    });
         }
     }
 
     // -- write to /etc/krb5.conf
+    Progress::NextStage ();
 
     // change the default realm name
     SCR::Write(.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
@@ -236,6 +257,9 @@ Install this package now?</p>")));
             SCR::Write( add (add (.etc.krb5_conf.v.realms, default_realm),
                 "default_domain"), default_domain);
     }
+
+    // final stage
+    Progress::NextStage ();
 
     return ret;
 }
@@ -292,14 +316,13 @@ define string RemoveOldEntry (string file, string old_module) ``{
     return file;
 }
 
-/**
+/** FIXME: not neccessary any more?
  * Change the authentication settings in the files in /etc/pam.d/
  * @param files the list of files to modificate
  * @return success
- */
+ *
 global define boolean UpdatePamFiles (list files) ``{
 
-    // TODO: better handling with pam_unix2.so
     foreach (`filename, files, ``{
 
         string file_path = "/etc/pam.d/" + filename;
@@ -376,6 +399,7 @@ global define boolean UpdatePamFiles (list files) ``{
     });
     return true;
 }
+*/
 
 
 /**

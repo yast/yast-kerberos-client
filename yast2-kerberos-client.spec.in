@@ -2,7 +2,7 @@
 # neededforbuild yast2-devel-packages
 
 @HEADER@
-Requires:	yast2 heimdal-lib
+Requires:	yast2 heimdal-lib yast2-pam yast2-packager
 
 BuildArchitectures:	noarch
 

@@ -13,8 +13,8 @@ textdomain "kerberos";
 
 import "Wizard";
 
-include "ui/common_popups.ycp";
-include "ui/common_messages.ycp";
+import "Popup";
+import "Label";
 include "wizard/sequencer.ycp";
 
 include "kerberos-client/dialogs.ycp";
@@ -52,7 +52,7 @@ global define symbol KerberosSequence() ``{
 
     Wizard::CreateDialog();
     Wizard::SetContentsButtons(caption, contents, "",
-	    BackButtonLabel(), NextButtonLabel());
+	    Label::BackButton(), Label::NextButton());
 
     any ret = WizardSequencer(aliases, sequence);
 
@@ -71,7 +71,7 @@ global define symbol KerberosAutoSequence() ``{
 
     Wizard::CreateDialog();
     Wizard::SetContentsButtons(caption, contents, "",
-	    BackButtonLabel(), NextButtonLabel());
+	    Label::BackButton(), Label::NextButton());
 
     any ret = MainSequence();
 
@@ -86,19 +86,27 @@ global define symbol KerberosAutoSequence() ``{
 global define symbol MainSequence() ``{
 
     map aliases = $[
-	"pam"	:       ``( PamDialog() ),
-	"configure"	:   ``( ConfigureDialog() ),
+	"pam"		: ``( PamDialog() ),
+	"configure"	: ``( ConfigureDialog() ),
+	"abort"		: ``( ReallyAbort()),
     ];
 
     map sequence = $[
 	"ws_start" : "pam",
 	"pam" : $[
-	    `abort	: `abort,
+	    `abort	: "abort",
 	    `next	: "configure",
+	    `finish	: `next,
 	],
 	"configure" : $[
-	    `abort	: `abort,
+	    `abort	: "abort",
 	    `next	: `next
+	],
+	"abort": $[
+	    `abort	: `abort,
+	    `next	: `abort,
+	    `cancel	: `back,
+	    `back	: `back
 	],
     ];
 
