@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 16 10:49:35 CET 2005 - jsuchome@suse.cz
+
+- remove indentation from /etc/krb5.conf (#72874)
+- 2.11.7
+
+-------------------------------------------------------------------
 Thu Mar  3 17:14:30 CET 2005 - jsuchome@suse.cz
 
 - replace new default values in /etc/krb5.conf (#67297)
