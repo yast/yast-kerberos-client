@@ -389,6 +389,7 @@ AFS will not be enabled."));
 	    afs_modified = false;
 	}
 	*/
+	packages = [];
     }
 
     Progress::NextStage ();
@@ -437,6 +438,8 @@ AFS will not be enabled."));
 
 	    });
         }
+	// write the changes now
+	PamSettings::Write ([]);
     }
 
     // -- write to /etc/krb5.conf
@@ -463,26 +466,30 @@ AFS will not be enabled."));
 	if (contains (SCR::Dir(.etc.krb5_conf.s), default_realm))
 	{
 	    // update the default realm settings
-	    SCR::Write( add (add (.etc.krb5_conf.v, default_realm), "kdc"),kdc);
+	    if (kdc != "")
+		SCR::Write(add(add(.etc.krb5_conf.v, default_realm),"kdc"),kdc);
 	    if (default_domain != "")
 		SCR::Write( add (add (.etc.krb5_conf.v, default_realm),
 		    "default_domain"), default_domain);
-	    if (kpasswd_server == "")
+	    if (kpasswd_server == "" && kdc != "")
 		// save only when the entry was mising or same as KDC
 		SCR::Write (add (add (.etc.krb5_conf.v, default_realm),
 		    "kpasswd_server"),kdc);
 	}
-	else
+	else if (default_realm != "")
 	{
 	    // specify the type of this subsection
 	    SCR::Write( add (.etc.krb5_conf.st.realms, default_realm), 1);
 	    // write the settings of the new default realm
-	    SCR::Write(
-		add (add (.etc.krb5_conf.v.realms, default_realm), "kdc"), kdc);
+	    if (kdc != "")
+	    {
+		SCR::Write(
+		    add(add(.etc.krb5_conf.v.realms,default_realm),"kdc"), kdc);
+	    }
 	    if (default_domain != "")
 		SCR::Write( add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "default_domain"), default_domain);
-	    if (kpasswd_server == "")
+	    if (kpasswd_server == "" && kdc != "")
 		SCR::Write(add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "kpasswd_server"), kdc);
 	}
@@ -507,6 +514,13 @@ AFS will not be enabled."));
 	if (afs_modified)
 	    SCR::Write (add (pam_sect, "afs_cells"), afs_cell);
 	*/
+
+	// write the changes now
+	SCR::Write (.etc.krb5_conf, nil);
+
+	// unmount agent; otherwise it won't be available to read new created
+	// sections (it will treat DEFAULT_REALM as a subsection of [realms])
+	SCR::UnmountAgent (.etc.krb5_conf);
     }
 
     /* AFS not supported
@@ -603,6 +617,7 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 	    "GSSAPIAuthentication"), write);
 	SCR::Write (add (add (.etc.ssh.ssh_config.v, ssh_section),
 	    "GSSAPIDelegateCredentials"), write);
+	SCR::Write (.etc.ssh.ssh_config, nil);
 	y2milestone ("/etc/ssh/ssh_config modified");
     }
 

@@ -29,7 +29,6 @@ import "RichText";
 import "CommandLine";
 
 include "kerberos-client/wizards.ycp";
-include "commandline/commandline.ycp";
 
 /* is this proposal or not? */
 boolean propose = false;
@@ -171,7 +170,7 @@ packages <b>pam_krb5</b> and <b>heimdal-lib</b> are required.<br>
 Install them now?</p>")))
 	ret = `auto;
     else
-	ret = CommandLineRun( cmdline );
+	ret = CommandLine::Run( cmdline );
 }
 
 y2debug("ret == %1", ret);
