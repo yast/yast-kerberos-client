@@ -20,7 +20,7 @@ Read	.sysconfig.afs-client.THIS_CELL_SERVER_NAME nil
 Read	.sysconfig.afs-client.THIS_CELL_SERVER nil
 Read	.sysconfig.afs-client.REGENERATE_CELL_INFO nil
 Dir	.etc.ssh.ssh_config.s: ["*"]
-Execute	.target.bash_output "/bin/hostname" $["stdout":"suse.cz"]
+Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"suse.cz"]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
