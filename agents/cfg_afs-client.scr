@@ -13,5 +13,5 @@
 .sysconfig.afs-client
 
 `ag_ini(
-  SysConfigFile("/etc/sysconfig/afs-client")
+  `SysConfigFile("/etc/sysconfig/afs-client")
 )

@@ -12,7 +12,7 @@
 .etc.krb5_conf
 
 `ag_ini(
-  IniAgent(
+  `IniAgent(
    "/etc/krb5.conf",
     $[
       "options" : [ "global_values" ],

@@ -12,7 +12,7 @@
 .etc.ssh.ssh_config
 
 `ag_ini(
-  IniAgent(
+  `IniAgent(
    "/etc/ssh/ssh_config",
     $[
       "options" : [ "global_values"],

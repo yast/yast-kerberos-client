@@ -561,7 +561,7 @@ AFS will not be enabled."));
 		string message = _("AFS client is currently running, but must be restarted to activate changes.
 Restart it now?
 
-Warning: Restarting the AFS client will stop all processes using AFS. If the '/home' directory is exported via AFS, entire X sessions could be killed.
+Warning: Restarting the AFS client will stop all processes using AFS. If your home directory is exported via AFS, entire X sessions could be killed.
 You can restart the AFS client later using the 'rcafs-client restart' command.
 ");
 

@@ -83,17 +83,17 @@ global define boolean KerberosChangeConfiguration (map options ) ``{
     boolean ret = false;
     if ( options ["kdc"]:nil != nil )
     {
-	Kerberos::kdc = options ["kdc"]:nil;
+	Kerberos::kdc = options ["kdc"]:"";
 	ret = true;
     }
     if ( options ["domain"]:nil != nil )
     {
-	Kerberos::default_domain = options ["domain"]:nil;
+	Kerberos::default_domain = options ["domain"]:"";
 	ret = true;
     }
     if ( options ["realm"]:nil != nil )
     {
-	Kerberos::default_realm = options ["realm"]:nil;
+	Kerberos::default_realm = options ["realm"]:"";
 	ret = true;
     }
     if (ret)
@@ -109,19 +109,27 @@ map cmdline = $[
     "guihandler"	: ``(KerberosSequence()),
     "initialize"	: ``(Kerberos::Read()),
     "finish"		: ``(Kerberos::Write()),
+    /* TODO NI
+    "guihandler"	: KerberosSequence,
+    "initialize"	: Kerberos::Read,
+    "finish"		: Kerberos::Write,
+    */
     "actions"		: $[
 	"pam" :$[
 	    "handler"	: ``(KerberosEnableHandler()),
+//	    "handler"	: KerberosEnableHandler, TODO NI
 	    // translators: command line help text for pam action
 	    "help"	: _("Enable or disable Kerberos authentication")
 	],
 	"summary" :$[
 	    "handler"	: ``(KerberosSummaryHandler()),
+//	    "handler"	: KerberosSummaryHandler, TODO NI
 	    // translators: command line help text for summary action
 	    "help"	: _("Configuration summary of Kerberos client")
 	],
 	"configure"	: $[
 	    "handler"	: ``(KerberosChangeConfiguration()),
+//	    "handler"	: KerberosChangeConfiguration, TODO NI
 	    // translators: command line help text for configure action
 	    "help"	: _("Change the global settings of Kerberos client")
 	]
