@@ -57,7 +57,10 @@ else if (func == "Reset") {
 else if (func == "Change") {
     ret = KerberosAutoSequence();
 }
-else if (func == "Result") {
+else if (func == "Read") {
+    ret = Kerberos::Read();
+}
+else if (func == "Export") {
     ret = Kerberos::Export();
 }
 else if (func == "Write") {
