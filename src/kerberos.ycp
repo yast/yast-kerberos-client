@@ -163,7 +163,8 @@ if(propose)
     ret = KerberosAutoSequence();
 else
 {
-    if (!PackageSystem::CheckAndInstallPackagesInteractive (Kerberos::required_packages))
+    if (!PackageSystem::CheckAndInstallPackagesInteractive (
+	Kerberos::UpdatedArchPackages (Kerberos::required_packages)))
 	ret = `auto;
     else
 	ret = CommandLine::Run (cmdline);
