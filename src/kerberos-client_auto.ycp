@@ -42,13 +42,7 @@ else if (func == "Reset") {
 }
 else if (func == "Change") {
     Kerberos::Import(param);
-    /*
-    Wizard::CreateDialog ();
-    Wizard::ReplaceAbortButton(`Empty ());
-    any res = KerberosDialog();
-    */
     any res = KerberosAutoSequence();
-//    UI::CloseDialog();
     return res;
 }
 else if (func == "Result") {

@@ -392,6 +392,9 @@ global define list Summary() ``{
     summary = Summary::AddHeader(summary, _("KDC server address"));
     summary = Summary::AddLine(summary, (kdc != "") ? kdc : nc);
 
+    summary = Summary::AddHeader(summary, _("Clock Skew"));
+    summary = Summary::AddLine(summary, (clockskew != "") ? clockskew : nc);
+
     return [ summary, [] ];
 }
 
