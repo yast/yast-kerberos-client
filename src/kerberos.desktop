@@ -14,7 +14,7 @@ X-SuSE-YaST-RootOnly=true
 X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-Geometry=
 X-SuSE-YaST-SortKey=
-X-SuSE-YaST-AutoinstResource=kerberos
+X-SuSE-YaST-AutoInstResource=kerberos
 
 Icon=kerberos-client
 Exec=/sbin/yast2 kerberos-client 
