@@ -248,7 +248,7 @@ domain name is usually used.</p>
 		    "openafs-client"]) &&
 		     !contains (packages, "openafs"))
 		{
-		    if (!Mode::config && !Require::IsPackageAvailableTarget ("openafs"))
+		    if (!Mode::config && !Require::IsPackageAvailable ("openafs"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
@@ -261,7 +261,7 @@ AFS cannot be enabled.
 			UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
 			continue;
 		    }
-		    if (!Mode::config && !Require::IsPackageAvailableTarget ("openafs-client"))
+		    if (!Mode::config && !Require::IsPackageAvailable ("openafs-client"))
 		    {
 			// error message, %1 is package name
 			Popup::Error (sformat (_("Package \"%1\" is not available for installation.

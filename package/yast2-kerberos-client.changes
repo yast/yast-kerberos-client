@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 11 09:44:51 CEST 2003 - jsuchome@suse.cz
+
+- there is no Require::IsPackageAvailableTarget function (#30459)
+- 2.8.10
+
+-------------------------------------------------------------------
 Tue Sep  9 16:54:55 CEST 2003 - jsuchome@suse.cz
 
 - do not require KDC and realm entries when Kerberos is not
