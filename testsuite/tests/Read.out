@@ -34,3 +34,25 @@ Dump	kdc: chimera.suse.cz
 Dump	
 Dump	ssh support: true
 Dump	============================================
+Dump	==== reading... ============================
+Read	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5"
+Execute	.target.bash "/usr/bin/test -e /etc/krb5.conf" 0
+Dir	.etc.krb5_conf.s: []
+Read	.etc.krb5_conf.v.libdefaults.default_realm nil
+Read	.etc.krb5_conf.v.libdefaults.clockskew "500"
+Read	.etc.krb5_conf.v.pam.ticket_lifetime nil
+Read	.etc.krb5_conf.v.pam.renew_lifetime nil
+Read	.etc.krb5_conf.v.pam.forwardable nil
+Read	.etc.krb5_conf.v.pam.proxiable nil
+Read	.etc.krb5_conf.v.pam.retain_after_close nil
+Read	.etc.krb5_conf.v.pam.minimum_uid "1"
+Read	.target.stat "/etc/sysconfig/afs-client" $[]
+Dir	.etc.ssh.ssh_config.s: ["*"]
+Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"suse.cz"]
+Dir	.etc.ssh.ssh_config.s: ["*"]
+Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
+Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
+Read	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes"
+Return	true
+Dump	default realm: SUSE.CZ
+Dump	============================================

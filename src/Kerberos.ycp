@@ -254,14 +254,16 @@ global define boolean Read () ``{
 
         clockskew = ReadFile (.etc.krb5_conf.v.libdefaults.clockskew, "300");
 
-        kdc = ReadFile (add ( add (.etc.krb5_conf.v, default_realm), "kdc"),"");
+	if (size (default_realm) > 0)
+	{
+	    path realm	= add (.etc.krb5_conf.v, default_realm);
+	    kdc = ReadFile (add (realm, "kdc"),"");
+	    admin_server = ReadFile (add (realm, "admin_server"),"");
+	    default_domain = ReadFile (add (realm,"default_domain"), "");
+	}
 
-	admin_server = ReadFile (add ( add (.etc.krb5_conf.v, default_realm), "admin_server"),"");
 	if (admin_server == kdc)
 	    admin_server = ""; // we could replace it in Write in this case...
-
-        default_domain = ReadFile ( add ( add (.etc.krb5_conf.v,
-            default_realm), "default_domain"), "");
 
 	ticket_lifetime = ReadFile (.etc.krb5_conf.v.pam.ticket_lifetime, "1d");
 	renew_lifetime = ReadFile (.etc.krb5_conf.v.pam.renew_lifetime, "1d");

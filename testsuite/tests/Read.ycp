@@ -97,5 +97,15 @@
     Testsuite::Dump ( sformat ("\nssh support: %1", Kerberos::ssh_support) );
     Testsuite::Dump ("============================================");
 
+    READ ["etc", "krb5_conf", "v", "libdefaults", "default_realm"]	= nil;
+
+    Testsuite::Dump ("==== reading... ============================");
+
+    Testsuite::Test(``(Kerberos::Read ()), [ READ, $[], EX ], 0);
+
+    Testsuite::Dump (sformat ("default realm: %1", Kerberos::default_realm) );
+
+    Testsuite::Dump ("============================================");
+
 
 }

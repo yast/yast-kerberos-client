@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Mar 29 12:52:32 CES 2005 - jsuchome@suse.cz
+
+- better checks for defaults
+- 2.12.0
+
+-------------------------------------------------------------------
+Fri Mar 11 13:54:05 CET 2005 - jsuchome@suse.cz
+
+- new tests 
+
+-------------------------------------------------------------------
 Thu Mar  3 17:14:30 CET 2005 - jsuchome@suse.cz
 
 - replace new default values in /etc/krb5.conf (#67297)
