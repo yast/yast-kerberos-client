@@ -1,8 +1,9 @@
 @HEADER-COMMENT@
-# neededforbuild yast2-devel-packages
+
+# neededforbuild  yast2-devel-packages
 
 @HEADER@
-Requires:	yast2 ast2-pam yast2-packager
+Requires:	yast2 yast2-pam yast2-packager
 
 BuildArchitectures:	noarch
 
