@@ -205,7 +205,8 @@ global define boolean Read () ``{
 	    use_pam_krb = true;
 	if (issubstring (val, "call_modules="))
 	{
-	    auth_modules = splitstring (select (splitstring (val, "="), 1, ""),",");
+	    list line_split	= splitstring (val, "=");
+	    auth_modules	= splitstring (line_split[1]:"",",");
 	    if (contains (auth_modules, "krb5afs"))
 	    {
 		use_pam_krb = true;

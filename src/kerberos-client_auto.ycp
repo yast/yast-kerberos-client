@@ -69,8 +69,11 @@ else if (func == "Export") {
     ret = Kerberos::Export();
 }
 else if (func == "Write") {
+	import "Progress";
 	Kerberos::write_only = true;
+	boolean progress_orig = Progress::set (false);
 	ret = Kerberos::Write();
+	Progress::set (progress_orig);
 }
 else if (func == "Packages") {
         ret = Kerberos::AutoPackages();

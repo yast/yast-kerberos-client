@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jan  5 15:54:55 CET 2005 - jsuchome@suse.cz
+
+- removed last select
+- switch Progress off in auto-client
+- 2.11.2
+
+-------------------------------------------------------------------
 Thu Dec 16 09:44:01 CET 2004 - jsuchome@suse.cz
 
 - do not ask for 'Abort Installation' when called from users
