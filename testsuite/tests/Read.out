@@ -6,7 +6,7 @@ Dir	.etc.krb5_conf.s: []
 Read	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ"
 Read	.etc.krb5_conf.v.libdefaults.clockskew "500"
 Read	.etc.krb5_conf.v."SUSE.CZ"."kdc" "chimera.suse.cz"
-Read	.etc.krb5_conf.v."SUSE.CZ"."kpasswd_server" nil
+Read	.etc.krb5_conf.v."SUSE.CZ"."admin_server" nil
 Read	.etc.krb5_conf.v."SUSE.CZ"."default_domain" nil
 Read	.etc.krb5_conf.v.pam.ticket_lifetime nil
 Read	.etc.krb5_conf.v.pam.renew_lifetime nil

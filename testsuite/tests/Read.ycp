@@ -22,7 +22,7 @@
 		    ],
 		    "SUSE.CZ": $[
 			"kdc": "chimera.suse.cz",
-			"kpasswd_server": nil,
+			"admin_server": nil,
 			"default_domain": nil,
 		    ],
 		    "pam" : $[
