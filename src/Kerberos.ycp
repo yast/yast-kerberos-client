@@ -17,6 +17,7 @@ module "Kerberos";
 textdomain "kerberos";
 
 import "Arch";
+import "FileUtils";
 import "Label";
 import "Mode";
 import "Package";
@@ -206,18 +207,6 @@ global define boolean WriteFile (path path_to_value, string value) {
 }
 
 /**
- * Check for file existence
- * @param path_to_file the path
- * @return the answer
- */
-global define boolean FileExists (string path_to_file) ``{
-
-    return (SCR::Execute (.target.bash,
-        sformat ("/usr/bin/test -e %1", path_to_file)) == 0);
-}
-
-
-/**
  * Reads Kerberos settings from the SCR
  * @return success
  */
@@ -246,7 +235,7 @@ global define boolean Read () ``{
     });
 
     // now read the settings from /etc/krb5.conf
-    if (FileExists ("/etc/krb5.conf"))
+    if (FileUtils::Exists ("/etc/krb5.conf"))
     {
         y2debug("krb5.conf sections: %1", SCR::Dir(.etc.krb5_conf.s));
 
@@ -277,12 +266,12 @@ global define boolean Read () ``{
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
 
     // propose some good values, if there are install defaults
-    if (default_domain == "" && FileExists ("/bin/ypdomainname"))
+    if (default_domain == "" && FileUtils::Exists ("/bin/ypdomainname"))
     {
         map out = (map) SCR::Execute (.target.bash_output, "/bin/ypdomainname");
         default_domain = deletechars (out["stdout"]:"", "\n");
     }
-    if (default_domain == "" && FileExists ("/bin/domainname"))
+    if (default_domain == "" && FileUtils::Exists ("/bin/domainname"))
     {
         map out = (map) SCR::Execute (.target.bash_output, "/bin/domainname");
         default_domain = deletechars (out["stdout"]:"", "\n");
@@ -295,13 +284,13 @@ global define boolean Read () ``{
         default_realm = toupper (default_domain);
     }
     if ((kdc == "" || kdc == "MY.COMPUTER" || kdc == "kerberos.example.com") &&
-	FileExists ("/usr/bin/ypwhich"))
+	FileUtils::Exists ("/usr/bin/ypwhich"))
     {
         map out = (map) SCR::Execute (.target.bash_output, "/usr/bin/ypwhich");
         kdc = deletechars (out["stdout"]:"", "\n");
     }
 
-    if (SCR::Read (.target.stat, "/etc/sysconfig/afs-client") != $[])
+    if (FileUtils::Exists ("/etc/sysconfig/afs-client"))
     {
 	// read AFS related values
 	afs_cell = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL);
@@ -559,7 +548,7 @@ AFS will not be enabled."));
 	SCR::Write (.sysconfig.afs-client.REGENERATE_CELL_INFO, regenerate_ci);
 	afs_server = afs_cell;
 	// get the name via 'getent hosts ip_addr' call
-	if (use_afs && SCR::Read (.target.stat, "/usr/bin/getent") != $[])
+	if (use_afs && FileUtils::Exists ("/usr/bin/getent"))
 	{
 	    map out = (map) SCR::Execute (.target.bash_output,
 		"LANG=C /usr/bin/getent hosts " + afs_serverip);

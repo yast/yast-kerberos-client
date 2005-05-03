@@ -67,7 +67,7 @@
 	    "afs-client": nil
 	],
 	"target": $[
-	    "stat": $[]
+	    "stat": $[ 1:2 ]
 	]
     ];
 
@@ -97,7 +97,8 @@
     Testsuite::Dump ( sformat ("\nssh support: %1", Kerberos::ssh_support) );
     Testsuite::Dump ("============================================");
 
-    READ ["etc", "krb5_conf", "v", "libdefaults", "default_realm"]	= nil;
+//    READ ["etc", "krb5_conf", "v", "libdefaults", "default_realm"]	= nil;
+    READ ["target", "stat"]						= $[];
 
     Testsuite::Dump ("==== reading... ============================");
 

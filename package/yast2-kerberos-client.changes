@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May  2 13:41:54 CEST 2005 - jsuchome@suse.cz
+
+- use FileUtils library
+- 2.12.1
+
+-------------------------------------------------------------------
 Tue Mar 29 12:52:32 CES 2005 - jsuchome@suse.cz
 
 - better checks for defaults
