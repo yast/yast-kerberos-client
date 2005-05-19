@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 19 10:23:09 CEST 2005 - jsuchome@suse.cz
+
+- add new default parameters (use_authtok, try_first_pass) to "pam"
+  section of /etc/krb5.conf to enable chaning the passwords (#76162)
+- 2.12.2
+
+-------------------------------------------------------------------
 Mon May  2 13:41:54 CEST 2005 - jsuchome@suse.cz
 
 - use FileUtils library

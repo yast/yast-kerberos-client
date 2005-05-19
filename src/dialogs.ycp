@@ -130,7 +130,7 @@ domain name is usually used.</p>
 	    // textentry label
 	    `TextEntry (`id (`kdc), _("&KDC Server Address"), kdc),
             // infield label
-	    `VSpacing (0.5)), `HSpacing (0.5)
+	    `VSpacing (0.4)), `HSpacing (0.5)
 	)),
         `VSpacing (0.2),
 	afs_available ?
@@ -148,10 +148,10 @@ domain name is usually used.</p>
 		`TextEntry (`id(`afs_serverip), _("&IP Address of AFS Server"),
 		    afs_serverip)
 	    ),
-	    `VSpacing (0.5)), `HSpacing (0.5)
+	    `VSpacing (0.4)), `HSpacing (0.5)
 	))
 	: `Empty (),
-        `VSpacing (),
+        `VSpacing (0.4),
 	`Right(`PushButton (`id(`advanced), _("Ad&vanced Settings..."))),
         `VSpacing (0.2)
     ), `HSpacing(3));

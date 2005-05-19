@@ -42,6 +42,8 @@ Write	.etc.krb5_conf.v.pam."forwardable" "true" true
 Write	.etc.krb5_conf.v.pam."proxiable" "false" true
 Write	.etc.krb5_conf.v.pam."retain_after_close" "false" true
 Write	.etc.krb5_conf.v.pam."minimum_uid" "0" true
+Write	.etc.krb5_conf.v.pam."use_authtok" "true" true
+Write	.etc.krb5_conf.v.pam."try_first_pass" "true" true
 Write	.etc.krb5_conf nil true
 Return	true
 Dump	==== (pam section doesn't exist) =================================
@@ -57,5 +59,7 @@ Write	.etc.krb5_conf.v.appdefaults.pam."forwardable" "true" true
 Write	.etc.krb5_conf.v.appdefaults.pam."proxiable" "false" true
 Write	.etc.krb5_conf.v.appdefaults.pam."retain_after_close" "false" true
 Write	.etc.krb5_conf.v.appdefaults.pam."minimum_uid" "0" true
+Write	.etc.krb5_conf.v.appdefaults.pam."use_authtok" "true" true
+Write	.etc.krb5_conf.v.appdefaults.pam."try_first_pass" "true" true
 Write	.etc.krb5_conf nil true
 Return	true

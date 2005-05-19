@@ -77,6 +77,8 @@ global string proxiable = "false";
 global string retain_after_close = "false";
 global boolean ssh_support = false;
 global string minimum_uid = "0";
+global string use_authtok	= "true";
+global string try_first_pass	= "true";
 
 // section in /etc/ssh/ssh_config file for storing krb support
 string ssh_section = "*";
@@ -112,37 +114,34 @@ global define boolean Modified() ``{
  * @return	success
  */
 global define boolean Import (map settings) ``{
-    use_pam_krb = settings["pam_login", "use_kerberos"]:false;
+    use_pam_krb		= settings["pam_login", "use_kerberos"]:false;
+    map client		= settings["kerberos_client"]:$[];
 
-	map client = settings["kerberos_client"]:$[];
-    default_domain = client["default_domain"]:"";
-    default_realm = client["default_realm"]:"";
-    kdc = client["kdc_server"]:"";
-    clockskew = client["clockskew"]:clockskew;
+    default_domain	= client["default_domain"]:"";
+    default_realm	= client["default_realm"]:"";
+    kdc			= client["kdc_server"]:"";
+    clockskew		= client["clockskew"]:clockskew;
+    ssh_support		= client["ssh_support"]:false;
+    ticket_lifetime	= client["ticket_lifetime"]:"1d";
+    renew_lifetime	= client["renew_lifetime"]:"1d";
+    minimum_uid		= client["minimum_uid"]:"0";
+    forwardable		= (client["forwardable"]:true) ? "true": "false";
+    proxiable		= (client["proxiable"]:false) ?   "true" :  "false";
+    retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
+    use_authtok		= (client["use_authtok"]:true) ? "true" : "false";
+    try_first_pass	= (client["try_first_pass"]:true) ? "true" : "false";
 
-    afs_serverip = client["afs_serverip"]:"";
-    afs_cell = client["afs_cell"]:"";
+    afs_serverip	= client["afs_serverip"]:"";
+    afs_cell		= client["afs_cell"]:"";
+    use_afs		= false;
     if (size(afs_serverip) > 0)
     {
-	use_afs = true;
-	afs_modified = true;
+	use_afs		= true;
+	afs_modified	= true;
     }
-    else
-	use_afs = false;
 
-    ssh_support = client["ssh_support"]:false;
-    ticket_lifetime = client["ticket_lifetime"]:"1d";
-    renew_lifetime = client["renew_lifetime"]:"1d";
-    boolean tmp_forwardable = client["forwardable"]:true;
-    forwardable= (tmp_forwardable) ? "true": "false";
-    boolean tmp_proxiable = client["proxiable"]:false;
-    proxiable = (tmp_proxiable) ?   "true" :  "false";
-    boolean tmp_retain_after_close = client["retain_after_close"]:false;
-    retain_after_close = (tmp_retain_after_close) ? "true" : "false";
-    minimum_uid = client["minimum_uid"]:"0";
-
-    pam_modified = true;
-    modified = true;
+    pam_modified	= true;
+    modified		= true;
     return true;
 }
 
@@ -153,7 +152,7 @@ global define boolean Import (map settings) ``{
  */
 global define map Export () ``{
 
-    return $[
+    map export_map	= $[
 	"pam_login": $[
 		"use_kerberos"		: use_pam_krb,
 	],
@@ -164,16 +163,20 @@ global define map Export () ``{
 		"clockskew"		: clockskew,
 		"afs_serverip"		: afs_serverip,
 		"afs_cell"	        : afs_cell,
-		"ssh_support"       : ssh_support,
-		"ticket_lifetime"   : ticket_lifetime,
-                "renew_lifetime"    : renew_lifetime,
-		"forwardable"       : ( forwardable == "true" ) ? true : false,
-                "proxiable"         : ( proxiable == "true") ? true: false,
-                "retain_after_close": ( retain_after_close == "true") ? true: false ,
-                "minimum_uid"       : minimum_uid
-
+		"ssh_support"		: ssh_support,
+		"ticket_lifetime"	: ticket_lifetime,
+                "renew_lifetime"	: renew_lifetime,
+                "minimum_uid"		: minimum_uid,
+		"forwardable"		: forwardable == "true",
+                "proxiable"		: proxiable == "true",
+                "retain_after_close"	: retain_after_close == "true",
 	]
     ];
+    if (use_authtok != "true")
+	export_map["kerberos_client","use_authtok"]	= false;
+    if (try_first_pass != "true")
+	export_map["kerberos_client","try_first_pass"]	= false;
+    return export_map;
 }
 
 /**
@@ -255,12 +258,14 @@ global define boolean Read () ``{
 	    admin_server = ""; // we could replace it in Write in this case...
 
 	ticket_lifetime = ReadFile (.etc.krb5_conf.v.pam.ticket_lifetime, "1d");
-	renew_lifetime = ReadFile (.etc.krb5_conf.v.pam.renew_lifetime, "1d");
-	forwardable = ReadFile (.etc.krb5_conf.v.pam.forwardable, "true");
-	proxiable = ReadFile (.etc.krb5_conf.v.pam.proxiable, "false");
+	renew_lifetime	= ReadFile (.etc.krb5_conf.v.pam.renew_lifetime, "1d");
+	forwardable	= ReadFile (.etc.krb5_conf.v.pam.forwardable, "true");
+	proxiable	= ReadFile (.etc.krb5_conf.v.pam.proxiable, "false");
 	retain_after_close = ReadFile (.etc.krb5_conf.v.pam.retain_after_close,
 	    "false");
-	minimum_uid = ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "0");
+	minimum_uid	= ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "0");
+	try_first_pass	= ReadFile (.etc.krb5_conf.v.pam.try_first_pass,"true");
+	use_authtok	= ReadFile (.etc.krb5_conf.v.pam.use_authtok, "true");
     }
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
@@ -518,6 +523,8 @@ AFS will not be enabled."));
 	WriteFile (add (pam_sect, "proxiable"), proxiable);
 	WriteFile (add (pam_sect, "retain_after_close"), retain_after_close);
 	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
+	WriteFile (add (pam_sect, "use_authtok"), use_authtok);
+	WriteFile (add (pam_sect, "try_first_pass"), try_first_pass);
 
 	if (afs_modified && afs_cell != "")
 	    WriteFile (add (pam_sect, "afs_cells"), afs_cell);
