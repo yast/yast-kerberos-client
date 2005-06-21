@@ -94,7 +94,7 @@ define symbol KerberosSequence() ``{
  */
 define symbol KerberosAutoSequence() ``{
     string caption = _("Kerberos Client Configuration");
-    term contents = `Label(_("Initializing ..."));
+    term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();
     Wizard::SetDesktopIcon("kerberos");

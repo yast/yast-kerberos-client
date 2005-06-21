@@ -57,7 +57,7 @@ define symbol ReadDialog() ``{
  */
 define symbol WriteDialog() ``{
     // help text
-    Wizard::RestoreHelp(_("Writing Kerberos Client Settings"));
+    Wizard::RestoreHelp(_("Writing Kerberos client settings..."));
     boolean ret = Kerberos::Write();
     return ret ? `next : `abort;
 }
@@ -70,30 +70,31 @@ define symbol ConfigureDialog() {
 
     // help text 1/5
     string help_text = _("<p>
-<b>Authentication with Kerberos</b><br>
-You can update your PAM settings to enable Kerberos authentication for your users.
+<b><big>Authentication with Kerberos</big></b><br>
+The Kerberos client configuration updates your PAM settings to enable Kerberos authentication.  Your system needs access to a Kerberos server in the network for this to work.
 </p>
 ") +
     // help text 2/5
     _("<p>
-<b>Basic Client Settings</b><br>
-Enter your <b>domain</b>, <b>default realm</b>, and the <b>host name</b> or <b>address</b> of your Key Distribution Center (KDC).</p>
+<b>Basic Client Settings</b>:
+Enter your <b>Default Domain</b>, <b>Default Realm</b>, and the host name or address of your Key Distribution Center (<b>KDC Server Address</b>).</p>
 ") +
 
+	
     // help text 3/5
     _("<p>
-It is common practice to use the domain name in uppercase as your default realm name. You can select freely, however.</p>
+It is common practice to use the domain name in uppercase as your default realm name, but you can select freely. If the realm is not available on the server, you cannot log in.  Ask your server administrator if you need more information.</p>
 ") +
 
+	//rwalter: the appearance order of this and 4/5 is reversed. Please fix.
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
 
     help_text = help_text +
     // help text 4/5
     _("<p>If you are using Kerberos authentication together with the AFS file
-system, check <b>Kerberos Support for AFS</b>. Enter an IP
-address for the <b>AFS Server</b>. As the name of <b>AFS Cell</b>, the DNS
-domain name is usually used.</p>
+system, check <b>Support AFS</b>.  As the <b>Cell Name</b>, the DNS
+domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
 ");
 
     string default_realm = Kerberos::default_realm;
@@ -139,13 +140,13 @@ domain name is usually used.</p>
 	    `VSpacing (0.5),
 	    `Left(`CheckBox (`id(`afs),`opt(`notify),
 		// chekbox label
-		_("Kerberos Support for &AFS"), use_afs)),
+		_("Support &AFS"), use_afs)),
 	    `VSpacing (0.5),
 	    `HBox (
 		// textentry label
-		`TextEntry (`id(`cell), _("AFS &Cell Name"), cell),
+		`TextEntry (`id(`cell), _("&Cell Name"), cell),
 		// textentry label
-		`TextEntry (`id(`afs_serverip), _("&IP Address of AFS Server"),
+		`TextEntry (`id(`afs_serverip), _("AFS Server &IP Address"),
 		    afs_serverip)
 	    ),
 	    `VSpacing (0.4)), `HSpacing (0.5)
@@ -232,7 +233,7 @@ domain name is usually used.</p>
 	    if (use_pam_krb && !Address::Check (kdc))
 	    {
 		// error popup label
-		Report::Error (_("The KDC server address is incorrect.") +
+		Report::Error (_("The KDC server address is invalid.") +
 		    "\n\n" + Address::Valid4 ());
 		UI::SetFocus (`id(`kdc));
 		result = `not_next;
@@ -249,7 +250,7 @@ domain name is usually used.</p>
 	    if (use_afs && !IP::Check (afs_serverip))
 	    {
 		// Popup text
-		Report::Error (_("The IP address is incorrect") +
+		Report::Error (_("The IP address is invalid.") +
 		    "\n\n" + IP::Valid4 ());
 		UI::SetFocus(`id(`afs_serverip));
 		result = `not_next;
@@ -272,7 +273,7 @@ domain name is usually used.</p>
 		    if (!Mode::config () && !Package::Available ("openafs"))
 		    {
 			// error message, %1 is package name
-			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
+			Popup::Error (sformat (_("Package %1 is not available for installation.
 AFS cannot be enabled.
 "), "openafs"));
 			afs_available = false;
@@ -286,7 +287,7 @@ AFS cannot be enabled.
 		    if (!Mode::config () && !Package::Available ("openafs-client"))
 		    {
 			// error message, %1 is package name
-			Popup::Error (sformat (_("Package \"%1\" is not available for installation.
+			Popup::Error (sformat (_("Package %1 is not available for installation.
 AFS cannot be enabled.
 "), "openafs-client"));
 			afs_available = false;
@@ -298,8 +299,8 @@ AFS cannot be enabled.
 			continue;
 		    }
 		    // yes/no pupup
-		    if (Popup::YesNo (_("Packages \"openafs\" and \"openafs-client\"
-are necessary for using AFS.
+		    if (Popup::YesNo (_("Packages openafs and openafs-client
+are required for using AFS.
 Install them?
 ")))
 			packages = (list<string>) union(packages,["openafs","openafs-client"]);
@@ -359,38 +360,36 @@ define symbol AdvancedDialog() {
     string help_text =
 
     // help text (do not transl. values "m","h", "d")
-    _("<p>Values of <b>Ticket Lifetime</b>, <b>Renewable Lifetime</b>, and
+    _("<p>Values of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and
 <b>Clock Skew</b> are in seconds by default. Alternatively, specify the time
-unit (<i>m</i> for minutes, <i>h</i> for hours, or <i>d</i> for days) and use
-it as a value suffix (e.g., <i>1d</i> or <i>24h</i> for one day).</p>
+unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day).</p>
 ") +
 
     // help text
-    _("<p><b>Forwardable tickets</b> let you transfer your complete identity
-(TGT) to another machine. <b>Proxiable tickets</b> only let you transfer
+    _("<p><b>Forwardable</b> lets you transfer your complete identity
+(TGT) to another machine. <b>Proxiable</b> only lets you transfer
 particular tickets.</p>
 ") +
 
     // help text
-    _("<p>If <b>Retain Tickets</b> is true, a PAM module retains the tickets
+    _("<p>If <b>Retained</b> is enabled, a PAM module keeps the tickets
 after closing the session.</p>
 ") +
 
     // help text
-    _("<p>To enable Kerberos support for your <b>openssh client</b>, check the
-appropriate check box. In such a case, Kerberos tickets are used for user
-authentication on the ssh server.</p>
+    _("<p>To enable Kerberos support for your OpenSSH client, select <b>Kerberos Support for OpenSSH Client</b>. In such a case, Kerberos tickets are used for user
+authentication on the SSH server.</p>
 ") +
 
     // help text
-    _("<p>When <b>Minimum UID</b> is greater than 0, authentication attempts by
+    _("<p>When the <b>Minimum UID</b> is greater than 0, authentication attempts by
 users with UIDs below the specified number are ignored. This is useful for
-disabling Kerberos authentication for the system administrator (<i>root</i>).</p>
+disabling Kerberos authentication for the system administrator root.</p>
 ")+
 
     // help text
     _("<p>
-The <b>Clock Skew</b> is the tolerance for the time stamps not exactly matching the host's system clock. The value is in seconds.</p>") +
+The <b>Clock Skew</b> is the tolerance for time stamps not exactly matching the host's system clock. The value is in seconds.</p>") +
 
     //helptext
     _("<p>
@@ -415,24 +414,24 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	`Frame (_("Ticket Attributes"), `HBox(`HSpacing (0.5), `VBox(
 	    `VSpacing (0.5),
 	    // textentry label
-	    `TextEntry (`id (`ticket), _("&Default Ticket Lifetime"), ticket),
+	    `TextEntry (`id (`ticket), _("&Default Lifetime"), ticket),
 	    // textentry label
-	    `TextEntry (`id (`renew), _("De&fault Renewable Ticket Lifetime"),
+	    `TextEntry (`id (`renew), _("De&fault Renewable Lifetime"),
 		renew),
 	    // checkbox label
-	    `Left(`CheckBox (`id (`forw), _("Tickets are For&wardable"), forw)),
+	    `Left(`CheckBox (`id (`forw), _("For&wardable"), forw)),
 	    // checkbox label
-	    `Left(`CheckBox (`id (`prox), _("Tickets are &Proxiable"), prox)),
+	    `Left(`CheckBox (`id (`prox), _("&Proxiable"), prox)),
 	    // checkbox label
-	    `Left(`CheckBox (`id (`retain), _("R&etain Tickets"), retain)),
+	    `Left(`CheckBox (`id (`retain), _("R&etained"), retain)),
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
         `VSpacing (1),
 	`Left(`CheckBox (`id (`ssh),
-	    // checkbox label (leave 'openssh')
-	    _("Kerberos Support for open&ssh Client"), ssh)),
+	    // checkbox label
+	    _("Kerberos Support for Open&SSH Client"), ssh)),
         `VSpacing (0.5),
-        // infield label
+        // UID=User ID
         `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
 	    tointeger (uid)),
 	`HBox (
@@ -479,7 +478,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 		!regexpmatch (ticket, "^([0-9]+)$"))
 	    {
 		// error popup (wrong format of entered value)
-		Popup::Error (_("Invalid format of Ticket Lifetime entry.
+		Popup::Error (_("Lifetime is invalid.
 Try again."));
 		UI::SetFocus (`id(`ticket));
 		result = `not_next;
@@ -489,7 +488,7 @@ Try again."));
 	    if (!regexpmatch (renew, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (renew, "^([0-9]+)$"))
 	    {
-		Popup::Error (_("Invalid format of Ticket Lifetime entry.
+		Popup::Error (_("Lifetime is invalid.
 Try again."));
 		UI::SetFocus (`id(`renew));
 		result = `not_next;
@@ -499,7 +498,7 @@ Try again."));
 	    if (!regexpmatch (clockskew, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (clockskew, "^([0-9]+)$"))
 	    {
-		Popup::Error (_("Invalid format of clock skew entry.
+		Popup::Error (_("Clock skew is invalid.
 Try again.
 "));
 		UI::SetFocus (`id(`skew));

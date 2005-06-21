@@ -104,7 +104,7 @@ define boolean KerberosChangeConfiguration (map options ) {
 map cmdline = $[
     "id"		: "kerberos",
     // translators: command line help text for Kerberos client module
-    "help"		: _("Kerberos client configuration module."),
+    "help"		: _("Kerberos client configuration module"),
     "guihandler"	: KerberosSequence,
     "initialize"	: Kerberos::Read,
     "finish"		: Kerberos::Write,
@@ -141,12 +141,12 @@ map cmdline = $[
 	],
 	"domain"	:$[
 	    // translators: command line help text for the domain option
-	    "help"	: _("Default Domain"),
+	    "help"	: _("Default domain"),
 	    "type"	: "string"
 	],
 	"realm"	:$[
-	    // translators: command line help text for the domain option
-	    "help"	: _("Default Realm"),
+	    // translators: command line help text for the realm option
+	    "help"	: _("Default realm"),
 	    "type"	: "string"
 	],
     ],
