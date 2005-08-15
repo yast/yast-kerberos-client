@@ -77,7 +77,6 @@ global string proxiable = "false";
 global string retain_after_close = "false";
 global boolean ssh_support = false;
 global string minimum_uid = "0";
-global string use_authtok	= "true";
 global string try_first_pass	= "true";
 
 // section in /etc/ssh/ssh_config file for storing krb support
@@ -128,7 +127,6 @@ global define boolean Import (map settings) ``{
     forwardable		= (client["forwardable"]:true) ? "true": "false";
     proxiable		= (client["proxiable"]:false) ?   "true" :  "false";
     retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
-    use_authtok		= (client["use_authtok"]:true) ? "true" : "false";
     try_first_pass	= (client["try_first_pass"]:true) ? "true" : "false";
 
     afs_serverip	= client["afs_serverip"]:"";
@@ -172,8 +170,6 @@ global define map Export () ``{
                 "retain_after_close"	: retain_after_close == "true",
 	]
     ];
-    if (use_authtok != "true")
-	export_map["kerberos_client","use_authtok"]	= false;
     if (try_first_pass != "true")
 	export_map["kerberos_client","try_first_pass"]	= false;
     return export_map;
@@ -265,7 +261,6 @@ global define boolean Read () ``{
 	    "false");
 	minimum_uid	= ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "0");
 	try_first_pass	= ReadFile (.etc.krb5_conf.v.pam.try_first_pass,"true");
-	use_authtok	= ReadFile (.etc.krb5_conf.v.pam.use_authtok, "true");
     }
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
@@ -523,7 +518,6 @@ AFS will not be enabled."));
 	WriteFile (add (pam_sect, "proxiable"), proxiable);
 	WriteFile (add (pam_sect, "retain_after_close"), retain_after_close);
 	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
-	WriteFile (add (pam_sect, "use_authtok"), use_authtok);
 	WriteFile (add (pam_sect, "try_first_pass"), try_first_pass);
 
 	if (afs_modified && afs_cell != "")
