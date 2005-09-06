@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep  6 15:39:31 CEST 2005 - jsuchome@suse.cz
+
+- adapted to the rename of openafs service and sysconfig file (#115335)
+- 2.12.6 
+
+-------------------------------------------------------------------
 Mon Aug 15 12:22:31 CEST 2005 - jsuchome@suse.cz
 
 - do not set use_authok (#104051)

@@ -290,13 +290,13 @@ global define boolean Read () ``{
         kdc = deletechars (out["stdout"]:"", "\n");
     }
 
-    if (FileUtils::Exists ("/etc/sysconfig/afs-client"))
+    if (FileUtils::Exists ("/etc/sysconfig/openafs-client"))
     {
 	// read AFS related values
-	afs_cell = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL);
-	afs_server = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER_NAME);
-	afs_serverip  = (string) SCR::Read (.sysconfig.afs-client.THIS_CELL_SERVER);
-	regenerate_ci = (string) SCR::Read (.sysconfig.afs-client.REGENERATE_CELL_INFO);
+	afs_cell = (string) SCR::Read (.sysconfig.openafs-client.THIS_CELL);
+	afs_server = (string) SCR::Read (.sysconfig.openafs-client.THIS_CELL_SERVER_NAME);
+	afs_serverip  = (string) SCR::Read (.sysconfig.openafs-client.THIS_CELL_SERVER);
+	regenerate_ci = (string) SCR::Read (.sysconfig.openafs-client.REGENERATE_CELL_INFO);
     }
 
     // propose AFS defaults
@@ -538,15 +538,15 @@ AFS will not be enabled."));
     {
 	// Adjust runlevels in which service runs
 	if (use_afs)
-	    Service::Enable ("afs-client");
+	    Service::Enable ("openafs-client");
 	else
-	    Service::Disable ("afs-client");
+	    Service::Disable ("openafs-client");
 
-	SCR::Write (.sysconfig.afs-client.THIS_CELL, afs_cell);
-	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER, afs_serverip);
+	SCR::Write (.sysconfig.openafs-client.THIS_CELL, afs_cell);
+	SCR::Write (.sysconfig.openafs-client.THIS_CELL_SERVER, afs_serverip);
 	if (use_afs)
 	    regenerate_ci = "yes";
-	SCR::Write (.sysconfig.afs-client.REGENERATE_CELL_INFO, regenerate_ci);
+	SCR::Write (.sysconfig.openafs-client.REGENERATE_CELL_INFO, regenerate_ci);
 	afs_server = afs_cell;
 	// get the name via 'getent hosts ip_addr' call
 	if (use_afs && FileUtils::Exists ("/usr/bin/getent"))
@@ -566,18 +566,18 @@ AFS will not be enabled."));
 	    else
 		y2error ("'getent hosts' returned error: %1", out["stderr"]:"");
 	}
-	SCR::Write (.sysconfig.afs-client.THIS_CELL_SERVER_NAME, afs_server);
+	SCR::Write (.sysconfig.openafs-client.THIS_CELL_SERVER_NAME, afs_server);
 
 	// force saving before starting service
-	SCR::Write (.sysconfig.afs-client, nil);
+	SCR::Write (.sysconfig.openafs-client, nil);
 
 	// stop service
 	if (!Mode::config ())
 	{
-	    boolean running = Service::Status ("afs-client") == 0;
+	    boolean running = Service::Status ("openafs-client") == 0;
 	    // start service for first time
 	    if (use_afs && !running)
-		Service::RunInitScript ("afs-client", "start");
+		Service::RunInitScript ("openafs-client", "start");
 	    else if (running)
 	    {
 		string command = "restart";
@@ -604,7 +604,7 @@ You can stop the AFS client later using the 'rcafs-client stop' command.
 		// popup header
 		if (Popup::AnyQuestion (_("AFS Settings Changed"), message,
 		    Label::YesButton(), Label::NoButton(), `focus_no))
-		    Service::RunInitScript ("afs-client", command);
+		    Service::RunInitScript ("openafs-client", command);
 	    }
 	}
     }

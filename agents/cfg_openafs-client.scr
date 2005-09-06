@@ -1,17 +1,17 @@
 /**
  * File:
- *   cfg_afs-client.scr
+ *   cfg_openafs-client.scr
  * Summary:
- *   SCR Agent for reading/writing /etc/sysconfig/afs-client
+ *   SCR Agent for reading/writing /etc/sysconfig/openafs-client
  *   using the sysconfig-agent
  *
  * $Id$
  *
- * Read/Sets the values defined in <tt>/etc/sysconfig/afs-client</tt>
+ * Read/Sets the values defined in <tt>/etc/sysconfig/openafs-client</tt>
  * in an easy manner.
  */
-.sysconfig.afs-client
+.sysconfig.openafs-client
 
 `ag_ini(
-  `SysConfigFile("/etc/sysconfig/afs-client")
+  `SysConfigFile("/etc/sysconfig/openafs-client")
 )
