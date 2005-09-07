@@ -63,6 +63,24 @@ define symbol WriteDialog() ``{
 }
 
 /**
+ * check the validity of the entered address
+ * enhanced for setting the port number after colon
+ */
+define boolean check_address (string address) {
+
+    list address_l = splitstring (address, ":");
+    if (size (address_l) == 1)
+	return Address::Check (address);
+    else if (size (address_l) == 2)
+    {
+	return
+	    Address::Check (address_l[0]:"") &&
+	    regexpmatch (address_l[1]:"0", "^[0-9]+$");
+    }
+    else return false;
+}
+
+/**
  * Dialog for configuring Kerberos client (values in /etc/krb5.conf)
  * @return dialog result
  */
@@ -80,7 +98,6 @@ The Kerberos client configuration updates your PAM settings to enable Kerberos a
 Enter your <b>Default Domain</b>, <b>Default Realm</b>, and the host name or address of your Key Distribution Center (<b>KDC Server Address</b>).</p>
 ") +
 
-	
     // help text 3/5
     _("<p>
 It is common practice to use the domain name in uppercase as your default realm name, but you can select freely. If the realm is not available on the server, you cannot log in.  Ask your server administrator if you need more information.</p>
@@ -230,7 +247,7 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
 		result = `not_next;
                 continue;
             }
-	    if (use_pam_krb && !Address::Check (kdc))
+	    if (use_pam_krb && !check_address (kdc))
 	    {
 		// error popup label
 		Report::Error (_("The KDC server address is invalid.") +

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep  7 10:36:17 CEST 2005 - jsuchome@suse.cz
+
+- allow setting the port number in KDC entry (#115451)
+- 2.12.7 
+
+-------------------------------------------------------------------
 Tue Sep  6 15:39:31 CEST 2005 - jsuchome@suse.cz
 
 - adapted to the rename of openafs service and sysconfig file (#115335)
