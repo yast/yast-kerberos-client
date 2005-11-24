@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov 24 08:58:19 CET 2005 - jsuchome@suse.cz
+
+- removed AFS configuration (not supported: F100215)
+- added missing comments for translators 
+- 2.13.0
+
+-------------------------------------------------------------------
 Wed Sep  7 10:36:17 CEST 2005 - jsuchome@suse.cz
 
 - allow setting the port number in KDC entry (#115451)

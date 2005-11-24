@@ -107,22 +107,10 @@ It is common practice to use the domain name in uppercase as your default realm 
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
 
-    help_text = help_text +
-    // help text 4/5
-    _("<p>If you are using Kerberos authentication together with the AFS file
-system, check <b>Support AFS</b>.  As the <b>Cell Name</b>, the DNS
-domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
-");
-
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
     string default_domain = Kerberos::default_domain;
-
-    string cell		= Kerberos::afs_cell;
-    string afs_serverip	= Kerberos::afs_serverip;
-    boolean use_afs	= Kerberos::use_afs;
     boolean use_pam_krb = Kerberos::use_pam_krb;
-    boolean afs_available = true;
 
     list<string> packages = Kerberos::packages;
 
@@ -148,28 +136,10 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
 	    // textentry label
 	    `TextEntry (`id (`kdc), _("&KDC Server Address"), kdc),
             // infield label
-	    `VSpacing (0.4)), `HSpacing (0.5)
+	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-        `VSpacing (0.2),
-	afs_available ?
-	// frame label
-	`Frame (_("AFS Settings"), `HBox(`HSpacing (0.5), `VBox(
-	    `VSpacing (0.5),
-	    `Left(`CheckBox (`id(`afs),`opt(`notify),
-		// chekbox label
-		_("Support &AFS"), use_afs)),
-	    `VSpacing (0.5),
-	    `HBox (
-		// textentry label
-		`TextEntry (`id(`cell), _("&Cell Name"), cell),
-		// textentry label
-		`TextEntry (`id(`afs_serverip), _("AFS Server &IP Address"),
-		    afs_serverip)
-	    ),
-	    `VSpacing (0.4)), `HSpacing (0.5)
-	))
-	: `Empty (),
-        `VSpacing (0.4),
+        `VSpacing (0.6),
+	// pushbutton label
 	`Right(`PushButton (`id(`advanced), _("Ad&vanced Settings..."))),
         `VSpacing (0.2)
     ), `HSpacing(3));
@@ -180,13 +150,7 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
         Label::BackButton (), Label::FinishButton ());
     Wizard::RestoreAbortButton ();
 
-    if (afs_available)
-    {
-	UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
-	UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
-    }
-
-    foreach (symbol widget, [`realm, `domain, `kdc, `afs, `advanced], ``{
+    foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
 	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
     });
 
@@ -194,12 +158,6 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
     do
     {
         result	= (symbol) UI::UserInput ();
-	use_afs = (boolean)UI::QueryWidget (`id(`afs), `Value) && afs_available;
-
-	if (result == `afs) {
-	    UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
-	    UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
-	}
 
         if (result == `pamyes || result == `pamno)
 	{
@@ -207,18 +165,6 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
 	    foreach (symbol widget, [`realm, `domain, `kdc, `advanced],``{
 		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	    });
-	    UI::ChangeWidget (`id (`afs),`Enabled,use_pam_krb && afs_available);
-	    if (result == `pamno)
-	    {
-		UI::ChangeWidget (`id (`cell), `Enabled, false);
-		UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
-	    }
-	    else
-	    {
-		UI::ChangeWidget (`id (`cell), `Enabled, use_afs);
-		UI::ChangeWidget (`id (`afs_serverip), `Enabled, use_afs);
-	    }
-	    use_afs = use_afs && use_pam_krb;
 	}
 
         if (result == `next || result == `advanced) {
@@ -226,9 +172,6 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
             default_realm = (string) UI::QueryWidget (`id(`realm), `Value);
             default_domain = (string) UI::QueryWidget (`id(`domain), `Value);
             kdc = (string) UI::QueryWidget (`id(`kdc), `Value);
-            afs_serverip = (string) UI::QueryWidget (`id(`afs_serverip), `Value);
-            cell = (string) UI::QueryWidget (`id(`cell), `Value);
-	    use_afs = use_afs && use_pam_krb;
 
             if (use_pam_krb && default_realm == "")
             {
@@ -256,83 +199,6 @@ domain name is usually used. Enter the <b>AFS Server IP Address</b>.</p>
 		result = `not_next;
 		continue;
 	    }
-	    if (use_afs && afs_serverip == "")
-            {
-                // error popup label
-                Report::Error(_("Enter the address of the AFS server."));
-		UI::SetFocus (`id(`afs_serverip));
-		result = `not_next;
-                continue;
-            }
-	    if (use_afs && !IP::Check (afs_serverip))
-	    {
-		// Popup text
-		Report::Error (_("The IP address is invalid.") +
-		    "\n\n" + IP::Valid4 ());
-		UI::SetFocus(`id(`afs_serverip));
-		result = `not_next;
-		continue;
-	    }
-	    if (use_afs && cell == "")
-            {
-                // error popup label
-                Report::Error(_("Enter the AFS cell name."));
-		UI::SetFocus (`id(`cell));
-		result = `not_next;
-                continue;
-            }
-	    // check for openafs* packages
-	    if (use_afs)
-	    {
-		if (!Package::InstalledAll (["openafs", "openafs-client"]) &&
-		     !contains (packages, "openafs"))
-		{
-		    if (!Mode::config () && !Package::Available ("openafs"))
-		    {
-			// error message, %1 is package name
-			Popup::Error (sformat (_("Package %1 is not available for installation.
-AFS cannot be enabled.
-"), "openafs"));
-			afs_available = false;
-			UI::ChangeWidget (`id (`afs), `Value, false);
-			UI::ChangeWidget (`id (`afs), `Enabled, false);
-			UI::ChangeWidget (`id (`cell), `Enabled, false);
-			UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
-			result = `not_next;
-			continue;
-		    }
-		    if (!Mode::config () && !Package::Available ("openafs-client"))
-		    {
-			// error message, %1 is package name
-			Popup::Error (sformat (_("Package %1 is not available for installation.
-AFS cannot be enabled.
-"), "openafs-client"));
-			afs_available = false;
-			UI::ChangeWidget (`id (`afs), `Value, false);
-			UI::ChangeWidget (`id (`afs), `Enabled, false);
-			UI::ChangeWidget (`id (`cell), `Enabled, false);
-			UI::ChangeWidget (`id (`afs_serverip), `Enabled, false);
-			result = `not_next;
-			continue;
-		    }
-		    // yes/no pupup
-		    if (Popup::YesNo (_("Packages openafs and openafs-client
-are required for using AFS.
-Install them?
-")))
-			packages = (list<string>) union(packages,["openafs","openafs-client"]);
-		    else
-		    {
-			result = `not_next;
-			continue;
-		    }
-		}
-	    }
-	    else
-	    {
-		packages = filter (string p, packages, ``( !contains (
-		    ["openafs", "openafs-client"], p)));
-	    }
         }
 	if ((result == `abort || result == `cancel) &&
 	    ReallyAbort () != `abort)
@@ -354,16 +220,7 @@ Install them?
             Kerberos::use_pam_krb = use_pam_krb;
         }
 
-	if (cell != Kerberos::afs_cell || use_afs != Kerberos::use_afs ||
-	    afs_serverip != Kerberos::afs_serverip)
-	{
-	    Kerberos::use_afs		= use_afs;
-	    Kerberos::afs_cell		= cell;
-	    Kerberos::afs_serverip	= afs_serverip;
-	    Kerberos::afs_modified	= true;
-	    Kerberos::pam_modified	= true;
-	}
-	Kerberos::packages = (list<string>) union (Kerberos::packages, packages);
+	Kerberos::packages = (list<string>) union(Kerberos::packages, packages);
     }
     return result;
 }
@@ -505,6 +362,7 @@ Try again."));
 	    if (!regexpmatch (renew, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (renew, "^([0-9]+)$"))
 	    {
+		// error popup (wrong format of entered value)
 		Popup::Error (_("Lifetime is invalid.
 Try again."));
 		UI::SetFocus (`id(`renew));
@@ -515,6 +373,7 @@ Try again."));
 	    if (!regexpmatch (clockskew, "^([0-9]+)[dmh]$") &&
 		!regexpmatch (clockskew, "^([0-9]+)$"))
 	    {
+		// error popup (wrong format of entered value)
 		Popup::Error (_("Clock skew is invalid.
 Try again.
 "));

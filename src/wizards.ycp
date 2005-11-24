@@ -93,7 +93,11 @@ define symbol KerberosSequence() ``{
  * @return sequence result
  */
 define symbol KerberosAutoSequence() ``{
+
+    // dialog caption
     string caption = _("Kerberos Client Configuration");
+
+    // label (init dialog)
     term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();

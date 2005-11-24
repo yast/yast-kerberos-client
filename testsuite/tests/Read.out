@@ -15,10 +15,6 @@ Read	.etc.krb5_conf.v.pam.retain_after_close nil
 Read	.etc.krb5_conf.v.pam.minimum_uid "1"
 Read	.etc.krb5_conf.v.pam.try_first_pass "false"
 Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"suse.cz"]
-Read	.sysconfig.openafs-client.THIS_CELL nil
-Read	.sysconfig.openafs-client.THIS_CELL_SERVER_NAME nil
-Read	.sysconfig.openafs-client.THIS_CELL_SERVER nil
-Read	.sysconfig.openafs-client.REGENERATE_CELL_INFO nil
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"suse.cz"]
 Dir	.etc.ssh.ssh_config.s: ["*"]
