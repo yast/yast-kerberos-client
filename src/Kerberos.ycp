@@ -70,6 +70,7 @@ global string retain_after_close = "false";
 global boolean ssh_support = false;
 global string minimum_uid = "0";
 global string try_first_pass	= "true";
+global string mappings	= "";
 
 // section in /etc/ssh/ssh_config file for storing krb support
 string ssh_section = "*";
@@ -120,6 +121,7 @@ global define boolean Import (map settings) ``{
     proxiable		= (client["proxiable"]:false) ?   "true" :  "false";
     retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
     try_first_pass	= (client["try_first_pass"]:true) ? "true" : "false";
+    mappings		= client["mappings"]:"";
 
     pam_modified	= true;
     modified		= true;
@@ -153,6 +155,8 @@ global define map Export () ``{
     ];
     if (try_first_pass != "true")
 	export_map["kerberos_client","try_first_pass"]	= false;
+    if (mappings != "")
+	export_map["kerberos_client","mappings"]	= mappings;
     return export_map;
 }
 
@@ -455,6 +459,18 @@ global define boolean Write () ``{
 	WriteFile (add (pam_sect, "retain_after_close"), retain_after_close);
 	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
 	WriteFile (add (pam_sect, "try_first_pass"), try_first_pass);
+
+	if (mappings != "")
+	{
+	    WriteFile (add (pam_sect, "mappings"), mappings);
+	}
+	else if (use_pam_krb)
+	{
+	    // If kerberos is set as authentication source, and mappings key
+	    // was not set via Import (=only way to set it), remove it
+	    if (ReadFile (.etc.krb5_conf.v.pam.mappings, "") != "")
+		SCR::Write (.etc.krb5_conf.v.pam.mappings, nil);
+	}
 
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);

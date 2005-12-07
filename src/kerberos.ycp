@@ -80,19 +80,41 @@ define boolean KerberosSummaryHandler (map options ) {
 define boolean KerberosChangeConfiguration (map options ) {
 
     boolean ret = false;
-    if ( options ["kdc"]:nil != nil )
+    if (options["clockskew"]:"" != "" &&
+	options["clockskew"]:"" != Kerberos::clockskew)
+    {
+	integer value = tointeger (options["clockskew"]:"");
+	// FIXME tointeger("blah") returns 0 (bug 115560)
+	if (value == nil || value < 0)
+	{
+	    // error: wrong input (probably string or negative integer)
+	    Report::Error (_("The value for Clock skew must be positive integer."));
+	    return false;
+	}
+	Kerberos::clockskew = options ["clockskew"]:"";
+	ret = true;
+    }
+    if (options ["kdc"]:nil != nil && options ["kdc"]:"" != Kerberos::kdc)
     {
 	Kerberos::kdc = options ["kdc"]:"";
 	ret = true;
     }
-    if ( options ["domain"]:nil != nil )
+    if (options ["domain"]:nil != nil &&
+	options ["domain"]:"" != Kerberos::default_domain)
     {
 	Kerberos::default_domain = options ["domain"]:"";
 	ret = true;
     }
-    if ( options ["realm"]:nil != nil )
+    if (options ["realm"]:nil != nil &&
+	options ["realm"]:"" != Kerberos::default_realm)
     {
 	Kerberos::default_realm = options ["realm"]:"";
+	ret = true;
+    }
+    if (options["minimum_uid"]:"" != "" &&
+	options["minimum_uid"]:"" != Kerberos::minimum_uid)
+    {
+	Kerberos::minimum_uid	= options ["minimum_uid"]:"";
 	ret = true;
     }
     if (ret)
@@ -149,11 +171,21 @@ map cmdline = $[
 	    "help"	: _("Default realm"),
 	    "type"	: "string"
 	],
+	"minimum_uid"	:$[
+	    // translators: command line help text for the minimum_uid option
+	    "help"	: _("Minimal UID used for Kerberos authentication"),
+	    "type"	: "string"
+	],
+	"clockskew"	:$[
+	    // translators: command line help text for the clockskew option
+	    "help"	: _("Clock skew (in seconds)"),
+	    "type"	: "string"
+	],
     ],
     "mappings"		: $[
 	"pam"		: [ "enable", "disable" ],
 	"summary"	: [],
-	"configure"	: [ "kdc", "domain", "realm" ],
+	"configure"	: ["kdc", "domain", "realm", "minimum_uid","clockskew"],
     ]
 ];
 

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Dec  1 17:45:34 CET 2005 - jsuchome@suse.cz
+
+- support "mappings" value, necessary for samba-client config
+- 2.13.1
+
+-------------------------------------------------------------------
 Thu Nov 24 08:58:19 CET 2005 - jsuchome@suse.cz
 
 - removed AFS configuration (not supported: F100215)
