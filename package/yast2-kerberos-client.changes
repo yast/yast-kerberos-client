@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Dec 19 12:39:08 CET 2005 - jsuchome@suse.cz
+
+- merged proofread texts
+- revert setting of "mappings" value (not needed)
+- 2.13.2
+
+-------------------------------------------------------------------
 Thu Dec  1 17:45:34 CET 2005 - jsuchome@suse.cz
 
 - support "mappings" value, necessary for samba-client config

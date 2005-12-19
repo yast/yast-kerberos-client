@@ -88,7 +88,7 @@ define boolean KerberosChangeConfiguration (map options ) {
 	if (value == nil || value < 0)
 	{
 	    // error: wrong input (probably string or negative integer)
-	    Report::Error (_("The value for Clock skew must be positive integer."));
+	    Report::Error (_("The value for clock skew must be a positive integer."));
 	    return false;
 	}
 	Kerberos::clockskew = options ["clockskew"]:"";
@@ -173,7 +173,7 @@ map cmdline = $[
 	],
 	"minimum_uid"	:$[
 	    // translators: command line help text for the minimum_uid option
-	    "help"	: _("Minimal UID used for Kerberos authentication"),
+	    "help"	: _("Minimum UID used for Kerberos authentication"),
 	    "type"	: "string"
 	],
 	"clockskew"	:$[

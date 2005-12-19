@@ -460,18 +460,6 @@ global define boolean Write () ``{
 	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
 	WriteFile (add (pam_sect, "try_first_pass"), try_first_pass);
 
-	if (mappings != "")
-	{
-	    WriteFile (add (pam_sect, "mappings"), mappings);
-	}
-	else if (use_pam_krb)
-	{
-	    // If kerberos is set as authentication source, and mappings key
-	    // was not set via Import (=only way to set it), remove it
-	    if (ReadFile (.etc.krb5_conf.v.pam.mappings, "") != "")
-		SCR::Write (.etc.krb5_conf.v.pam.mappings, nil);
-	}
-
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);
 
