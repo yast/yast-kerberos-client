@@ -2,7 +2,7 @@
  *  WriteFile.ycp
  *  Test of Kerberos::WriteFile function
  *  Author:	Jiri Suchomel <jsuchome@suse.cz>
- *  $Id: WriteFile.ycp 21833 2005-02-22 13:51:43Z jsuchome $
+ *  $Id$
  */
 
 {
