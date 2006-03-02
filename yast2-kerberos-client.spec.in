@@ -1,7 +1,7 @@
 @HEADER-COMMENT@
 
 @HEADER@
-BuildRequires:	yast2-devel-packages yast2-pam
+BuildRequires:	doxygen perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-pam yast2-testsuite
 Requires:	yast2 yast2-pam
 
 BuildArchitectures:	noarch
