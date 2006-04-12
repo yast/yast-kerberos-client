@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 12 13:19:32 CEST 2006 - jsuchome@suse.cz
+
+- fixed installing architecture-specific packages (#164313)
+- 2.13.4 
+
+-------------------------------------------------------------------
 Thu Mar  2 12:47:20 CET 2006 - jsuchome@suse.cz
 
 - reduced BuildRequires

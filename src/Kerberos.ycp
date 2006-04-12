@@ -82,8 +82,7 @@ global list<string> packages = [];
 global map arch_packages	= $[
     "krb5"	: $[
         "ia64"		: [ "krb5-x86" ],
-        "ppc"		: [ "krb5-64bit" ],
-        "ppc64"		: [ "krb5-32bit" ],
+        "ppc64"		: [ "krb5-64bit" ],
         "s390_64"	: [ "krb5-32bit" ],
         "x86_64"	: [ "krb5-32bit" ],
     ]
