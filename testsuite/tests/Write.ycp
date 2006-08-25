@@ -7,7 +7,7 @@
 
 {
 
-    // testedfiles: Kerberos.ycp PamSettings.ycp
+    // testedfiles: Kerberos.ycp Pam.ycp
     import "Testsuite";
     import "Kerberos";
 
@@ -39,17 +39,24 @@
     ];
 
     map WRITE = $[];
+    map EX = $[
+	"target": $[
+	    "bash_output": $[
+		"stdout" : ""
+	    ]
+	]
+    ];
 
     Testsuite::Dump ("==== writing without any changes =================================");
 
-    Testsuite::Test(``(Kerberos::Write ()), [ $[], WRITE, $[] ], 0);
+    Testsuite::Test(``(Kerberos::Write ()), [ $[], WRITE, EX ], 0);
 
     Testsuite::Dump ("==== ssh modified (enabled) ======================================");
 
     Kerberos::ssh_modified = true;
     Kerberos::ssh_support = true;
 
-    Testsuite::Test(``(Kerberos::Write ()), [ $[], WRITE, $[] ], 0);
+    Testsuite::Test(``(Kerberos::Write ()), [ $[], WRITE, EX ], 0);
 
     Testsuite::Dump ("==== kerberos disabled, ssh support disabled, krb5.conf untouched=");
 
@@ -57,10 +64,7 @@
     Kerberos::use_pam_krb = false;
     Kerberos::ssh_support = false;
 
-    Testsuite::Test(``(Kerberos::Write ()), [ READ, WRITE, $[] ], 0);
-
-    Testsuite::Dump ("\nThe map with original values is always read again in");
-    Testsuite::Dump ("PamSettings::RemoveValue() function, so the output is strange...\n");
+    Testsuite::Test(``(Kerberos::Write ()), [ READ, WRITE, EX ], 0);
 
     Testsuite::Dump ("==== only krb5.conf modified =====================================");
     Testsuite::Dump ("==== (all sections exist) ========================================");
@@ -72,7 +76,7 @@
     Kerberos::default_realm = "SUSE.CZ";
     Kerberos::kdc = "chimera.suse.cz";
 
-    Testsuite::Test(``(Kerberos::Write ()), [ READ, WRITE, $[] ], 0);
+    Testsuite::Test(``(Kerberos::Write ()), [ READ, WRITE, EX ], 0);
 
     Testsuite::Dump ("==== (pam section doesn't exist) =================================");
     READ = $[
@@ -87,5 +91,5 @@
     ];
     Kerberos::admin_server = "user_defined"; // -> won't be written
 
-    Testsuite::Test(``(Kerberos::Write ()), [ READ, $[], $[] ], 0);
+    Testsuite::Test(``(Kerberos::Write ()), [ READ, $[], EX ], 0);
 }

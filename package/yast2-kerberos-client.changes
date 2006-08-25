@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug 25 12:59:27 CEST 2006 - jsuchome@suse.cz
+
+- adapted for pam-config usage (F300956)
+- API of PamSettings module is obsolete
+- 2.14.0 
+
+-------------------------------------------------------------------
 Wed Apr 12 13:19:32 CEST 2006 - jsuchome@suse.cz
 
 - fixed installing architecture-specific packages (#164313)

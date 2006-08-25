@@ -21,7 +21,7 @@ import "FileUtils";
 import "Label";
 import "Mode";
 import "Package";
-import "PamSettings";
+import "Pam";
 import "Popup";
 import "Progress";
 import "Service";
@@ -36,13 +36,6 @@ global boolean write_only = false;
 
 // if pam_krb5 module is used for login
 global boolean use_pam_krb = false;
-
-// if pam_krb5afs module is used for login
-global boolean use_afs = false;
-
-// current pam modules called by pam_unix (value of call_modules=... in
-// /etc/security/pam_unix2)
-list<string> auth_modules = [];
 
 // if pam_unix is in /etc/pam.d/login
 boolean pam_unix_present = false;
@@ -195,26 +188,7 @@ global define boolean WriteFile (path path_to_value, string value) {
  */
 global define boolean Read () ``{
 
-    // check only "auth"?
-    list<string> auth_settings = PamSettings::GetValues ("pam_unix2", "auth");
-    boolean comment = false;
-    foreach (string val, auth_settings, ``{
-	if (substring (val, 0, 1) == "#")
-	    comment = true;
-	if (comment)
-	    return;
-	if (contains (auth_settings, "use_krb5"))
-	    use_pam_krb = true;
-	if (issubstring (val, "call_modules="))
-	{
-	    list line_split	= splitstring (val, "=");
-	    auth_modules	= splitstring (line_split[1]:"",",");
-	    if (contains (auth_modules, "krb5afs"))
-	    {
-		use_pam_krb = true;
-	    }
-	}
-    });
+    use_pam_krb	= Pam::Enabled ("krb5");
 
     // now read the settings from /etc/krb5.conf
     if (FileUtils::Exists ("/etc/krb5.conf"))
@@ -373,29 +347,12 @@ global define boolean Write () ``{
     {
         if (use_pam_krb)
         {
-	    auth_modules = filter (string m, auth_modules,``(m != "krb5afs"));
-	    foreach (string type, [ "account", "auth", "password" ], {
-		    PamSettings::AddValue ("unix2", type, "use_krb5");
-		    PamSettings::RemoveValue ("unix2", type,"call_modules");
-		    if (auth_modules != [])
-			PamSettings::AddValue ("unix2", type, sformat (
-			    "call_modules=%1", mergestring (auth_modules,",")));
-	    });
+	    Pam::Add ("krb5");
         }
         else
         {
-	    auth_modules = filter (string m, auth_modules,``(m != "krb5afs"));
-	    foreach (string type, [ "account", "auth", "password" ], ``{
-		PamSettings::RemoveValue ("unix2", type, "use_krb5");
-		PamSettings::RemoveValue ("unix2", type, "call_modules");
-		if (auth_modules != [])
-		    PamSettings::AddValue ("unix2", type, sformat (
-			"call_modules=%1", mergestring (auth_modules,",")));
-
-	    });
+	    Pam::Remove ("krb5");
         }
-	// write the changes now
-	PamSettings::Write (false);
     }
 
     // -- write to /etc/krb5.conf

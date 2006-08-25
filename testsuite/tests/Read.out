@@ -1,6 +1,5 @@
 Dump	==== reading... ============================
-Dir	.etc.security.section: ["/etc/security/pam_pwcheck.conf", "/etc/security/pam_unix2.conf"]
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5"
+Execute	.target.bash_output "pam-config -q --krb5" $["stdout":"password: "]
 Dir	.etc.krb5_conf.s: []
 Read	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ"
 Read	.etc.krb5_conf.v.libdefaults.clockskew "500"
@@ -14,9 +13,9 @@ Read	.etc.krb5_conf.v.pam.proxiable nil
 Read	.etc.krb5_conf.v.pam.retain_after_close nil
 Read	.etc.krb5_conf.v.pam.minimum_uid "1"
 Read	.etc.krb5_conf.v.pam.try_first_pass "false"
-Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"suse.cz"]
+Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
-Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"suse.cz"]
+Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
@@ -24,19 +23,16 @@ Read	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes"
 Return	true
 Dump	============================================
 Dump	kerberos used: true
-Dump	AFS used: false
-Dump	
-Dump	default domain: suse.cz
 Dump	default realm: SUSE.CZ
 Dump	kdc: chimera.suse.cz
 Dump	
 Dump	ssh support: true
 Dump	============================================
 Dump	==== reading... ============================
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5"
+Execute	.target.bash_output "pam-config -q --krb5" $["stdout":"password: "]
 Execute	.target.bash "/usr/bin/touch /etc/krb5.conf" 0
 Dir	.etc.ssh.ssh_config.s: ["*"]
-Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"suse.cz"]
+Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"

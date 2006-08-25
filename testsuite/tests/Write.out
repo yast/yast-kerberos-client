@@ -6,28 +6,11 @@ Write	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes" true
 Write	.etc.ssh.ssh_config nil true
 Return	true
 Dump	==== kerberos disabled, ssh support disabled, krb5.conf untouched=
-Dir	.etc.security.section: ["/etc/security/pam_pwcheck.conf", "/etc/security/pam_unix2.conf"]
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."account" "use_krb5"
-Write	.etc.security.v."/etc/security/pam_unix2.conf"."account" "" true
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."account" "use_krb5"
-Write	.etc.security.v."/etc/security/pam_unix2.conf"."account" "use_krb5" true
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5"
-Write	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok" true
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5"
-Write	.etc.security.v."/etc/security/pam_unix2.conf"."auth" "nullok use_krb5" true
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap use_krb5"
-Write	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap" true
-Read	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap use_krb5"
-Write	.etc.security.v."/etc/security/pam_unix2.conf"."password" "nullok use_ldap use_krb5" true
-Write	.etc.security nil true
+Execute	.target.bash_output "pam-config -d --krb5" $["stdout":""]
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "no" true
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "no" true
 Write	.etc.ssh.ssh_config nil true
 Return	true
-Dump	
-Dump	The map with original values is always read again in
-Dump	PamSettings::RemoveValue() function, so the output is strange...
-Dump	
 Dump	==== only krb5.conf modified =====================================
 Dump	==== (all sections exist) ========================================
 Write	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ" true
