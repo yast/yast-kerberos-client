@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 12 15:04:12 CEST 2006 - jsuchome@suse.cz
+
+- changed the default value of minimum_uid to 1
+- 2.14.2 
+
+-------------------------------------------------------------------
 Tue Sep 12 09:20:15 CEST 2006 - jsuchome@suse.cz
 
 - write use_shmem=sshd to pam section of krb5.conf (#201706)

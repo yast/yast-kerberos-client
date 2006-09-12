@@ -61,7 +61,7 @@ global string forwardable = "true";
 global string proxiable = "false";
 global string retain_after_close = "false";
 global boolean ssh_support = false;
-global string minimum_uid = "0";
+global string minimum_uid = "1";
 global string use_shmem	= "sshd";
 global string mappings	= "";
 
@@ -108,7 +108,7 @@ global define boolean Import (map settings) ``{
     ssh_support		= client["ssh_support"]:false;
     ticket_lifetime	= client["ticket_lifetime"]:"1d";
     renew_lifetime	= client["renew_lifetime"]:"1d";
-    minimum_uid		= client["minimum_uid"]:"0";
+    minimum_uid		= client["minimum_uid"]:minimum_uid;
     forwardable		= (client["forwardable"]:true) ? "true": "false";
     proxiable		= (client["proxiable"]:false) ?   "true" :  "false";
     retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
@@ -216,7 +216,7 @@ global define boolean Read () ``{
 	proxiable	= ReadFile (.etc.krb5_conf.v.pam.proxiable, "false");
 	retain_after_close = ReadFile (.etc.krb5_conf.v.pam.retain_after_close,
 	    "false");
-	minimum_uid	= ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "0");
+	minimum_uid	= ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "1");
 	use_shmem	= ReadFile (.etc.krb5_conf.v.pam.use_shmem, "sshd");
     }
     else
