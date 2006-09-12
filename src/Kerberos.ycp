@@ -62,7 +62,7 @@ global string proxiable = "false";
 global string retain_after_close = "false";
 global boolean ssh_support = false;
 global string minimum_uid = "0";
-global string try_first_pass	= "true";
+global string use_shmem	= "sshd";
 global string mappings	= "";
 
 // section in /etc/ssh/ssh_config file for storing krb support
@@ -112,7 +112,7 @@ global define boolean Import (map settings) ``{
     forwardable		= (client["forwardable"]:true) ? "true": "false";
     proxiable		= (client["proxiable"]:false) ?   "true" :  "false";
     retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
-    try_first_pass	= (client["try_first_pass"]:true) ? "true" : "false";
+    use_shmem		= client["use_shmem"]:use_shmem;
     mappings		= client["mappings"]:"";
 
     pam_modified	= true;
@@ -145,8 +145,8 @@ global define map Export () ``{
                 "retain_after_close"	: retain_after_close == "true",
 	]
     ];
-    if (try_first_pass != "true")
-	export_map["kerberos_client","try_first_pass"]	= false;
+    if (use_shmem != "sshd")
+	export_map["kerberos_client","use_shmem"]	= use_shmem;
     if (mappings != "")
 	export_map["kerberos_client","mappings"]	= mappings;
     return export_map;
@@ -217,7 +217,7 @@ global define boolean Read () ``{
 	retain_after_close = ReadFile (.etc.krb5_conf.v.pam.retain_after_close,
 	    "false");
 	minimum_uid	= ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "0");
-	try_first_pass	= ReadFile (.etc.krb5_conf.v.pam.try_first_pass,"true");
+	use_shmem	= ReadFile (.etc.krb5_conf.v.pam.use_shmem, "sshd");
     }
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
@@ -414,7 +414,7 @@ global define boolean Write () ``{
 	WriteFile (add (pam_sect, "proxiable"), proxiable);
 	WriteFile (add (pam_sect, "retain_after_close"), retain_after_close);
 	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
-	WriteFile (add (pam_sect, "try_first_pass"), try_first_pass);
+	WriteFile (add (pam_sect, "use_shmem"), use_shmem);
 
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);

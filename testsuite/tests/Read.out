@@ -12,7 +12,7 @@ Read	.etc.krb5_conf.v.pam.forwardable nil
 Read	.etc.krb5_conf.v.pam.proxiable nil
 Read	.etc.krb5_conf.v.pam.retain_after_close nil
 Read	.etc.krb5_conf.v.pam.minimum_uid "1"
-Read	.etc.krb5_conf.v.pam.try_first_pass "false"
+Read	.etc.krb5_conf.v.pam.use_shmem ""
 Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"password: "]

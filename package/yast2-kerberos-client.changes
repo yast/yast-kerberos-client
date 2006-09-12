@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 12 09:20:15 CEST 2006 - jsuchome@suse.cz
+
+- write use_shmem=sshd to pam section of krb5.conf (#201706)
+- 2.14.1 
+
+-------------------------------------------------------------------
 Fri Aug 25 12:59:27 CEST 2006 - jsuchome@suse.cz
 
 - adapted for pam-config usage (F300956)

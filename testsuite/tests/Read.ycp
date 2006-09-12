@@ -32,7 +32,7 @@
 			"forwardable": nil,
 			"proxiable": nil,
 			"retain_after_close": nil,
-			"try_first_pass"	: "false",
+			"use_shmem"	: "",
 			"use_authtok"		: nil,
 		    ]
 		],
