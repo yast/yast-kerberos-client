@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 21 16:13:21 CEST 2006 - jsuchome@suse.cz
+
+- show Next instead of Finish during installation (F120214)
+- 2.14.3 
+
+-------------------------------------------------------------------
 Tue Sep 12 15:04:12 CEST 2006 - jsuchome@suse.cz
 
 - changed the default value of minimum_uid to 1
