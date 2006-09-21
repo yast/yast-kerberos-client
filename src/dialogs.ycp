@@ -147,7 +147,9 @@ It is common practice to use the domain name in uppercase as your default realm 
     Wizard::SetContentsButtons (
         // dialog title
         _("Kerberos Client Configuration"), con, help_text,
-        Label::BackButton (), Label::FinishButton ());
+        Label::BackButton (),
+	Stage::cont () ? Label::NextButton () : Label::FinishButton ()
+    );
     Wizard::RestoreAbortButton ();
 
     foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
