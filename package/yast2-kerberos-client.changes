@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov 14 15:35:12 CET 2006 - jsuchome@suse.cz
+
+- added RNC file for autoyast profile validation (#220775)
+- 2.13.7 
+
+-------------------------------------------------------------------
 Thu Sep 21 16:12:53 CEST 2006 - jsuchome@suse.cz
 
 - show Next instead of Finish during installation (F120214)

@@ -84,7 +84,6 @@ define boolean KerberosChangeConfiguration (map options ) {
 	options["clockskew"]:"" != Kerberos::clockskew)
     {
 	integer value = tointeger (options["clockskew"]:"");
-	// FIXME tointeger("blah") returns 0 (bug 115560)
 	if (value == nil || value < 0)
 	{
 	    // error: wrong input (probably string or negative integer)
