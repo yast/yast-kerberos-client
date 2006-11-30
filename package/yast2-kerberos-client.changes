@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov 30 08:11:29 CET 2006 - jsuchome@suse.cz
+
+- install more architecture-specific packages (#224510)
+- 2.13.8 
+
+-------------------------------------------------------------------
 Tue Nov 14 15:35:12 CET 2006 - jsuchome@suse.cz
 
 - added RNC file for autoyast profile validation (#220775)
