@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 12 12:58:59 CET 2007 - jsuchome@suse.cz
+
+- enable calling modules for NSS configuration (F5673)
+- fixed map with architecture dependent packages
+- 2.15.0 
+
+-------------------------------------------------------------------
 Wed Nov 29 16:46:30 CET 2006 - jsuchome@suse.cz
 
 - install more architecture-specific packages (#224510)
