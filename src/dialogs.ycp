@@ -272,7 +272,10 @@ The <b>Clock Skew</b> is the tolerance for time stamps not exactly matching the 
 To synchronize your time with an NTP server, configure your computer
 as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 </p>
-");
+") +
+
+    // help text about launching selected yast module
+    _("<p>To configure source of user accounts, select the appropriate configuration module in <b>Configure User Data</b>.</p>");
 
     string uid		= Kerberos::minimum_uid;
     string ticket	= Kerberos::ticket_lifetime;
@@ -320,6 +323,16 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 		`PushButton (`id(`ntp), _("&NTP Configuration..."))
 	    )
 	),
+	`VSpacing (),
+	`Left (
+	    // menu button label
+	    `MenuButton (`id (`nss_client), _("C&onfigure User Data"), [
+		// menu item
+		`item (`id (`ldap), _("LDAP Client")),
+		// menu item
+		`item (`id (`nis), _("NIS Client"))
+	    ])
+	),
         `VSpacing (1)
     ), `HSpacing(3));
 
@@ -332,6 +345,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
     if (Mode::config ())
     {
         UI::ChangeWidget(`id(`ntp), `Enabled, false);
+        UI::ChangeWidget(`id(`nss_client), `Enabled, false);
     }
 
     symbol result = nil;
@@ -339,11 +353,12 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
     {
         result = (symbol) UI::UserInput ();
 
-	if (result == `ntp) {
-
-	    if (Package::InstallAll ( ["yast2-ntp-client"]))
+	if (result == `ntp || result == `ldap || result == `nis)
+	{
+	    string cl = substring (tostring (result), 1);
+	    if (Package::Install (sformat ("yast2-%1-client", cl)));
 	    {
-		WFM::CallFunction ("ntp-client", []);
+		WFM::CallFunction (cl + "-client", []);
 	    }
 	}
 

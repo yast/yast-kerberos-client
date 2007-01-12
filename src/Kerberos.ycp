@@ -81,11 +81,17 @@ global list<string> packages = [];
 // packages to install for specific arhitectures (#49808)
 global map arch_packages	= $[
     "krb5"	: $[
-        "ia64"		: [ "krb5-x86", "pam_krb5-x86" ],
-        "ppc64"		: [ "krb5-64bit", "pam_krb5-64bit" ],
-        "s390_64"	: [ "krb5-32bit", "pam_krb5-32bit" ],
-        "x86_64"	: [ "krb5-32bit", "pam_krb5-32bit" ],
-    ]
+        "ia64"		: [ "krb5-x86" ],
+        "ppc64"		: [ "krb5-64bit" ],
+        "s390_64"	: [ "krb5-32bit" ],
+        "x86_64"	: [ "krb5-32bit" ],
+    ],
+    "pam_krb5"	: $[
+        "ia64"		: [ "pam_krb5-x86" ],
+        "ppc64"		: [ "pam_krb5-64bit" ],
+        "s390_64"	: [ "pam_krb5-32bit" ],
+        "x86_64"	: [ "pam_krb5-32bit" ],
+    ],
 ];
 
 
