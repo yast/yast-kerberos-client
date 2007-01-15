@@ -275,7 +275,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 ") +
 
     // help text about launching selected yast module
-    _("<p>To configure source of user accounts, select the appropriate configuration module in <b>Configure User Data</b>.</p>");
+    _("<p>To configure the source of user accounts, select the appropriate configuration module in <b>Configure User Data</b>.</p>");
 
     string uid		= Kerberos::minimum_uid;
     string ticket	= Kerberos::ticket_lifetime;
