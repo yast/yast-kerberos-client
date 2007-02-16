@@ -121,6 +121,16 @@ define boolean KerberosChangeConfiguration (map options ) {
     return ret;
 }
 
+/**
+ * Wrapper for writing Kerberos configuration
+ */
+define boolean KerberosWrite ()
+{
+    if (!Package::InstallAll (Kerberos::UpdatedArchPackages (Kerberos::required_packages)))
+	return false;
+    return Kerberos::Write ();
+}
+
 /* the command line description map */
 map cmdline = $[
     "id"		: "kerberos",
@@ -128,7 +138,7 @@ map cmdline = $[
     "help"		: _("Kerberos client configuration module"),
     "guihandler"	: KerberosSequence,
     "initialize"	: Kerberos::Read,
-    "finish"		: Kerberos::Write,
+    "finish"		: KerberosWrite,
     "actions"		: $[
 	"pam" :$[
 	    "handler"	: KerberosEnableHandler,
@@ -193,13 +203,7 @@ map cmdline = $[
 if(propose)
     ret = KerberosAutoSequence();
 else
-{
-    if (!PackageSystem::CheckAndInstallPackagesInteractive (
-	Kerberos::UpdatedArchPackages (Kerberos::required_packages)))
-	ret = `auto;
-    else
-	ret = CommandLine::Run (cmdline);
-}
+    ret = CommandLine::Run (cmdline);
 
 y2debug("ret == %1", ret);
 

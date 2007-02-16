@@ -112,8 +112,6 @@ It is common practice to use the domain name in uppercase as your default realm 
     string default_domain = Kerberos::default_domain;
     boolean use_pam_krb = Kerberos::use_pam_krb;
 
-    list<string> packages = Kerberos::packages;
-
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (0.5),
         `RadioButtonGroup(`id(`rd),
@@ -207,6 +205,18 @@ It is common practice to use the domain name in uppercase as your default realm 
 	{
 	    result = `not_next;
 	}
+	if (result == `next && use_pam_krb)
+	{
+	    if (!Package::InstallAll (Kerberos::UpdatedArchPackages (Kerberos::required_packages)))
+	    {
+		result = `not_next;
+		use_pam_krb	= false;
+		UI::ChangeWidget (`id (`rd), `Value, `pamno);
+		foreach (symbol widget, [`realm, `domain, `kdc, `advanced],``{
+		    UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
+		});
+	    }
+	}
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
 
     if (result == `next || result == `advanced)
@@ -221,8 +231,6 @@ It is common practice to use the domain name in uppercase as your default realm 
             Kerberos::pam_modified = true;
             Kerberos::use_pam_krb = use_pam_krb;
         }
-
-	Kerberos::packages = (list<string>) union(Kerberos::packages, packages);
     }
     return result;
 }

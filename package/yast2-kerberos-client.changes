@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 16 15:45:45 CET 2007 - jsuchome@suse.cz
+
+- install required packages at the end of configuration (#233160)
+- 2.15.2 
+
+-------------------------------------------------------------------
 Mon Jan 15 11:00:12 CET 2007 - jsuchome@suse.cz
 
 - merged texts from proofread
