@@ -1,6 +1,6 @@
 /**
- *  ReadFile.ycp
- *  Test of Kerberos::ReadFile function
+ *  ReadKrb5ConfValue.ycp
+ *  Test of Kerberos::ReadKrb5ConfValue function
  *  Author:	Jiri Suchomel <jsuchome@suse.cz>
  *  $Id$
  */
@@ -16,11 +16,11 @@
 	    "krb5_conf" : $[
 		"v" : $[
 		    "libdefaults": $[
-			"default_realm": "SUSE.CZ",
-			"clockskew": "500"
+			"default_realm": ["SUSE.CZ"],
+			"clockskew": ["500"]
 		    ],
 		    "SUSE.CZ": $[
-			"kdc": "chimera.suse.cz",
+			"kdc": ["chimera.suse.cz"],
 			"default_domain": nil,
 		    ],
 		    "pam" : $[
@@ -34,17 +34,17 @@
 
     path p = .etc.krb5_conf.v.libdefaults.default_realm;
 
-    string realm = (string)Testsuite::Test(``(Kerberos::ReadFile (p, "")), [ READ, $[], $[] ], 0);
+    string realm = (string)Testsuite::Test(``(Kerberos::ReadKrb5ConfValue (p, "")), [ READ, $[], $[] ], 0);
 
     p = add ( add (.etc.krb5_conf.v, realm), "kdc");
 
-    Testsuite::Test(``(Kerberos::ReadFile (p, "test.suse.cz")), [ READ, $[], $[] ], 0);
+    Testsuite::Test(``(Kerberos::ReadKrb5ConfValue (p, "test.suse.cz")), [ READ, $[], $[] ], 0);
 
     p = add ( add (.etc.krb5_conf.v, "SUSE.DE"), "kdc");
 
-    Testsuite::Test(``(Kerberos::ReadFile (p, "test.suse.de")), [ READ, $[], $[] ], 0);
+    Testsuite::Test(``(Kerberos::ReadKrb5ConfValue (p, "test.suse.de")), [ READ, $[], $[] ], 0);
 
     p = .etc.krb5_conf.v.pam.ticket_lifetime;
 
-    Testsuite::Test(``(Kerberos::ReadFile (p, "1d")), [ READ, $[], $[] ], 0);
+    Testsuite::Test(``(Kerberos::ReadKrb5ConfValue (p, "1d")), [ READ, $[], $[] ], 0);
 }

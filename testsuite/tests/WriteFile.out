@@ -1,4 +1,0 @@
-Write	.etc.krb5_conf.v.libdefaults.default_realm "SUSE" true
-Return	true
-Return	false
-Return	false

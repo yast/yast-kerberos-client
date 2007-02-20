@@ -159,20 +159,66 @@ global define map Export () ``{
 }
 
 /**
- * Reads the item value from the /etc/krb5.conf via ini agent
- * If the item doesn't exist, returns empty string (not nil)
+ * Reads the item values from the /etc/krb5.conf via ini agent
+ * If the item doesn't exist, returns the default value
  * @param path_to_value path for agent (.etc.krb5_conf)
- * @return string the value
+ * @param def_value default value for the key (path)
+ * @return list string the values for given key
  */
-global define string ReadFile (path path_to_value, string def_value) ``{
+global list<string> ReadKrb5ConfValues (path path_to_value, string def_value) ``{
 
-    string value = (string) SCR::Read (path_to_value);
+    list<string> value = (list<string>) SCR::Read (path_to_value);
     if (value == nil)
-        value = def_value;
-
+        value = [def_value];
     return value;
 }
 
+/**
+ * Reads the item value from the /etc/krb5.conf via ini agent
+ * If the item doesn't exist, returns the default value
+ * @param path_to_value path for agent (.etc.krb5_conf)
+ * @param def_value default value for the key (path)
+ * @return string the value
+ */
+global string ReadKrb5ConfValue (path path_to_value, string def_value) {
+
+    list vals	= ReadKrb5ConfValues (path_to_value, def_value);
+    return vals[0]:def_value;
+}
+
+/**
+ * Deprecated variant to ReadKrb5ConfValue
+ * @deprecated
+ */
+global string ReadFile (path path_to_value, string def_value) {
+
+    y2warning ("This function is deprecated, use ReadKrb5ConfValue instead.");
+    return ReadKrb5ConfValue (path_to_value, def_value);
+}
+
+/**
+ * Write list of values for given key to /etc/krb5.conf
+ * Do not write anything for empty and nil values
+ * @param path_to_value path for agent (.etc.krb5_conf)
+ * @param value
+ * @return false when nothing was written, success of write otherwise
+ */
+global boolean WriteKrb5ConfValues (path path_to_value, list<string> values) {
+
+    if (values == nil || values == [])
+	return false;
+    return SCR::Write (path_to_value, values);
+}
+
+/**
+ * Write (possible) multiple values of given key to /etc/krb5.conf
+ * @param values values separated by spaces
+ */
+global boolean WriteKrb5ConfValuesAsString (path path_to_value, string values) {
+
+    return WriteKrb5ConfValues (path_to_value,
+	filter (string val, splitstring (values, " \t"), ``(val != "")));
+}
 /**
  * Write the item value to /etc/krb5.conf
  * Do not write anything for empty and nil values
@@ -180,13 +226,24 @@ global define string ReadFile (path path_to_value, string def_value) ``{
  * @param value
  * @return false when nothing was written, success of write otherwise
  */
-global define boolean WriteFile (path path_to_value, string value) {
+global boolean WriteKrb5ConfValue (path path_to_value, string value) {
 
     if (value == nil || value == "")
 	return false;
-
-    return SCR::Write (path_to_value, value);
+    return WriteKrb5ConfValues (path_to_value, [value]);
 }
+
+/**
+ * Deprecated variant to WriteKrb5ConfValue
+ * @deprecated
+ */
+global define boolean WriteFile (path path_to_value, string value) {
+
+    y2warning ("This function is deprecated, use WriteKrb5ConfValue instead.");
+    return WriteKrb5ConfValue (path_to_value, value);
+}
+
+
 
 /**
  * Reads Kerberos settings from the SCR
@@ -201,29 +258,29 @@ global define boolean Read () ``{
     {
         y2debug("krb5.conf sections: %1", SCR::Dir(.etc.krb5_conf.s));
 
-        default_realm = ReadFile(.etc.krb5_conf.v.libdefaults.default_realm,"");
+        default_realm = ReadKrb5ConfValue(.etc.krb5_conf.v.libdefaults.default_realm,"");
 
-        clockskew = ReadFile (.etc.krb5_conf.v.libdefaults.clockskew, "300");
+        clockskew = ReadKrb5ConfValue (.etc.krb5_conf.v.libdefaults.clockskew, "300");
 
 	if (size (default_realm) > 0)
 	{
 	    path realm	= add (.etc.krb5_conf.v, default_realm);
-	    kdc = ReadFile (add (realm, "kdc"),"");
-	    admin_server = ReadFile (add (realm, "admin_server"),"");
-	    default_domain = ReadFile (add (realm,"default_domain"), "");
+	    kdc		= mergestring (ReadKrb5ConfValues (add (realm, "kdc"),""), " ");
+	    admin_server = mergestring (ReadKrb5ConfValues(add (realm, "admin_server"),""), " ");
+	    default_domain = ReadKrb5ConfValue (add (realm,"default_domain"), "");
 	}
 
 	if (admin_server == kdc)
 	    admin_server = ""; // we could replace it in Write in this case...
 
-	ticket_lifetime = ReadFile (.etc.krb5_conf.v.pam.ticket_lifetime, "1d");
-	renew_lifetime	= ReadFile (.etc.krb5_conf.v.pam.renew_lifetime, "1d");
-	forwardable	= ReadFile (.etc.krb5_conf.v.pam.forwardable, "true");
-	proxiable	= ReadFile (.etc.krb5_conf.v.pam.proxiable, "false");
-	retain_after_close = ReadFile (.etc.krb5_conf.v.pam.retain_after_close,
+	ticket_lifetime = ReadKrb5ConfValue (.etc.krb5_conf.v.pam.ticket_lifetime, "1d");
+	renew_lifetime	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.renew_lifetime, "1d");
+	forwardable	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.forwardable, "true");
+	proxiable	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.proxiable, "false");
+	retain_after_close = ReadKrb5ConfValue (.etc.krb5_conf.v.pam.retain_after_close,
 	    "false");
-	minimum_uid	= ReadFile (.etc.krb5_conf.v.pam.minimum_uid, "1");
-	use_shmem	= ReadFile (.etc.krb5_conf.v.pam.use_shmem, "sshd");
+	minimum_uid	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.minimum_uid, "1");
+	use_shmem	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.use_shmem, "sshd");
     }
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
@@ -367,7 +424,7 @@ global define boolean Write () ``{
     if (modified)
     {
 	// change the default realm name
-	WriteFile (.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
+	WriteKrb5ConfValue (.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
 
 	// write the mapping domain-realm
 	if (default_domain != "")
@@ -375,20 +432,20 @@ global define boolean Write () ``{
 	    string domain = default_domain;
 	    if ( findfirstof (domain, ".") != 0)
 		domain = "." + domain;
-	    WriteFile (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
+	    WriteKrb5ConfValue (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
 	}
 
-	WriteFile (.etc.krb5_conf.v.libdefaults.clockskew, clockskew);
+	WriteKrb5ConfValue (.etc.krb5_conf.v.libdefaults.clockskew, clockskew);
 
 	if (contains (SCR::Dir(.etc.krb5_conf.s), default_realm))
 	{
 	    // update the default realm settings
-	    WriteFile (add (add (.etc.krb5_conf.v, default_realm),"kdc"),kdc);
-	    WriteFile (add (add (.etc.krb5_conf.v, default_realm),
+	    WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v, default_realm),"kdc"),kdc);
+	    WriteKrb5ConfValue (add (add (.etc.krb5_conf.v, default_realm),
 		"default_domain"), default_domain);
 	    if (admin_server == "")
 		// save only when the entry was mising or same as KDC
-		WriteFile (add (add (.etc.krb5_conf.v, default_realm),
+		WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v, default_realm),
 		    "admin_server"),kdc);
 	}
 	else if (default_realm != "")
@@ -396,12 +453,12 @@ global define boolean Write () ``{
 	    // specify the type of this subsection
 	    SCR::Write( add (.etc.krb5_conf.st.realms, default_realm), 1);
 	    // write the settings of the new default realm
-	    WriteFile (
+	    WriteKrb5ConfValuesAsString (
 		add (add(.etc.krb5_conf.v.realms,default_realm),"kdc"), kdc);
-	    WriteFile (add (add (.etc.krb5_conf.v.realms, default_realm),
+	    WriteKrb5ConfValue (add (add (.etc.krb5_conf.v.realms, default_realm),
 		"default_domain"), default_domain);
 	    if (admin_server == "")
-		WriteFile(add (add (.etc.krb5_conf.v.realms, default_realm),
+		WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "admin_server"), kdc);
 	}
 
@@ -414,13 +471,13 @@ global define boolean Write () ``{
 	    pam_sect = .etc.krb5_conf.v.appdefaults.pam;
 	}
 
-	WriteFile (add (pam_sect, "ticket_lifetime"), ticket_lifetime);
-	WriteFile (add (pam_sect, "renew_lifetime"), renew_lifetime);
-	WriteFile (add (pam_sect, "forwardable"), forwardable);
-	WriteFile (add (pam_sect, "proxiable"), proxiable);
-	WriteFile (add (pam_sect, "retain_after_close"), retain_after_close);
-	WriteFile (add (pam_sect, "minimum_uid"), minimum_uid);
-	WriteFile (add (pam_sect, "use_shmem"), use_shmem);
+	WriteKrb5ConfValue (add (pam_sect, "ticket_lifetime"), ticket_lifetime);
+	WriteKrb5ConfValue (add (pam_sect, "renew_lifetime"), renew_lifetime);
+	WriteKrb5ConfValue (add (pam_sect, "forwardable"), forwardable);
+	WriteKrb5ConfValue (add (pam_sect, "proxiable"), proxiable);
+	WriteKrb5ConfValue (add (pam_sect, "retain_after_close"), retain_after_close);
+	WriteKrb5ConfValue (add (pam_sect, "minimum_uid"), minimum_uid);
+	WriteKrb5ConfValue (add (pam_sect, "use_shmem"), use_shmem);
 
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);

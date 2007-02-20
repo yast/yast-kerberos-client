@@ -15,7 +15,7 @@
   `IniAgent(
    "/etc/krb5.conf",
     $[
-      "options" : [ "global_values" ],
+      "options" : [ "global_values", "repeat_names" ],
       "comments": [ "^[ \t]*#.*", "#.*", "^[ \t]*$" ],
       "sections" : [
         $[

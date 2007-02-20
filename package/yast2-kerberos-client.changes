@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 20 13:15:44 CET 2007 - jsuchome@suse.cz
+
+- support multiple values for KDC (#246241)
+- 2.15.3
+
+-------------------------------------------------------------------
 Fri Feb 16 15:45:45 CET 2007 - jsuchome@suse.cz
 
 - install required packages at the end of configuration (#233160)

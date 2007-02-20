@@ -13,34 +13,34 @@ Write	.etc.ssh.ssh_config nil true
 Return	true
 Dump	==== only krb5.conf modified =====================================
 Dump	==== (all sections exist) ========================================
-Write	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ" true
-Write	.etc.krb5_conf.v.libdefaults.clockskew "300" true
+Write	.etc.krb5_conf.v.libdefaults.default_realm ["SUSE.CZ"] true
+Write	.etc.krb5_conf.v.libdefaults.clockskew ["300"] true
 Dir	.etc.krb5_conf.s: ["SUSE.CZ", "libdefaults", "pam"]
-Write	.etc.krb5_conf.v."SUSE.CZ"."kdc" "chimera.suse.cz" true
-Write	.etc.krb5_conf.v."SUSE.CZ"."admin_server" "chimera.suse.cz" true
+Write	.etc.krb5_conf.v."SUSE.CZ"."kdc" ["chimera.suse.cz"] true
+Write	.etc.krb5_conf.v."SUSE.CZ"."admin_server" ["chimera.suse.cz"] true
 Dir	.etc.krb5_conf.s: ["SUSE.CZ", "libdefaults", "pam"]
-Write	.etc.krb5_conf.v.pam."ticket_lifetime" "1d" true
-Write	.etc.krb5_conf.v.pam."renew_lifetime" "1d" true
-Write	.etc.krb5_conf.v.pam."forwardable" "true" true
-Write	.etc.krb5_conf.v.pam."proxiable" "false" true
-Write	.etc.krb5_conf.v.pam."retain_after_close" "false" true
-Write	.etc.krb5_conf.v.pam."minimum_uid" "1" true
-Write	.etc.krb5_conf.v.pam."use_shmem" "sshd" true
+Write	.etc.krb5_conf.v.pam."ticket_lifetime" ["1d"] true
+Write	.etc.krb5_conf.v.pam."renew_lifetime" ["1d"] true
+Write	.etc.krb5_conf.v.pam."forwardable" ["true"] true
+Write	.etc.krb5_conf.v.pam."proxiable" ["false"] true
+Write	.etc.krb5_conf.v.pam."retain_after_close" ["false"] true
+Write	.etc.krb5_conf.v.pam."minimum_uid" ["1"] true
+Write	.etc.krb5_conf.v.pam."use_shmem" ["sshd"] true
 Write	.etc.krb5_conf nil true
 Return	true
 Dump	==== (pam section doesn't exist) =================================
-Write	.etc.krb5_conf.v.libdefaults.default_realm "SUSE.CZ" true
-Write	.etc.krb5_conf.v.libdefaults.clockskew "300" true
+Write	.etc.krb5_conf.v.libdefaults.default_realm ["SUSE.CZ"] true
+Write	.etc.krb5_conf.v.libdefaults.clockskew ["300"] true
 Dir	.etc.krb5_conf.s: ["SUSE.CZ", "libdefaults"]
-Write	.etc.krb5_conf.v."SUSE.CZ"."kdc" "chimera.suse.cz" true
+Write	.etc.krb5_conf.v."SUSE.CZ"."kdc" ["chimera.suse.cz"] true
 Dir	.etc.krb5_conf.s: ["SUSE.CZ", "libdefaults"]
 Write	.etc.krb5_conf.st.appdefaults.pam 1 true
-Write	.etc.krb5_conf.v.appdefaults.pam."ticket_lifetime" "1d" true
-Write	.etc.krb5_conf.v.appdefaults.pam."renew_lifetime" "1d" true
-Write	.etc.krb5_conf.v.appdefaults.pam."forwardable" "true" true
-Write	.etc.krb5_conf.v.appdefaults.pam."proxiable" "false" true
-Write	.etc.krb5_conf.v.appdefaults.pam."retain_after_close" "false" true
-Write	.etc.krb5_conf.v.appdefaults.pam."minimum_uid" "1" true
-Write	.etc.krb5_conf.v.appdefaults.pam."use_shmem" "sshd" true
+Write	.etc.krb5_conf.v.appdefaults.pam."ticket_lifetime" ["1d"] true
+Write	.etc.krb5_conf.v.appdefaults.pam."renew_lifetime" ["1d"] true
+Write	.etc.krb5_conf.v.appdefaults.pam."forwardable" ["true"] true
+Write	.etc.krb5_conf.v.appdefaults.pam."proxiable" ["false"] true
+Write	.etc.krb5_conf.v.appdefaults.pam."retain_after_close" ["false"] true
+Write	.etc.krb5_conf.v.appdefaults.pam."minimum_uid" ["1"] true
+Write	.etc.krb5_conf.v.appdefaults.pam."use_shmem" ["sshd"] true
 Write	.etc.krb5_conf nil true
 Return	true

@@ -17,22 +17,22 @@
 	    "krb5_conf" : $[
 		"v" : $[
 		    "libdefaults": $[
-			"default_realm": "SUSE.CZ",
-			"clockskew": "500"
+			"default_realm": ["SUSE.CZ"],
+			"clockskew": ["500"]
 		    ],
 		    "SUSE.CZ": $[
-			"kdc": "chimera.suse.cz",
+			"kdc": ["chimera.suse.cz", "kdc.suse.cz"],
 			"admin_server": nil,
 			"default_domain": nil,
 		    ],
 		    "pam" : $[
-			"minimum_uid": "1",
+			"minimum_uid": ["1"],
 			"renew_lifetime": nil,
 			"ticket_lifetime": nil,
 			"forwardable": nil,
 			"proxiable": nil,
 			"retain_after_close": nil,
-			"use_shmem"	: "",
+			"use_shmem"	: [""],
 			"use_authtok"		: nil,
 		    ]
 		],

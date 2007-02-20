@@ -95,8 +95,7 @@ The Kerberos client configuration updates your PAM settings to enable Kerberos a
     // help text 2/5
     _("<p>
 <b>Basic Client Settings</b>:
-Enter your <b>Default Domain</b>, <b>Default Realm</b>, and the host name or address of your Key Distribution Center (<b>KDC Server Address</b>).</p>
-") +
+Enter your <b>Default Domain</b>, <b>Default Realm</b>, and the hostname or address of your Key Distribution Center (<b>KDC Server Address</b>). To specify more values for KDC, separate them by spaces.</p>") +
 
     // help text 3/5
     _("<p>
@@ -190,14 +189,22 @@ It is common practice to use the domain name in uppercase as your default realm 
 		result = `not_next;
                 continue;
             }
-	    if (use_pam_krb && !check_address (kdc))
+	    if (use_pam_krb)
 	    {
-		// error popup label
-		Report::Error (_("The KDC server address is invalid.") +
-		    "\n\n" + Address::Valid4 ());
-		UI::SetFocus (`id(`kdc));
-		result = `not_next;
-		continue;
+		list<string> kdcs	= splitstring (kdc, " \t");
+		boolean checked		= true;
+		foreach (string k, kdcs, {
+		    checked	= checked && check_address (k);
+		});
+		if (!checked)
+		{
+		    // error popup label
+		    Report::Error (_("The KDC server address is invalid.") +
+			"\n\n" + Address::Valid4 ());
+		    UI::SetFocus (`id(`kdc));
+		    result = `not_next;
+		    continue;
+		}
 	    }
         }
 	if ((result == `abort || result == `cancel) &&
