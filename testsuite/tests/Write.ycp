@@ -51,6 +51,17 @@
 
     Testsuite::Test(``(Kerberos::Write ()), [ $[], WRITE, EX ], 0);
 
+    Testsuite::Dump ("==== pam enabled with krb5-ignore_unknown_principals=");
+
+    Kerberos::pam_modified	= true;
+    Kerberos::use_pam_krb	= true;
+    Kerberos::ignore_unknown	= true;
+
+    Testsuite::Test(``(Kerberos::Write ()), [ READ, WRITE, EX ], 0);
+
+    Kerberos::pam_modified	= false;
+    Kerberos::ignore_unknown	= false;
+
     Testsuite::Dump ("==== ssh modified (enabled) ======================================");
 
     Kerberos::ssh_modified = true;

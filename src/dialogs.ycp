@@ -273,6 +273,9 @@ authentication on the SSH server.</p>
 ") +
 
     // help text
+    _("<p>Check <b>Ignore Unknown Users</b> to have Kerberos ignore authentication attempts by users it does not know.</p>") +
+
+    // help text
     _("<p>When the <b>Minimum UID</b> is greater than 0, authentication attempts by
 users with UIDs below the specified number are ignored. This is useful for
 disabling Kerberos authentication for the system administrator root.</p>
@@ -299,11 +302,11 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
     boolean prox	= Kerberos::proxiable == "true";
     boolean retain	= Kerberos::retain_after_close == "true";
     boolean ssh		= Kerberos::ssh_support;
-
+    boolean ignore_unknown	= Kerberos::ignore_unknown;
     string clockskew	= Kerberos::clockskew;
 
     term con = `HBox (`HSpacing (3), `VBox (
-        `VSpacing (1),
+        `VSpacing (0.8),
 	// frame label
 	`Frame (_("Ticket Attributes"), `HBox(`HSpacing (0.5), `VBox(
 	    `VSpacing (0.5),
@@ -320,11 +323,15 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	    `Left(`CheckBox (`id (`retain), _("R&etained"), retain)),
 	    `VSpacing (0.5)), `HSpacing (0.5)
 	)),
-        `VSpacing (1),
+        `VSpacing (0.8),
 	`Left(`CheckBox (`id (`ssh),
 	    // checkbox label
 	    _("Kerberos Support for Open&SSH Client"), ssh)),
-        `VSpacing (0.5),
+        `VSpacing (0.4),
+	`Left (`CheckBox (`id (`ignore_unknown),
+	    // checkbox label
+	    _("&Ignore Unknown Users"), ignore_unknown)),
+        `VSpacing (0.4),
         // UID=User ID
         `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
 	    tointeger (uid)),
@@ -437,11 +444,16 @@ Try again.
 	    "true" : "false";
 	Kerberos::retain_after_close =
 	    (boolean) UI::QueryWidget (`id(`retain), `Value) ? "true" : "false";
-
 	if (ssh != Kerberos::ssh_support)
 	{
 	    Kerberos::ssh_modified = true;
 	    Kerberos::ssh_support = ssh;
+	}
+	ignore_unknown	= (boolean) UI::QueryWidget (`id(`ignore_unknown), `Value);
+        if (ignore_unknown != Kerberos::ignore_unknown)
+        {
+            Kerberos::pam_modified	= true;
+	    Kerberos::ignore_unknown	= ignore_unknown;
 	}
     }
     return result;

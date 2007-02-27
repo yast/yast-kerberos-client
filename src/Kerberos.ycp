@@ -65,6 +65,9 @@ global string minimum_uid = "1";
 global string use_shmem	= "sshd";
 global string mappings	= "";
 
+// --krb5-ignore_unknown_principals for pam-config
+global boolean ignore_unknown	= true;
+
 // section in /etc/ssh/ssh_config file for storing krb support
 string ssh_section = "*";
 
@@ -112,6 +115,7 @@ global define boolean Import (map settings) ``{
     kdc			= client["kdc_server"]:"";
     clockskew		= client["clockskew"]:clockskew;
     ssh_support		= client["ssh_support"]:false;
+    ignore_unknown	= client["ignore_unknown"]:ignore_unknown;
     ticket_lifetime	= client["ticket_lifetime"]:"1d";
     renew_lifetime	= client["renew_lifetime"]:"1d";
     minimum_uid		= client["minimum_uid"]:minimum_uid;
@@ -143,6 +147,7 @@ global define map Export () ``{
 		"kdc_server"		: kdc,
 		"clockskew"		: clockskew,
 		"ssh_support"		: ssh_support,
+		"ignore_unknown"	: ignore_unknown,
 		"ticket_lifetime"	: ticket_lifetime,
                 "renew_lifetime"	: renew_lifetime,
                 "minimum_uid"		: minimum_uid,
@@ -251,7 +256,10 @@ global define boolean WriteFile (path path_to_value, string value) {
  */
 global define boolean Read () ``{
 
-    use_pam_krb	= Pam::Enabled ("krb5");
+    map pam_query	= Pam::Query ("krb5");
+    use_pam_krb		= size (pam_query) > 0;
+    if (use_pam_krb) // if krb is not enabled, ignore_unknown is true by default
+	ignore_unknown	= contains (pam_query["account"]:[], "ignore_unknown_principals");
 
     // now read the settings from /etc/krb5.conf
     if (FileUtils::Exists ("/etc/krb5.conf"))
@@ -395,7 +403,7 @@ global define boolean Write () ``{
 	list<string> to_install = [];
 	// check if packages are avialable...
 	foreach (string p, packages, ``{
-	    if (Package::Available (p))
+	    if (Package::Available (p) == true)
 		to_install = add (to_install, p);
 	});
 	Package::DoInstallAndRemove (to_install, []);
@@ -411,6 +419,10 @@ global define boolean Write () ``{
         if (use_pam_krb)
         {
 	    Pam::Add ("krb5");
+	    if (ignore_unknown)
+		Pam::Add ("krb5-ignore_unknown_principals");
+	    else
+		Pam::Remove ("krb5-ignore_unknown_principals");
         }
         else
         {
