@@ -38,7 +38,7 @@ Write	.etc.krb5_conf.v.libdefaults.clockskew ["300"] true
 Dir	.etc.krb5_conf.s: ["SUSE.CZ", "libdefaults"]
 Write	.etc.krb5_conf.v."SUSE.CZ"."kdc" ["chimera.suse.cz"] true
 Dir	.etc.krb5_conf.s: ["SUSE.CZ", "libdefaults"]
-Write	.etc.krb5_conf.st.appdefaults.pam 1 true
+Write	.etc.krb5_conf.st.appdefaults.pam [1] true
 Write	.etc.krb5_conf.v.appdefaults.pam."ticket_lifetime" ["1d"] true
 Write	.etc.krb5_conf.v.appdefaults.pam."renew_lifetime" ["1d"] true
 Write	.etc.krb5_conf.v.appdefaults.pam."forwardable" ["true"] true

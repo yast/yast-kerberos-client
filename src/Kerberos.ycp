@@ -463,7 +463,7 @@ global define boolean Write () ``{
 	else if (default_realm != "")
 	{
 	    // specify the type of this subsection
-	    SCR::Write( add (.etc.krb5_conf.st.realms, default_realm), 1);
+	    SCR::Write( add (.etc.krb5_conf.st.realms, default_realm), [1]);
 	    // write the settings of the new default realm
 	    WriteKrb5ConfValuesAsString (
 		add (add(.etc.krb5_conf.v.realms,default_realm),"kdc"), kdc);
@@ -479,7 +479,7 @@ global define boolean Write () ``{
 	if (!contains (SCR::Dir(.etc.krb5_conf.s), "pam"))
 	{
 	    // specify the type of new subsection
-	    SCR::Write(.etc.krb5_conf.st.appdefaults.pam, 1);
+	    SCR::Write(.etc.krb5_conf.st.appdefaults.pam, [1]);
 	    pam_sect = .etc.krb5_conf.v.appdefaults.pam;
 	}
 

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar 30 12:52:51 CEST 2007 - jsuchome@suse.cz
+
+- correct using of krb5.conf file sections during write (#258840)
+- 2.15.5 
+
+-------------------------------------------------------------------
 Tue Feb 27 09:00:31 CET 2007 - jsuchome@suse.cz
 
 - added option to "Ignore Unknown Principles" (#217369)
