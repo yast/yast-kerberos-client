@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 25 13:30:04 CEST 2007 - jsrain@suse.cz
+
+- removed outdated translations from .desktop-files (#271209)
+
+-------------------------------------------------------------------
 Fri Mar 30 12:52:51 CEST 2007 - jsuchome@suse.cz
 
 - correct using of krb5.conf file sections during write (#258840)
