@@ -48,6 +48,9 @@ global string default_domain = "";
 global string kdc = "";
 string admin_server = "";
 
+// used for pkinit-nss (feature 302132)
+global string trusted_servers	= "";
+
 global string clockskew = "300";
 
 global boolean pam_modified = false;
@@ -124,6 +127,7 @@ global define boolean Import (map settings) ``{
     retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
     use_shmem		= client["use_shmem"]:use_shmem;
     mappings		= client["mappings"]:"";
+    trusted_servers	= client["trusted_servers"]:"";
 
     pam_modified	= true;
     modified		= true;
@@ -160,6 +164,8 @@ global define map Export () ``{
 	export_map["kerberos_client","use_shmem"]	= use_shmem;
     if (mappings != "")
 	export_map["kerberos_client","mappings"]	= mappings;
+    if (trusted_servers	!= "")
+	export_map["kerberos_client","trusted_servers"]	= trusted_servers;
     return export_map;
 }
 
@@ -289,6 +295,7 @@ global define boolean Read () ``{
 	    "false");
 	minimum_uid	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.minimum_uid, "1");
 	use_shmem	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.use_shmem, "sshd");
+	trusted_servers	= ReadKrb5ConfValue (.etc.krb5_conf.v.pkinit.trusted_servers, "");
     }
     else
         SCR::Execute (.target.bash, sformat("/usr/bin/touch /etc/krb5.conf"));
@@ -490,6 +497,19 @@ global define boolean Write () ``{
 	WriteKrb5ConfValue (add (pam_sect, "retain_after_close"), retain_after_close);
 	WriteKrb5ConfValue (add (pam_sect, "minimum_uid"), minimum_uid);
 	WriteKrb5ConfValue (add (pam_sect, "use_shmem"), use_shmem);
+
+	if (trusted_servers != "" &&
+	    Package::Installed ("krb5-plugin-preauth-pkinit-nss"))
+	{
+	    path pkinit_sect	= .etc.krb5_conf.v.pkinit;
+	    if (!contains (SCR::Dir(.etc.krb5_conf.s), "pkinit"))
+	    {
+		SCR::Write (.etc.krb5_conf.st.appdefaults.pkinit, [1]);
+		pkinit_sect	= .etc.krb5_conf.v.appdefaults.pkinit;
+	    }
+	    WriteKrb5ConfValue (
+		add (pkinit_sect, "trusted_servers"), trusted_servers);
+	}
 
 	// write the changes now
 	SCR::Write (.etc.krb5_conf, nil);
