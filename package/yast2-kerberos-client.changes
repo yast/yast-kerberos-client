@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jul 31 12:25:15 CEST 2007 - jsuchome@suse.cz
+
+- Smart Card Integration (F302132):
+  - modify /etc/pam_pkcs11/pam_pkcs11.conf if it is present
+  - write domain without leading dot in domain_realm section
+- 2.15.7
+
+-------------------------------------------------------------------
 Tue Jun 19 09:26:50 CEST 2007 - jsuchome@suse.cz
 
 - added support for "pkinit" section in krb5.conf (F302132)
