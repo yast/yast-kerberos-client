@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 19 11:28:26 CEST 2007 - jsuchome@suse.cz
+
+- Use Kerberos checked by default during installation (#330054)
+- 2.16.0
+
+-------------------------------------------------------------------
 Tue Jul 31 12:25:15 CEST 2007 - jsuchome@suse.cz
 
 - Smart Card Integration (F302132):

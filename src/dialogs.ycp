@@ -106,10 +106,13 @@ It is common practice to use the domain name in uppercase as your default realm 
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
 
+    // during installation, star ldap is default value
+    boolean installation    =
+	Stage::cont () && !contains (WFM::Args (), "from_users");
     string default_realm = Kerberos::default_realm;
     string kdc = Kerberos::kdc;
     string default_domain = Kerberos::default_domain;
-    boolean use_pam_krb = Kerberos::use_pam_krb;
+    boolean use_pam_krb = Kerberos::use_pam_krb || installation;
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (0.5),
@@ -152,6 +155,11 @@ It is common practice to use the domain name in uppercase as your default realm 
     foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
 	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
     });
+    // during installation, only enabling makes sence
+    if (installation)
+    {
+	UI::ChangeWidget (`id (`pamno), `Enabled, false);
+    }
 
     symbol result = nil;
     do
