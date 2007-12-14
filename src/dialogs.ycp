@@ -12,6 +12,8 @@
 textdomain "kerberos";
 
 import "Address";
+import "CWM";
+import "CWMTab";
 import "IP";
 import "Kerberos";
 import "Label";
@@ -20,7 +22,139 @@ import "Package";
 import "Popup";
 import "Report";
 import "Stage";
+import "String";
 import "Wizard";
+
+// map of current expert settings
+map<string,any> ExpertSettings	= $[];
+
+boolean	text_mode	= false;
+
+/******************************************************************************
+ * widget handlers
+ ******************************************************************************/
+
+  /**
+   * universal widget: initialize the string value of widget @param
+   */
+  define void InitDescription (string id) {
+    string val	= ExpertSettings[id]:"";
+    if (id == "minimum_uid")
+	UI::ChangeWidget (`id (id), `Value, tointeger (val));
+    else
+	UI::ChangeWidget (`id (id), `Value, val);
+  }
+
+  /**
+   * store the string value of given widget
+   */
+  define void StoreDescription (string key, map event) {
+    if (key == "minimum_uid")
+	ExpertSettings[key]	= tostring (UI::QueryWidget (`id(key), `Value));
+    else
+	ExpertSettings[key]	= UI::QueryWidget (`id(key), `Value);
+  }
+
+  /**
+   * handler for general string-value widgets: store their value on exit/save
+   */
+  define symbol HandleDescription (string key, map event) {
+    // store the value on exiting
+    if (event["ID"]:nil == `next) StoreDescription (key, event);
+    return nil;
+  }
+
+  /**
+   * universal widget: initialize the string value of widget @param
+   */
+  define void InitCheckBox (string id) {
+    UI::ChangeWidget (`id (id), `Value, ExpertSettings[id]:false);
+  }
+
+  /**
+   * handler for Configure User Data menubutton + NTP client button
+   */
+  symbol HandleClientCallButton (string key, map event) {
+    any ID	= event["ID"]:nil;
+    if ((key != "nss_client" || event["EventType"]:"" != "MenuEvent") &&
+	(key != "ntp" || ID != key))
+	return nil;
+    if (ID == "ldap" || ID == "nis" || ID == "ntp")
+    {
+	if (Package::Install (sformat ("yast2-%1-client", ID)))
+	    WFM::CallFunction ((string)ID + "-client", []);
+    }
+    return nil;
+  }
+
+  /**
+   * Validation function for widgets with time values
+   */
+  define boolean ValidateTimeEntries (string key, map event) {
+    string val	= (string) UI::QueryWidget (`id(key), `Value);
+    if (val == "" || Kerberos::ValidateTimeEntries (key, val))
+	return true;
+    UI::SetFocus (`id(key));
+    return false;
+  }
+
+  /**
+   * universal handler for directory browsing
+   */
+  symbol HandleBrowseDirectory (string key, map event) {
+
+    if (event["ID"]:nil != key) return nil;
+    string val		= substring (key, 7);
+    string current	= (string) UI::QueryWidget (`id (val), `Value);
+    if (current == nil) current = "";
+    // directory location popup label
+    string dir	= UI::AskForExistingDirectory (current, _("Path to Directory"));
+    if (dir!= nil)
+    {
+	UI::ChangeWidget (`id (val), `Value, dir);
+	StoreDescription (val, $[]);
+    }
+    return nil;
+  }
+
+  /**
+   * universal handler for looking up files
+   */
+  symbol HandleBrowseFile (string key, map event) {
+
+    if (event["ID"]:nil != key) return nil;
+    string val		= substring (key, 7);
+    string current	= (string) UI::QueryWidget (`id (val), `Value);
+    if (current == nil) current = "";
+    // file location popup label
+    string dir	= UI::AskForExistingFile (current, "", _("Path to File"));
+    if (dir!= nil)
+    {
+	UI::ChangeWidget (`id (val), `Value, dir);
+	StoreDescription (val, $[]);
+    }
+    return nil;
+  }
+
+  /**
+   * initialize the value of combo box
+   */
+  define void InitCombo (string id) {
+    string value	= ExpertSettings[id]:"";
+    list items	=  [
+	// combo box item
+	`item (`id ("true"), _("All services"), "true" == value),
+	// combo box item
+	`item (`id ("false"), _("No services"), "false" == value || value == "")
+    ];
+    if (! contains (["true", "false", ""], value))
+	items	= add (items, `item (`id (value), value, true));
+    UI::ChangeWidget (`id (id), `Items, items);
+  }
+
+/******************************************************************************
+ * end of widget handlers
+ ******************************************************************************/
 
 /**
  * The dialog that appears when the [Abort] button is pressed.
@@ -250,221 +384,479 @@ It is common practice to use the domain name in uppercase as your default realm 
     return result;
 }
 
+map<string, map> widget_description	= $[
+    // ---------------- widgtes for ("main") tab
+    "ticket_lifetime" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("&Default Lifetime"),
+	// help text (do not transl. values "m","h", "d")
+	"help"		: _("<p>Values of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and <b>Clock Skew</b> are in seconds by default. Alternatively, specify the time unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"validate_type"	: `function,
+	"validate_function"	: ValidateTimeEntries,
+	"valid_chars"	: String::CDigit () + "dmh",
+    ],
+    "renew_lifetime" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("De&fault Renewable Lifetime"),
+	"no_help"	: true,
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"validate_type"	: `function,
+	"validate_function"	: ValidateTimeEntries,
+	"valid_chars"	: String::CDigit () + "dmh",
+    ],
+    "forwardable" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// checkbox label
+	"label"		: _("For&wardable"),
+	// help text
+	"help"		: _("<p><b>Forwardable</b> lets you transfer your complete identity (TGT) to another machine. <b>Proxiable</b> only lets you transfer particular tickets. Select if the options should be aplied to all PAM services, none of them or enter a list of services separated by spaces.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "proxiable" : $[
+//	"widget"	: `checkbox,
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// checkbox label
+	"label"		: _("&Proxiable"),
+	"no_help"	: true,
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "retain_after_close" : $[
+	"widget"	: `checkbox,
+	// checkbox label
+	"label"		: _("R&etained"),
+	// help text
+	"help"		: _("<p>If <b>Retained</b> is enabled, a PAM module keeps the tickets after closing the session.</p>"),
+	"init"		: InitCheckBox,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "ssh_support" : $[
+	"widget"	: `checkbox,
+	// checkbox label
+	"label"		: _("Kerberos Support for Open&SSH Client"),
+	// help text
+	"help"		: _("<p>To enable Kerberos support for your OpenSSH client, select <b>Kerberos Support for OpenSSH Client</b>. In such a case, Kerberos tickets are used for user authentication on the SSH server.</p>"),
+	"init"		: InitCheckBox,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "ignore_unknown" : $[
+	"widget"	: `checkbox,
+	// checkbox label
+	"label"		: _("&Ignore Unknown Users"),
+	// help text
+	"help"		: _("<p>Check <b>Ignore Unknown Users</b> to have Kerberos ignore authentication attempts by users it does not know.</p>"),
+	"init"		: InitCheckBox,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "minimum_uid" : $[
+	"widget"	: `intfield,
+	"opt"		: [ `hstretch ],
+	// intfield label
+	"label"		: _("Minimum &UID"),
+	 // help text
+	"help"		: _("<p>When the <b>Minimum UID</b> is greater than 0, authentication attempts by users with UIDs below the specified number are ignored. This is useful for disabling Kerberos authentication for the system administrator root.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "clockskew" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("C&lock Skew"),
+	// help text
+	"help"		: _("<p>The <b>Clock Skew</b> is the tolerance for time stamps not exactly matching the host's system clock. The value is in seconds.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"validate_type"	: `function,
+	"validate_function"	: ValidateTimeEntries,
+	"valid_chars"	: String::CDigit () + "dmh",
+    ],
+    "ntp"	: $[
+	"widget"	: `push_button,
+	// push button label
+	"label"		: _("&NTP Configuration..."),
+	"help"		: _("<p>
+To synchronize your time with an NTP server, configure your computer
+as an NTP client. Access the configuration with <b>NTP Configuration</b>.
+</p>
+"),
+	"handle"	: HandleClientCallButton
+    ],
+    "nss_client"	: $[
+	"widget"	: `menu_button,
+	// push button label
+	"label"		: _("C&onfigure User Data"),
+	// help text
+	"help"		: _("<p>To configure the source of user accounts, select the appropriate configuration module in <b>Configure User Data</b>.</p>"),
+	"items"		: [
+	    // menu item
+	    [ "ldap", _("LDAP Client") ],
+	    // menu item
+	    [ "nis", _("NIS Client") ],
+	],
+	"handle"	: HandleClientCallButton
+    ],
+
+    // ---------------- widgtes for Expert Pam Settings ("pam_expert") tab
+    "ccache_dir" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("Credential Cac&he Directory"),
+	// help text for "Credential Cac&he Directory"
+	"help"		: _("<p>Specify the directory where to place credential cache files as <b>Credential Cache Directory</b>.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "browse_ccache_dir"	: $[
+	"widget"	: `push_button,
+	// push button label
+	"label"		: _("&Browse..."),
+	"no_help"	: true,
+	"handle"	: HandleBrowseDirectory,
+    ],
+    "ccname_template" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("Credential Cache &Template"),
+	// help text
+	"help"		: _("<p><b>Credential Cache Template</b> specifies the location in which to place the user's session-specific credential cache.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"no_help"	: true,
+    ],
+    "keytab" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("&Keytab File Location"),
+	// help text
+	"help"		: _("<p>Specify the location of the file with the keys of pricipals in <b>Keytab File Location</b>.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "browse_keytab"	: $[
+	"widget"	: `push_button,
+	// push button label
+	"label"		: _("Bro&wse..."),
+	"no_help"	: true,
+	"handle"	: HandleBrowseFile,
+    ],
+    "mappings" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("&Mappings"),
+	// help text
+	"help"		: _("<p>With <b>Mappings</b>, define specifies how PAM module should derive the principal's name from the system user name.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "banner" : $[
+	"widget"	: `textentry,
+	// textentry label
+	"label"		: _("Ba&nner"),
+	// help text
+	"help"		: _("<p>The value of <b>Banner</b> is a text that should be shown before a password questions.</p>"),
+	"init"		: InitDescription,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    // ---------------- widgets for Services tab
+    "services_help"		:$[
+	"widget"	: `empty,
+	// generic help for Services tab
+	"help"		: _("All settings in this dialog can be aplied for all PAM services, no service or a specific list of services separated by commas."),
+    ],
+    "addressless" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// textentry label
+	"label"		: _("Add&ressless Initial Tickets"),
+	// help text
+	"help"		: _("<p>When <b>Addressless Initial Tickets</b> is set, initial tickets (TGT) with no address information are requested.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "debug" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `notify, `editable ],
+	// textentry label
+	"label"		: _("&Debug"),
+	// help text
+	"help"		: _("<p>Check <b>Debug</b> to turn on debugging for selected services via syslog.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "debug_sensitive" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `notify, `editable ],
+	// textentry label
+	"label"		: _("&Sensitive Debug"),
+	// help text
+	"help"		: _("<p><b>Sensitive Debug</b> turns  on  debugging  of  sensitive  information.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "existing_ticket" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// textentry label
+	"label"		: _("Accept &Existing Ticket"),
+	// help text
+	"help"		: _("<p>Check <b>Accept Existing Ticket</b> to tell PAM module to accept the presence of pre-existing Kerberos credentials as sufficient to authenticate the user.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"items"		: [],
+    ],
+    "external" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// textentry label
+	"label"		: _("E&xternal credentials"),
+	// help text
+	"help"		: _("<p>List the services allowed to provide credentials in <b>External credentials</b>.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"items"		: [],
+    ],
+    "use_shmem" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// textentry label
+	"label"		: _("Use Shared Mem&ory"),
+	// help text
+	"help"		: _("<p><b>Use Shared Memory</b> describes the services for which the shared memory is used during authentication.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"items"		: [],
+    ],
+    "validate" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `hstretch, `notify, `editable ],
+	// textentry label
+	"label"		: _("&Validate Initial Ticket"),
+	// help text
+	"help"		: _("<p>Select the services for which should TGT be validated by changing the value of <b>Validate Initial Ticket</b>."),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+	"items"		: [],
+    ],
+    "initial_prompt" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `notify, `editable ],
+	// textentry label
+	"label"		: _("&Initial Prompt"),
+	// help text
+	"help"		: _("<p>With <b>Initial Prompt</b> checked, PAM module asks for a password before authentication attempt.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+    "subsequent_prompt" : $[
+	"widget"	: `combobox,
+	"opt"		: [ `notify, `editable ],
+	// textentry label
+	"label"		: _("Subsequent &Prompt"),
+	// help text
+	"help"		: _("<p>If <b>Subsequent Prompt</b> is enabled, PAM module may ask user for a password if the previously-entered  password  was  somehow  insufficient for authentication.</p>"),
+	"init"		: InitCombo,
+	"store"		: StoreDescription,
+	"handle"	: HandleDescription,
+    ],
+];
+
+// description of tab layouts
+map get_tabs_descr () {
+    return $[
+    "main" : $[
+	// tab header
+	"header"	: _("PAM Settings"),
+	"contents"	: `Top (`HBox (`HSpacing (3), `VBox (
+	    `VSpacing (0.4),
+	    // frame label
+	    `Frame (_("Ticket Attributes"), `HBox (`HSpacing (0.5), `VBox(
+		`VSpacing (0.4),
+		"ticket_lifetime",
+		"renew_lifetime",
+		`HBox ("forwardable", `HSpacing (0.5), "proxiable"),
+		`VSpacing (0.4)), `HSpacing (0.5)
+	    )),
+	    `VSpacing (0.4),
+	    `Left ("ssh_support"),
+	    `VSpacing (0.2),
+	    `Left ("ignore_unknown"),
+	    `VSpacing (0.4),
+	    "minimum_uid",
+	    `HBox (
+		"clockskew",
+		`VBox (`Label (""), "ntp")
+	    ),
+	    `VSpacing (0.6),
+	    `Left ("nss_client")
+	), `HSpacing(3))),
+	"widget_names" : [
+	    "ticket_lifetime", "renew_lifetime",
+	    "forwardable", "proxiable", 
+	    "ssh_support", "ignore_unknown", "minimum_uid", "clockskew", "ntp",
+	    "nss_client",
+	],
+    ],
+    "pam_expert" : $[
+	// tab header
+	"header"	: _("Expert PAM Settings"),
+	"contents"	: `HBox (`HSpacing(2), `VBox (
+	    `VSpacing (0.4),
+	    `HBox ("keytab", `VBox (`Label (""), "browse_keytab")),
+	    `HBox ("ccache_dir", `VBox (`Label (""), "browse_ccache_dir")),
+	    "ccname_template",
+	    "mappings",
+	    "banner",
+	    `VStretch ()
+	), `HSpacing (2)),
+	"widget_names" : [
+	    "keytab", "browse_keytab", "ccache_dir", "browse_ccache_dir",
+	    "ccname_template", "mappings", "banner",
+	],
+    ],
+    "services"	: $[
+	// tab header
+	"header"	: _("PAM Services"),
+	"contents"	: `HBox (`HSpacing(2), `VBox (
+	    "services_help",
+	    `VSpacing (0.4),
+	    "addressless",
+	    `VSpacing (0.4),
+	    "existing_ticket",
+	    `VSpacing (0.4),
+	    "external",
+	    `VSpacing (0.4),
+	    "use_shmem",
+	    `VSpacing (0.4),
+	    "validate",
+	    `VSpacing (0.4),
+	    `HBox (
+		`HWeight (1, "debug"),
+		`HSpacing (0.5),
+		`HWeight (1, "debug_sensitive")
+	    ),
+	    `VSpacing (0.4),
+	    `HBox (
+		`HWeight (1, "initial_prompt"),
+		`HSpacing (0.5),
+		`HWeight (1, "subsequent_prompt")
+	    ),
+	    `VSpacing (0.4),
+	    `VStretch ()
+	), `HSpacing (2)),
+	"widget_names" : [
+	    "services_help", "addressless",
+	    "existing_ticket", "external", "use_shmem", "validate",
+	    "debug", "debug_sensitive",
+	    "initial_prompt", "subsequent_prompt",
+	],
+    ],
+    "realms"	: $[
+	// tab header
+	"header"	: _("Realm Settings"),
+	"contents"	: `HBox (`HSpacing(2), `VBox (
+	    `VSpacing (0.4),
+	    `Empty (`opt (`hstretch, `vstretch))
+	), `HSpacing (2)),
+	"widget_names" : [
+	],
+    ],
+    ];
+}
+
 /**
  * Kerberos advanced configuration
  * @return dialog result
  */
 define symbol AdvancedDialog() {
 
-    string help_text =
+    map display_info        = UI::GetDisplayInfo ();
+    text_mode               = display_info["TextMode"]:false;
 
-    // help text (do not transl. values "m","h", "d")
-    _("<p>Values of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and
-<b>Clock Skew</b> are in seconds by default. Alternatively, specify the time
-unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day).</p>
-") +
+    ExpertSettings	= (map<string,any>) union (Kerberos::ExpertSettings, $[
+	"minimum_uid"		: Kerberos::minimum_uid,
+	"ticket_lifetime"	: Kerberos::ticket_lifetime,
+	"renew_lifetime"	: Kerberos::renew_lifetime,
+	"forwardable"		: Kerberos::forwardable,
+	"proxiable"		: Kerberos::proxiable,
+	"ignore_unknown"	: Kerberos::ignore_unknown,
+	"clockskew"		: Kerberos::clockskew,
+	"ssh_support"		: Kerberos::ssh_support,
+    ]);
 
-    // help text
-    _("<p><b>Forwardable</b> lets you transfer your complete identity
-(TGT) to another machine. <b>Proxiable</b> only lets you transfer
-particular tickets.</p>
-") +
+    widget_description["tab"] = CWMTab::CreateWidget($[
+	"tab_order"	: [ "main", "pam_expert", "services" ],
+	"tabs"		: get_tabs_descr (),
+	"widget_descr"	: widget_description,
+	"initial_tab"	: "main",
+    ]);
 
-    // help text
-    _("<p>If <b>Retained</b> is enabled, a PAM module keeps the tickets
-after closing the session.</p>
-") +
+    Wizard::SetContentsButtons("", `VBox (), "",
+	Label::CancelButton(), Label::AcceptButton());
 
-    // help text
-    _("<p>To enable Kerberos support for your OpenSSH client, select <b>Kerberos Support for OpenSSH Client</b>. In such a case, Kerberos tickets are used for user
-authentication on the SSH server.</p>
-") +
-
-    // help text
-    _("<p>Check <b>Ignore Unknown Users</b> to have Kerberos ignore authentication attempts by users it does not know.</p>") +
-
-    // help text
-    _("<p>When the <b>Minimum UID</b> is greater than 0, authentication attempts by
-users with UIDs below the specified number are ignored. This is useful for
-disabling Kerberos authentication for the system administrator root.</p>
-")+
-
-    // help text
-    _("<p>
-The <b>Clock Skew</b> is the tolerance for time stamps not exactly matching the host's system clock. The value is in seconds.</p>") +
-
-    //helptext
-    _("<p>
-To synchronize your time with an NTP server, configure your computer
-as an NTP client. Access the configuration with <b>NTP Configuration</b>.
-</p>
-") +
-
-    // help text about launching selected yast module
-    _("<p>To configure the source of user accounts, select the appropriate configuration module in <b>Configure User Data</b>.</p>");
-
-    string uid		= Kerberos::minimum_uid;
-    string ticket	= Kerberos::ticket_lifetime;
-    string renew	= Kerberos::renew_lifetime;
-    boolean forw	= Kerberos::forwardable == "true";
-    boolean prox	= Kerberos::proxiable == "true";
-    boolean retain	= Kerberos::retain_after_close == "true";
-    boolean ssh		= Kerberos::ssh_support;
-    boolean ignore_unknown	= Kerberos::ignore_unknown;
-    string clockskew	= Kerberos::clockskew;
-
-    term con = `HBox (`HSpacing (3), `VBox (
-        `VSpacing (0.8),
-	// frame label
-	`Frame (_("Ticket Attributes"), `HBox(`HSpacing (0.5), `VBox(
-	    `VSpacing (0.5),
-	    // textentry label
-	    `TextEntry (`id (`ticket), _("&Default Lifetime"), ticket),
-	    // textentry label
-	    `TextEntry (`id (`renew), _("De&fault Renewable Lifetime"),
-		renew),
-	    // checkbox label
-	    `Left(`CheckBox (`id (`forw), _("For&wardable"), forw)),
-	    // checkbox label
-	    `Left(`CheckBox (`id (`prox), _("&Proxiable"), prox)),
-	    // checkbox label
-	    `Left(`CheckBox (`id (`retain), _("R&etained"), retain)),
-	    `VSpacing (0.5)), `HSpacing (0.5)
-	)),
-        `VSpacing (0.8),
-	`Left(`CheckBox (`id (`ssh),
-	    // checkbox label
-	    _("Kerberos Support for Open&SSH Client"), ssh)),
-        `VSpacing (0.4),
-	`Left (`CheckBox (`id (`ignore_unknown),
-	    // checkbox label
-	    _("&Ignore Unknown Users"), ignore_unknown)),
-        `VSpacing (0.4),
-        // UID=User ID
-        `IntField (`id (`uid), _("Minimum &UID"), 0, 60000,
-	    tointeger (uid)),
-	`HBox (
-	    // textentry label
-	    `TextEntry (`id (`skew), _("C&lock Skew"), clockskew),
-
-	    `VBox (
-		`Label (""),
-		// button label (run YaST client for NTP)
-		`PushButton (`id(`ntp), _("&NTP Configuration..."))
-	    )
-	),
-	`VSpacing (),
-	`Left (
-	    // menu button label
-	    `MenuButton (`id (`nss_client), _("C&onfigure User Data"), [
-		// menu item
-		`item (`id (`ldap), _("LDAP Client")),
-		// menu item
-		`item (`id (`nis), _("NIS Client"))
-	    ])
-	),
-        `VSpacing (1)
-    ), `HSpacing(3));
-
-    Wizard::SetContentsButtons (
-        // dialog title
-        _("Advanced Kerberos Client Configuration"), con, help_text,
-        Label::CancelButton (), Label::AcceptButton ());
-    Wizard::HideAbortButton ();
-
-    if (Mode::config ())
+    symbol ret = CWM::ShowAndRun ($[
+	"widget_names"		: [
+	    "tab"
+	],
+	"widget_descr"		: widget_description,
+	"contents"		: `VBox ("tab"),
+	// default dialog caption
+	"caption"		: _("Advanced Kerberos Client Configuration"),
+	"back_button"		: Label::CancelButton (),
+	"next_button"		: Label::AcceptButton (),
+	"abort_button"		: nil,
+    ]);
+    y2milestone ("Returning %1", ret);
+    if (ret == `next)
     {
-        UI::ChangeWidget(`id(`ntp), `Enabled, false);
-        UI::ChangeWidget(`id(`nss_client), `Enabled, false);
-    }
-
-    symbol result = nil;
-    do
-    {
-        result = (symbol) UI::UserInput ();
-
-	if (result == `ntp || result == `ldap || result == `nis)
+	Kerberos::ExpertSettings	= ExpertSettings;
+        Kerberos::minimum_uid		= ExpertSettings["minimum_uid"]:"1";
+	Kerberos::ticket_lifetime = ExpertSettings["ticket_lifetime"]:"1d";
+	Kerberos::renew_lifetime	= ExpertSettings["renew_lifetime"]:"1d";
+        Kerberos::clockskew		= ExpertSettings["clockskew"]:"300";
+	Kerberos::forwardable		= ExpertSettings["forwardable"]:"false";
+	Kerberos::proxiable		= ExpertSettings["proxiable"]:"false";
+	if (ExpertSettings["ssh_support"]:false != Kerberos::ssh_support)
 	{
-	    string cl = substring (tostring (result), 1);
-	    if (Package::Install (sformat ("yast2-%1-client", cl)));
-	    {
-		WFM::CallFunction (cl + "-client", []);
-	    }
+	    Kerberos::ssh_modified	= true;
+	    Kerberos::ssh_support	= ExpertSettings["ssh_support"]:false;
 	}
-
-        if (result == `next) {
-	    // check the values (lifetimes: d/m/h)
-            ticket = (string) UI::QueryWidget (`id(`ticket), `Value);
-	    if (!regexpmatch (ticket, "^([0-9]+)[dmh]$") &&
-		!regexpmatch (ticket, "^([0-9]+)$"))
-	    {
-		// error popup (wrong format of entered value)
-		Popup::Error (_("Lifetime is invalid.
-Try again."));
-		UI::SetFocus (`id(`ticket));
-		result = `not_next;
-		continue;
-	    }
-            renew = (string) UI::QueryWidget (`id(`renew), `Value);
-	    if (!regexpmatch (renew, "^([0-9]+)[dmh]$") &&
-		!regexpmatch (renew, "^([0-9]+)$"))
-	    {
-		// error popup (wrong format of entered value)
-		Popup::Error (_("Lifetime is invalid.
-Try again."));
-		UI::SetFocus (`id(`renew));
-		result = `not_next;
-		continue;
-	    }
-            clockskew = (string) UI::QueryWidget (`id(`skew), `Value);
-	    if (!regexpmatch (clockskew, "^([0-9]+)[dmh]$") &&
-		!regexpmatch (clockskew, "^([0-9]+)$"))
-	    {
-		// error popup (wrong format of entered value)
-		Popup::Error (_("Clock skew is invalid.
-Try again.
-"));
-		UI::SetFocus (`id(`skew));
-		result = `not_next;
-		continue;
-	    }
-
-	    ssh = (boolean) UI::QueryWidget (`id(`ssh), `Value);
-
-        }
-	if ((result == `abort || result == `cancel) &&
-	    ReallyAbort () != `abort)
-	{
-	    result = `not_next;
-	}
-
-    } while (!contains ([`back, `next, `cancel, `abort], result));
-
-    if (result == `next)
-    {
-        Kerberos::minimum_uid = sformat("%1",UI::QueryWidget(`id(`uid),`Value));
-	Kerberos::ticket_lifetime = ticket;
-	Kerberos::renew_lifetime = renew;
-        Kerberos::clockskew = clockskew;
-	Kerberos::forwardable = (boolean)UI::QueryWidget (`id(`forw), `Value) ?
-	    "true" : "false";
-	Kerberos::proxiable = (boolean) UI::QueryWidget (`id(`prox), `Value) ?
-	    "true" : "false";
-	Kerberos::retain_after_close =
-	    (boolean) UI::QueryWidget (`id(`retain), `Value) ? "true" : "false";
-	if (ssh != Kerberos::ssh_support)
-	{
-	    Kerberos::ssh_modified = true;
-	    Kerberos::ssh_support = ssh;
-	}
-	ignore_unknown	= (boolean) UI::QueryWidget (`id(`ignore_unknown), `Value);
-        if (ignore_unknown != Kerberos::ignore_unknown)
+        if (ExpertSettings["ignore_unknown"]:false != Kerberos::ignore_unknown)
         {
             Kerberos::pam_modified	= true;
-	    Kerberos::ignore_unknown	= ignore_unknown;
+	    Kerberos::ignore_unknown	=ExpertSettings["ignore_unknown"]:false;
 	}
     }
-    return result;
+    return ret;
 }
 
 

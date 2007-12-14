@@ -22,8 +22,8 @@ import "Label";
 import "Mode";
 import "Package";
 import "Pam";
-import "Popup";
 import "Progress";
+import "Report";
 import "Service";
 import "Summary";
 
@@ -62,9 +62,12 @@ global string ticket_lifetime = "1d";
 global string renew_lifetime = "1d";
 global string forwardable = "true";
 global string proxiable = "false";
+// obsolete, do not use
 global string retain_after_close = "false";
 global boolean ssh_support = false;
 global string minimum_uid = "1";
+
+// deprecated at this scope: now present in ExpertSettings map
 global string use_shmem	= "sshd";
 global string mappings	= "";
 
@@ -93,6 +96,13 @@ global map arch_packages	= $[
     ],
 ];
 
+/**
+  map with the settings configurable in the expert tabs
+ */
+global map<string,any> ExpertSettings	= $[];
+
+// backup of original ExpertSettings
+map<string,any> OrigExpertSettings	= $[];
 
 /**
  * Data was modified?
@@ -124,11 +134,12 @@ global define boolean Import (map settings) ``{
     minimum_uid		= client["minimum_uid"]:minimum_uid;
     forwardable		= (client["forwardable"]:true) ? "true": "false";
     proxiable		= (client["proxiable"]:false) ?   "true" :  "false";
-    retain_after_close	= (client["retain_after_close"]:false)? "true": "false";
     use_shmem		= client["use_shmem"]:use_shmem;
     mappings		= client["mappings"]:"";
     trusted_servers	= client["trusted_servers"]:"";
-
+    ExpertSettings	= client["ExpertSettings"]:$[];
+    if (!haskey (ExpertSettings, "use_shmem") && haskey (client, "use_shmem"))
+	ExpertSettings["use_shmem"]	= use_shmem;
     pam_modified	= true;
     modified		= true;
     return true;
@@ -157,11 +168,9 @@ global define map Export () ``{
                 "minimum_uid"		: minimum_uid,
 		"forwardable"		: forwardable == "true",
                 "proxiable"		: proxiable == "true",
-                "retain_after_close"	: retain_after_close == "true",
+		"ExpertSettings"	: ExpertSettings,
 	]
     ];
-    if (use_shmem != "sshd")
-	export_map["kerberos_client","use_shmem"]	= use_shmem;
     if (mappings != "")
 	export_map["kerberos_client","mappings"]	= mappings;
     if (trusted_servers	!= "")
@@ -217,7 +226,7 @@ global string ReadFile (path path_to_value, string def_value) {
 global boolean WriteKrb5ConfValues (path path_to_value, list<string> values) {
 
     if (values == nil || values == [])
-	return false;
+	return SCR::Write (path_to_value, nil); // FIXME test
     return SCR::Write (path_to_value, values);
 }
 
@@ -240,7 +249,7 @@ global boolean WriteKrb5ConfValuesAsString (path path_to_value, string values) {
 global boolean WriteKrb5ConfValue (path path_to_value, string value) {
 
     if (value == nil || value == "")
-	return false;
+	return SCR::Write (path_to_value, nil); // FIXME test
     return WriteKrb5ConfValues (path_to_value, [value]);
 }
 
@@ -287,14 +296,30 @@ global define boolean Read () ``{
 	if (admin_server == kdc)
 	    admin_server = ""; // we could replace it in Write in this case...
 
-	ticket_lifetime = ReadKrb5ConfValue (.etc.krb5_conf.v.pam.ticket_lifetime, "1d");
-	renew_lifetime	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.renew_lifetime, "1d");
-	forwardable	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.forwardable, "true");
-	proxiable	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.proxiable, "false");
-	retain_after_close = ReadKrb5ConfValue (.etc.krb5_conf.v.pam.retain_after_close,
-	    "false");
-	minimum_uid	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.minimum_uid, "1");
-	use_shmem	= ReadKrb5ConfValue (.etc.krb5_conf.v.pam.use_shmem, "sshd");
+	path pam_p	= .etc.krb5_conf.v.pam;
+	ticket_lifetime = ReadKrb5ConfValue (add(pam_p,"ticket_lifetime"),"1d");
+	renew_lifetime	= ReadKrb5ConfValue (add (pam_p,"renew_lifetime"),"1d");
+	forwardable	= ReadKrb5ConfValue (add (pam_p,"forwardable"), "true");
+	proxiable	= ReadKrb5ConfValue (add (pam_p,"proxiable"), "false");
+	minimum_uid	= ReadKrb5ConfValue (add (pam_p, "minimum_uid"), "1");
+
+	foreach (string key, [ "keytab", "ccache_dir", "ccname_template",
+	    "mappings", "existing_ticket", "external", "validate", "use_shmem",
+	    "addressless", "debug", "debug_sensitive",
+	    "initial_prompt", "subsequent_prompt", ],
+	{
+	    string val	= ReadKrb5ConfValue (add (pam_p, key), nil);
+	    if (val != nil)
+		ExpertSettings[key]	= val;
+	});
+	if (!haskey (ExpertSettings, "use_shmem"))
+	    ExpertSettings["use_shmem"]	= "sshd";
+	use_shmem	= ExpertSettings["use_shmem"]:"sshd";
+	if (!haskey (ExpertSettings, "external"))
+	    ExpertSettings["external"]	= "sshd";
+
+	OrigExpertSettings	= ExpertSettings;
+
 	trusted_servers	= ReadKrb5ConfValue (.etc.krb5_conf.v.pkinit.trusted_servers, "");
     }
     else
@@ -463,8 +488,9 @@ global define boolean Write () ``{
 	{
 	    // update the default realm settings
 	    WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v, default_realm),"kdc"),kdc);
-	    WriteKrb5ConfValue (add (add (.etc.krb5_conf.v, default_realm),
-		"default_domain"), default_domain);
+	    if (default_domain != "" && default_domain != nil)
+		WriteKrb5ConfValue (add (add (.etc.krb5_conf.v, default_realm),
+		    "default_domain"), default_domain);
 	    if (admin_server == "")
 		// save only when the entry was mising or same as KDC
 		WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v, default_realm),
@@ -477,8 +503,9 @@ global define boolean Write () ``{
 	    // write the settings of the new default realm
 	    WriteKrb5ConfValuesAsString (
 		add (add(.etc.krb5_conf.v.realms,default_realm),"kdc"), kdc);
-	    WriteKrb5ConfValue (add (add (.etc.krb5_conf.v.realms, default_realm),
-		"default_domain"), default_domain);
+	    if (default_domain != "" && default_domain != nil)
+		WriteKrb5ConfValue (add (add (.etc.krb5_conf.v.realms, default_realm),
+		    "default_domain"), default_domain);
 	    if (admin_server == "")
 		WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "admin_server"), kdc);
@@ -497,9 +524,22 @@ global define boolean Write () ``{
 	WriteKrb5ConfValue (add (pam_sect, "renew_lifetime"), renew_lifetime);
 	WriteKrb5ConfValue (add (pam_sect, "forwardable"), forwardable);
 	WriteKrb5ConfValue (add (pam_sect, "proxiable"), proxiable);
-	WriteKrb5ConfValue (add (pam_sect, "retain_after_close"), retain_after_close);
 	WriteKrb5ConfValue (add (pam_sect, "minimum_uid"), minimum_uid);
-	WriteKrb5ConfValue (add (pam_sect, "use_shmem"), use_shmem);
+
+	foreach (string key, any value, ExpertSettings, {
+	    path pth	= add (pam_sect, key);
+	    if (is (value, boolean))
+	    {
+		WriteKrb5ConfValue (pth, value == true ? "true" : "false");
+		return;
+	    }
+	    // rest is string
+	    if (value != "")
+		WriteKrb5ConfValue (pth, (string) value);
+	    // removin
+	    else if (OrigExpertSettings[key]:"" != "")
+		WriteKrb5ConfValue (pth, nil); // FIXME doesn't work!
+	});
 
 	if (trusted_servers != "" &&
 	    Package::Installed ("krb5-plugin-preauth-pkinit-nss"))
@@ -635,6 +675,26 @@ global define map AutoPackages() {
     ]);
 }
 
+/**
+ * Validation function for time-related values
+ */
+global boolean ValidateTimeEntries (string key, string val) {
+    if (!regexpmatch (val, "^([0-9]+)[dmh]$") &&
+	!regexpmatch (val, "^([0-9]+)$"))
+    {
+	if (key == "clockskew")
+	    // error popup (wrong format of entered value)
+	    Report::Error (_("Clock skew is invalid.
+Try again.
+"));
+	else
+	    // error popup (wrong format of entered value)
+	    Report::Error (_("Lifetime is invalid.
+Try again."));
+	return false;
+    }
+    return true;
+}
 
 
 /* EOF */

@@ -24,7 +24,6 @@ y2milestone ("Kerberos-client module started");
 import "Kerberos";
 import "Wizard";
 import "Report";
-import "PackageSystem";
 import "RichText";
 import "CommandLine";
 
@@ -90,6 +89,8 @@ define boolean KerberosChangeConfiguration (map options ) {
 	    Report::Error (_("The value for clock skew must be a positive integer."));
 	    return false;
 	}
+	if (!Kerberos::ValidateTimeEntries("clockskew",options["clockskew"]:""))
+	    return false;
 	Kerberos::clockskew = options ["clockskew"]:"";
 	ret = true;
     }
@@ -116,6 +117,50 @@ define boolean KerberosChangeConfiguration (map options ) {
 	Kerberos::minimum_uid	= options ["minimum_uid"]:"";
 	ret = true;
     }
+    if (options["forwardable"]:"" != "" &&
+	options["forwardable"]:"" != Kerberos::forwardable)
+    {
+	Kerberos::forwardable	= options["forwardable"]:"";
+	ret	= true;
+    }
+    if (options["proxiable"]:"" != "" &&
+	options["proxiable"]:"" != Kerberos::proxiable)
+    {
+	Kerberos::proxiable	= options["proxiable"]:"";
+	ret	= true;
+    }
+    if (options["ticket_lifetime"]:"" != "" &&
+	options["ticket_lifetime"]:"" != Kerberos::ticket_lifetime)
+    {
+	string val	= options["ticket_lifetime"]:"";
+	if (!Kerberos::ValidateTimeEntries ("ticket_lifetime", val))
+	    return false;
+	Kerberos::ticket_lifetime	= val;
+	ret	= true;
+    }
+    if (options["renew_lifetime"]:"" != "" &&
+	options["renew_lifetime"]:"" != Kerberos::renew_lifetime)
+    {
+	string val	= options["renew_lifetime"]:"";
+	if (!Kerberos::ValidateTimeEntries ("renew_lifetime", val))
+	    return false;
+	Kerberos::renew_lifetime	= options["renew_lifetime"]:"";
+	ret	= true;
+    }
+    foreach (string expert_key, [
+	"keytab", "ccache_dir", "ccname_template",
+	"mappings", "existing_ticket", "external", "validate", "use_shmem",
+	"addressless", "debug", "debug_sensitive",
+	"initial_prompt", "subsequent_prompt" ],
+    {
+	string val	= options[expert_key]:"";
+	if (val != "" && Kerberos::ExpertSettings[expert_key]:"" != val)
+	{
+	    Kerberos::ExpertSettings[expert_key]	= val;
+	    ret	= true;
+	}
+    });
+
     if (ret)
 	Kerberos::modified = true;
     return ret;
@@ -190,11 +235,102 @@ map cmdline = $[
 	    "help"	: _("Clock skew (in seconds)"),
 	    "type"	: "string"
 	],
+	"ticket_lifetime": $[
+	    // help text for command line option
+	    "help"	: _("Default ticket lifetime"),
+	    "type"	: "string",
+	],
+	"renew_lifetime": $[
+	    // help text for command line option
+	    "help"	: _("Default renewable lifetime"),
+	    "type"	: "string",
+	],
+	"forwardable": $[
+	    // help text for command line option
+	    "help"	: _("Forwardable credentials"),
+	    "type"	: "string",
+	],
+	"proxiable": $[
+	    // help text for command line option
+	    "help"	: _("Proxiable credentials"),
+	    "type"	: "string",
+	],
+	"keytab"	: $[
+	    // help text for command line option
+	    "help"	: _("Keytab File Location"),
+	    "type"	: "string",
+	],
+	"ccache_dir"	: $[
+	    // help text for command line option
+	    "help"	: _("Credential Cache Directory"),
+	    "type"	: "string",
+	],
+	"ccname_template"	: $[
+	    // help text for command line option
+	    "help"	: _("Credential Cache Template"),
+	    "type"	: "string",
+	],
+	"mappings"	: $[
+	    // help text for command line option
+	    "help"	: _("Mappings"),
+	    "type"	: "string",
+	],
+	"existing_ticket"	: $[
+	    // help text for command line option
+	    "help"	: _("Accept Existing Ticket"),
+	    "type"	: "string",
+	],
+	"external"	: $[
+	    // help text for command line option
+	    "help"	: _("External credentials"),
+	    "type"	: "string",
+	],
+	"validate"	: $[
+	    // help text for command line option
+	    "help"	: _("Validate Initial Ticket"),
+	    "type"	: "string",
+	],
+	"use_shmem"	: $[
+	    // help text for command line option
+	    "help"	: _("Use Shared Memory"),
+	    "type"	: "string",
+	],
+	"addressless"	: $[
+	    // help text for command line option
+	    "help"	: _("Addressless Initial Tickets"),
+	    "type"	: "string",
+	],
+	"debug"		: $[
+	    // help text for command line option
+	    "help"	: _("Debug"),
+	    "type"	: "string",
+	],
+	"debug_sensitive"	: $[
+	    // help text for command line option
+	    "help"	: _("Sensitive debug"),
+	    "type"	: "string",
+	],
+	"initial_prompt"	: $[
+	    // help text for command line option
+	    "help"	: _("Initial prompt"),
+	    "type"	: "string",
+	],
+	"subsequent_prompt"	: $[
+	    // help text for command line option
+	    "help"	: _("Subsequent prompt"),
+	    "type"	: "string",
+	],
     ],
     "mappings"		: $[
 	"pam"		: [ "enable", "disable" ],
 	"summary"	: [],
-	"configure"	: ["kdc", "domain", "realm", "minimum_uid","clockskew"],
+	"configure"	: ["kdc", "domain", "realm", "minimum_uid","clockskew",
+	    "ticket_lifetime", "renew_lifetime", "forwardable", "proxiable",
+	    "keytab", "ccache_dir", "ccname_template",
+	    "mappings", "existing_ticket", "external", "validate", "use_shmem",
+	    "addressless", "debug", "debug_sensitive",
+	    "initial_prompt", "subsequent_prompt",
+	],
     ]
 ];
 

@@ -6,13 +6,24 @@ Read	.etc.krb5_conf.v.libdefaults.clockskew ["500"]
 Read	.etc.krb5_conf.v."SUSE.CZ"."kdc" ["chimera.suse.cz", "kdc.suse.cz"]
 Read	.etc.krb5_conf.v."SUSE.CZ"."admin_server" nil
 Read	.etc.krb5_conf.v."SUSE.CZ"."default_domain" nil
-Read	.etc.krb5_conf.v.pam.ticket_lifetime nil
-Read	.etc.krb5_conf.v.pam.renew_lifetime nil
-Read	.etc.krb5_conf.v.pam.forwardable nil
-Read	.etc.krb5_conf.v.pam.proxiable nil
-Read	.etc.krb5_conf.v.pam.retain_after_close nil
-Read	.etc.krb5_conf.v.pam.minimum_uid ["1"]
-Read	.etc.krb5_conf.v.pam.use_shmem [""]
+Read	.etc.krb5_conf.v.pam."ticket_lifetime" nil
+Read	.etc.krb5_conf.v.pam."renew_lifetime" nil
+Read	.etc.krb5_conf.v.pam."forwardable" nil
+Read	.etc.krb5_conf.v.pam."proxiable" nil
+Read	.etc.krb5_conf.v.pam."minimum_uid" ["1"]
+Read	.etc.krb5_conf.v.pam."keytab" nil
+Read	.etc.krb5_conf.v.pam."ccache_dir" nil
+Read	.etc.krb5_conf.v.pam."ccname_template" nil
+Read	.etc.krb5_conf.v.pam."mappings" nil
+Read	.etc.krb5_conf.v.pam."existing_ticket" ["true"]
+Read	.etc.krb5_conf.v.pam."external" ["false"]
+Read	.etc.krb5_conf.v.pam."validate" nil
+Read	.etc.krb5_conf.v.pam."use_shmem" nil
+Read	.etc.krb5_conf.v.pam."addressless" ["false"]
+Read	.etc.krb5_conf.v.pam."debug" nil
+Read	.etc.krb5_conf.v.pam."debug_sensitive" nil
+Read	.etc.krb5_conf.v.pam."initial_prompt" nil
+Read	.etc.krb5_conf.v.pam."subsequent_prompt" nil
 Read	.etc.krb5_conf.v.pkinit.trusted_servers nil
 Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Dec 11 15:50:54 CET 2007 - jsuchome@suse.cz
+
+- removed obsolete retain_after_close option
+- implemented support for more pam_krb5 options (F302014)
+- 2.16.1
+
+-------------------------------------------------------------------
 Fri Oct 19 11:28:26 CEST 2007 - jsuchome@suse.cz
 
 - Use Kerberos checked by default during installation (#330054)
