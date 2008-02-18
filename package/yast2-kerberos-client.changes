@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 18 15:48:16 CET 2008 - jsuchome@suse.cz
+
+- now domain has the leading dot in domain_realm section (#298362)
+- 2.16.3
+
+-------------------------------------------------------------------
 Tue Jan 29 12:46:31 CET 2008 - jsuchome@suse.cz
 
 - added option to provide Kerberos data via DNS (F301812)

@@ -514,12 +514,9 @@ global define boolean Write () ``{
 	if (default_domain != "")
 	{
 	    string domain = default_domain;
-	    WriteKrb5ConfValue (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
 	    if ( findfirstof (domain, ".") != 0)
-	    {
 		domain = "." + domain;
-		WriteKrb5ConfValue (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
-	    }
+	    WriteFile (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
 	}
 
 	WriteKrb5ConfValue (.etc.krb5_conf.v.libdefaults.clockskew, clockskew);
