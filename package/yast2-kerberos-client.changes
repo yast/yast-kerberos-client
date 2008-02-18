@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 29 12:46:31 CET 2008 - jsuchome@suse.cz
+
+- added option to provide Kerberos data via DNS (F301812)
+- 2.16.2 
+
+-------------------------------------------------------------------
 Tue Dec 11 15:50:54 CET 2007 - jsuchome@suse.cz
 
 - removed obsolete retain_after_close option

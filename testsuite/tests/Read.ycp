@@ -46,6 +46,7 @@
 			"initial_prompt"	: nil,
 			"subsequent_prompt"	: nil,
 			"addressless"		: ["false"],
+			"banner"	: ["haha"],
 		    ],
 		    "pkinit" : $[
 			"trusted_servers": nil,

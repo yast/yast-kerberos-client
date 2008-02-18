@@ -236,7 +236,9 @@ Enter your <b>Default Domain</b>, <b>Default Realm</b>, and the hostname or addr
 It is common practice to use the domain name in uppercase as your default realm name, but you can select freely. If the realm is not available on the server, you cannot log in.  Ask your server administrator if you need more information.</p>
 ") +
 
-	//rwalter: the appearance order of this and 4/5 is reversed. Please fix.
+    // help text for Use DNS to aquire the configuration data at runtime
+    _("Check <b>Use DNS to aquire the configuration data at runtime</b> to let your client use the Kerberos authentication data provided by DNS. This option cannot be selected if DNS server doesn't provide such data.</p>") +
+
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
 
@@ -247,6 +249,8 @@ It is common practice to use the domain name in uppercase as your default realm 
     string kdc = Kerberos::kdc;
     string default_domain = Kerberos::default_domain;
     boolean use_pam_krb = Kerberos::use_pam_krb || installation;
+    boolean dns_used		= Kerberos::dns_used;
+    boolean dns_available	= Kerberos::dns_available;
 
     term con = `HBox (`HSpacing (3), `VBox (
         `VSpacing (0.5),
@@ -257,6 +261,14 @@ It is common practice to use the domain name in uppercase as your default realm 
 		// radio button label
                 `Left(`RadioButton(`id(`pamyes), `opt (`notify), _("&Use Kerberos"), use_pam_krb)))))
 	),
+	`VSpacing (0.2),
+	`Left (`HBox (
+	    `HSpacing (2),
+	    `CheckBox (`id (`dns), `opt (`notify),
+		// checkbox label
+		_("Use DN&S to aquire the configuration data at runtime"),
+		dns_used)
+	)),
         `VSpacing (),
 	// frame label
 	`Frame (_("Basic Kerberos Settings"), `HBox(`HSpacing (0.5), `VBox(
@@ -286,9 +298,13 @@ It is common practice to use the domain name in uppercase as your default realm 
     );
     Wizard::RestoreAbortButton ();
 
+    UI::ChangeWidget (`id (`dns), `Enabled, dns_available);
     foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
 	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
+	if (widget != `advanced && use_pam_krb)
+	    UI::ChangeWidget (`id (widget), `Enabled, !dns_used);
     });
+
     // during installation, only enabling makes sence
     if (installation)
     {
@@ -307,12 +323,23 @@ It is common practice to use the domain name in uppercase as your default realm 
 		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	    });
 	}
+	if (result == `dns)
+	{
+	    dns_used	= (boolean) UI::QueryWidget (`id (`dns), `Value);
+	    foreach (symbol widget, [`realm, `domain, `kdc ], {
+		UI::ChangeWidget (`id (widget), `Enabled, !dns_used);
+	    });
+	    // fill the values with the ones provided by DNS...
+	    UI::ChangeWidget (`id(`realm), `Value, Kerberos::dns_default_realm);
+	    UI::ChangeWidget (`id(`kdc), `Value, Kerberos::dns_kdc);
+	}
 
         if (result == `next || result == `advanced) {
 
             default_realm = (string) UI::QueryWidget (`id(`realm), `Value);
             default_domain = (string) UI::QueryWidget (`id(`domain), `Value);
             kdc = (string) UI::QueryWidget (`id(`kdc), `Value);
+	    dns_used	= (boolean) UI::QueryWidget (`id (`dns), `Value);
 
             if (use_pam_krb && default_realm == "")
             {
@@ -374,6 +401,7 @@ It is common practice to use the domain name in uppercase as your default realm 
         Kerberos::default_domain = default_domain;
 	Kerberos::default_realm = default_realm;
 	Kerberos::kdc = kdc;
+	Kerberos::dns_used = dns_used;
 
         if (use_pam_krb != Kerberos::use_pam_krb)
         {

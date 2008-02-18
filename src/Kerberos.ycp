@@ -44,6 +44,9 @@ boolean pam_unix_present = false;
 global string default_realm = "";
 global string default_domain = "";
 
+global string dns_default_realm = "";
+global string dns_kdc		= "";
+
 // adress of KDC (key distribution centre) server for default realm
 global string kdc = "";
 string admin_server = "";
@@ -95,6 +98,12 @@ global map arch_packages	= $[
         "x86_64"	: [ "pam_krb5-32bit" ],
     ],
 ];
+
+// if DNS can be used for retrieving configuration data
+global boolean dns_available	= false;
+
+// if DNS is used for retrieving configuration data
+global boolean dns_used		= false;
 
 /**
   map with the settings configurable in the expert tabs
@@ -226,7 +235,7 @@ global string ReadFile (path path_to_value, string def_value) {
 global boolean WriteKrb5ConfValues (path path_to_value, list<string> values) {
 
     if (values == nil || values == [])
-	return SCR::Write (path_to_value, nil); // FIXME test
+	return SCR::Write (path_to_value, nil);
     return SCR::Write (path_to_value, values);
 }
 
@@ -249,7 +258,7 @@ global boolean WriteKrb5ConfValuesAsString (path path_to_value, string values) {
 global boolean WriteKrb5ConfValue (path path_to_value, string value) {
 
     if (value == nil || value == "")
-	return SCR::Write (path_to_value, nil); // FIXME test
+	return SCR::Write (path_to_value, nil);
     return WriteKrb5ConfValues (path_to_value, [value]);
 }
 
@@ -292,7 +301,6 @@ global define boolean Read () ``{
 	    admin_server = mergestring (ReadKrb5ConfValues(add (realm, "admin_server"),""), " ");
 	    default_domain = ReadKrb5ConfValue (add (realm,"default_domain"), "");
 	}
-
 	if (admin_server == kdc)
 	    admin_server = ""; // we could replace it in Write in this case...
 
@@ -306,7 +314,7 @@ global define boolean Read () ``{
 	foreach (string key, [ "keytab", "ccache_dir", "ccname_template",
 	    "mappings", "existing_ticket", "external", "validate", "use_shmem",
 	    "addressless", "debug", "debug_sensitive",
-	    "initial_prompt", "subsequent_prompt", ],
+	    "initial_prompt", "subsequent_prompt", "banner"],
 	{
 	    string val	= ReadKrb5ConfValue (add (pam_p, key), nil);
 	    if (val != nil)
@@ -335,6 +343,38 @@ global define boolean Read () ``{
     {
         map out = (map) SCR::Execute (.target.bash_output, "/bin/domainname");
         default_domain = deletechars (out["stdout"]:"", "\n");
+    }
+
+    // now, check DNS status (Fate 301812)
+    if (FileUtils::Exists ("/usr/bin/dig") && default_domain != "" && 
+	!Mode::test ())
+    {
+	map out = (map) SCR::Execute (.target.bash_output, sformat ("dig TXT _kerberos.%1 +short", default_domain));
+	dns_default_realm = deletechars (out["stdout"]:"", "\n\"");
+	if (dns_default_realm != "")
+	{
+	    out = (map) SCR::Execute (.target.bash_output, sformat ("dig SRV _kerberos._udp.%1 +short", default_domain));
+	    list split = splitstring (deletechars (out["stdout"]:"", "\n")," ");
+	    dns_kdc	= split[3]:"";
+	    if (dns_kdc != "" &&
+		substring (dns_kdc, size (dns_kdc) - 1, 1) == ".")
+		dns_kdc	= substring (dns_kdc, 0, size (dns_kdc) - 1);
+	    if (dns_kdc != "")
+		dns_available = true;
+	    // empty domain_realm section and no kdc entry defined and
+	    // values via DNS are available -> DNS is used
+	    if (kdc == "" &&
+		(!contains ((list)SCR::Dir(.etc.krb5_conf.s), "domain_realm") ||
+		SCR::Dir(.etc.krb5_conf.v.domain_realm) == []))
+	    {
+		dns_used	= true;
+		kdc		= dns_kdc;
+		default_realm	= dns_default_realm;
+		y2milestone ("kdc by DNS %1, default_domain: %2",
+		    dns_kdc, dns_default_realm);
+		y2milestone ("DNS is used for Kerberos data");
+	    }
+	}
     }
 
     if ((default_realm == "" || default_realm == "MY.REALM" ||
@@ -465,7 +505,7 @@ global define boolean Write () ``{
     // -- write to /etc/krb5.conf
     Progress::NextStage ();
 
-    if (modified)
+    if (modified && !dns_used)
     {
 	// change the default realm name
 	WriteKrb5ConfValue (.etc.krb5_conf.v.libdefaults.default_realm, default_realm);
@@ -510,6 +550,24 @@ global define boolean Write () ``{
 		WriteKrb5ConfValuesAsString (add (add (.etc.krb5_conf.v.realms, default_realm),
 		    "admin_server"), kdc);
 	}
+    }
+    if (modified)
+    {
+	/*
+	    3. Yes, if the user chooses DNS you need to remove the domain_realm
+	    section (so that the domain->realm mapping can be read through DNS)
+	    and at least the complete sub-section describing the realm
+	    (maybe even the whole [realms]-section).
+	*/
+	if (dns_used)
+	{
+	    y2milestone ("DNS set to use: removing domain info from krb5.conf");
+	    WriteKrb5ConfValue (.etc.krb5_conf.s.domain_realm, nil);
+	    WriteKrb5ConfValue (add (.etc.krb5_conf.s, default_realm), nil);
+	    // write the default realm name
+	    WriteKrb5ConfValue (.etc.krb5_conf.v.libdefaults.default_realm,
+		default_realm);
+	}
 
 	// write advanced settings
 	path pam_sect = .etc.krb5_conf.v.pam;
@@ -538,7 +596,7 @@ global define boolean Write () ``{
 		WriteKrb5ConfValue (pth, (string) value);
 	    // removin
 	    else if (OrigExpertSettings[key]:"" != "")
-		WriteKrb5ConfValue (pth, nil); // FIXME doesn't work!
+		WriteKrb5ConfValue (pth, nil);
 	});
 
 	if (trusted_servers != "" &&
