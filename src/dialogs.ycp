@@ -866,7 +866,6 @@ define symbol AdvancedDialog() {
     y2milestone ("Returning %1", ret);
     if (ret == `next)
     {
-	Kerberos::ExpertSettings	= ExpertSettings;
         Kerberos::minimum_uid		= ExpertSettings["minimum_uid"]:"1";
 	Kerberos::ticket_lifetime = ExpertSettings["ticket_lifetime"]:"1d";
 	Kerberos::renew_lifetime	= ExpertSettings["renew_lifetime"]:"1d";
@@ -883,6 +882,9 @@ define symbol AdvancedDialog() {
             Kerberos::pam_modified	= true;
 	    Kerberos::ignore_unknown	=ExpertSettings["ignore_unknown"]:false;
 	}
+	// ssh_support, ignore_unknown are not from /etc/krb5.conf
+	ExpertSettings	= remove (ExpertSettings, "ssh_support");
+	Kerberos::ExpertSettings = remove (ExpertSettings, "ignore_unknown");
     }
     return ret;
 }

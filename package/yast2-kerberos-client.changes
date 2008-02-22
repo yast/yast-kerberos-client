@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb 22 13:39:35 CET 2008 - jsuchome@suse.cz
+
+- do not write "ssh_support" and "ignore_unknown" to /etc/krb5.conf
+  (bnc#363980)
+- 2.16.4
+
+-------------------------------------------------------------------
 Mon Feb 18 15:48:16 CET 2008 - jsuchome@suse.cz
 
 - now domain has the leading dot in domain_realm section (#298362)
