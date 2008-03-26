@@ -849,7 +849,7 @@ define symbol AdvancedDialog() {
     ]);
 
     Wizard::SetContentsButtons("", `VBox (), "",
-	Label::CancelButton(), Label::AcceptButton());
+	Label::CancelButton(), Label::OKButton());
 
     symbol ret = CWM::ShowAndRun ($[
 	"widget_names"		: [
@@ -860,7 +860,7 @@ define symbol AdvancedDialog() {
 	// default dialog caption
 	"caption"		: _("Advanced Kerberos Client Configuration"),
 	"back_button"		: Label::CancelButton (),
-	"next_button"		: Label::AcceptButton (),
+	"next_button"		: Label::OKButton (),
 	"abort_button"		: nil,
     ]);
     y2milestone ("Returning %1", ret);
