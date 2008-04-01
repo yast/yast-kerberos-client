@@ -695,11 +695,14 @@ global define string ShortSummary() ``{
     sformat (_("<b>Default Realm</b>: %1<br>"), (default_realm != "") ?
 	default_realm : nc) +
     // summary text (yes/no follows)
-    sformat(_("<b>Kerberos Authentication Enabled</b>: %1<br>"), use_pam_krb ?
+    sformat(_("<b>Kerberos Authentication Enabled</b>: %1"), use_pam_krb ?
 	// summary value
 	_("Yes") :
 	// summary value
 	_("No"));
+    if (dns_used)
+	// summary line
+	summary	= summary + "<br>" + _("Configuration Acquired via DNS");
 
     return summary;
 }

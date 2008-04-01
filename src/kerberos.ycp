@@ -160,6 +160,22 @@ define boolean KerberosChangeConfiguration (map options ) {
 	    ret	= true;
 	}
     });
+    if (options["dns"]:"" != "")
+    {
+	boolean dns	= (options["dns"]:"" == "yes");
+	if (dns != Kerberos::dns_used)
+	{
+	    if (dns && !Kerberos::dns_available)
+	    {
+		y2warning ("DNS does not provide config, ignoring");
+	    }
+	    else
+	    {
+		Kerberos::dns_used	= true;
+		ret			= true;
+	    }
+	}
+    }
 
     if (ret)
 	Kerberos::modified = true;
@@ -209,6 +225,11 @@ map cmdline = $[
 	"disable"	:$[
 	    // translators: command line help text for pam disable option
 	    "help"	: _("Disable the service")
+	],
+	"dns"		: $[
+	    "help"	: _("Use DNS to aquire the configuration at runtime"),
+	    "type"      : "enum",
+	    "typespec"  : [ "yes", "no" ],
 	],
 	"kdc"	:$[
 	    // translators: command line help text for the kdc option
@@ -329,7 +350,7 @@ map cmdline = $[
 	    "keytab", "ccache_dir", "ccname_template",
 	    "mappings", "existing_ticket", "external", "validate", "use_shmem",
 	    "addressless", "debug", "debug_sensitive",
-	    "initial_prompt", "subsequent_prompt",
+	    "initial_prompt", "subsequent_prompt", "dns",
 	],
     ]
 ];

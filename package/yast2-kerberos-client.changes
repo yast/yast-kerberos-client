@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr  1 15:29:54 CEST 2008 - jsuchome@suse.cz
+
+- added CLI option to (un)set DNS
+- 2.16.6
+
+-------------------------------------------------------------------
 Wed Mar 26 10:46:25 CET 2008 - jsuchome@suse.cz
 
 - use OK button label instead of Accept (fate #120373)
