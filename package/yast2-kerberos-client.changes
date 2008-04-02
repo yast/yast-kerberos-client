@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr  2 10:10:11 CEST 2008 - jsuchome@suse.cz
+
+- added SCR agent for /etc/ssh/sshd_config (fate #303415)
+- 2.16.7
+
+-------------------------------------------------------------------
 Tue Apr  1 15:29:54 CEST 2008 - jsuchome@suse.cz
 
 - added CLI option to (un)set DNS
