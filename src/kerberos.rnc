@@ -17,12 +17,17 @@ kerberos_client = element kerberos_client {
     element default_domain     { text }? &
     element default_realm      { text }? &
     element forwardable        { BOOLEAN }? &
+    element ignore_unknown     { BOOLEAN }? &
     element kdc_server         { text }? &
     element minimum_uid        { text }? &
     element proxiable          { BOOLEAN }? &
     element renew_lifetime     { text }? &
     element retain_after_close { BOOLEAN }? &
     element ssh_support        { BOOLEAN }? &
-    element ticket_lifetime    { text }?
+    element ticket_lifetime    { text }? &
+    element ExpertSettings     {
+        element external  { text }? &
+        element use_shmem { text }?
+    }?
 }
 
