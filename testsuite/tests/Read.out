@@ -26,9 +26,7 @@ Read	.etc.krb5_conf.v.pam."initial_prompt" nil
 Read	.etc.krb5_conf.v.pam."subsequent_prompt" nil
 Read	.etc.krb5_conf.v.pam."banner" ["haha"]
 Read	.etc.krb5_conf.v.pkinit.trusted_servers nil
-Execute	.target.bash_output "/bin/ypdomainname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
-Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
@@ -45,7 +43,6 @@ Dump	==== reading... ============================
 Execute	.target.bash_output "pam-config -q --krb5" $["stdout":"password: "]
 Execute	.target.bash "/usr/bin/touch /etc/krb5.conf" 0
 Dir	.etc.ssh.ssh_config.s: ["*"]
-Execute	.target.bash_output "LANG=C /bin/hostname" $["stdout":"password: "]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"

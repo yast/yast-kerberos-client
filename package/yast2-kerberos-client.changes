@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr 10 15:42:32 CEST 2008 - jsuchome@suse.cz
+
+- if no KDC is defined, try to propose reasonable one (fate#302863)
+- 2.16.7 
+
+-------------------------------------------------------------------
 Wed Apr  2 15:42:01 CEST 2008 - ug@suse.de
 
 - rnc file fixed
