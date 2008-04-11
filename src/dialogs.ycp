@@ -592,7 +592,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("&Mappings"),
 	// help text
-	"help"		: _("<p>With <b>Mappings</b>, define specifies how PAM module should derive the principal's name from the system user name.</p>"),
+	"help"		: _("<p>With <b>Mappings</b>, specify how PAM module should derive the principal's name from the system user name.</p>"),
 	"init"		: InitDescription,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -611,7 +611,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
     "services_help"		:$[
 	"widget"	: `empty,
 	// generic help for Services tab
-	"help"		: _("All settings in this dialog can be aplied for all PAM services, no service or a specific list of services separated by commas."),
+	"help"		: _("All settings in this dialog can be applied for all PAM services, no service or a specific list of services separated by commas."),
     ],
     "addressless" : $[
 	"widget"	: `combobox,
