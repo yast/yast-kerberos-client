@@ -305,12 +305,6 @@ It is common practice to use the domain name in uppercase as your default realm 
 	    UI::ChangeWidget (`id (widget), `Enabled, !dns_used);
     });
 
-    // during installation, only enabling makes sence
-    if (installation)
-    {
-	UI::ChangeWidget (`id (`pamno), `Enabled, false);
-    }
-
     symbol result = nil;
     do
     {

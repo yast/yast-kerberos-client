@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr 15 09:58:52 CEST 2008 - jsuchome@suse.cz
+
+- disabling during installation makes sense with current workflow
+- 2.16.9
+
+-------------------------------------------------------------------
 Fri Apr 11 14:56:09 CEST 2008 - jsuchome@suse.cz
 
 - text fixes (bnc#375588)
