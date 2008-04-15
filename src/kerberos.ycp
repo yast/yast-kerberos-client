@@ -328,17 +328,17 @@ map cmdline = $[
 	],
 	"debug_sensitive"	: $[
 	    // help text for command line option
-	    "help"	: _("Sensitive debug"),
+	    "help"	: _("Sensitive Debug"),
 	    "type"	: "string",
 	],
 	"initial_prompt"	: $[
 	    // help text for command line option
-	    "help"	: _("Initial prompt"),
+	    "help"	: _("Initial Prompt"),
 	    "type"	: "string",
 	],
 	"subsequent_prompt"	: $[
 	    // help text for command line option
-	    "help"	: _("Subsequent prompt"),
+	    "help"	: _("Subsequent Prompt"),
 	    "type"	: "string",
 	],
     ],

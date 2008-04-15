@@ -237,7 +237,7 @@ It is common practice to use the domain name in uppercase as your default realm 
 ") +
 
     // help text for Use DNS to aquire the configuration data at runtime
-    _("Check <b>Use DNS to aquire the configuration data at runtime</b> to let your client use the Kerberos authentication data provided by DNS. This option cannot be selected if DNS server doesn't provide such data.</p>") +
+    _("Check <b>Use DNS to Aquire the Configuration Data at Runtime</b> to let your client use the Kerberos authentication data provided by DNS. This option cannot be selected if the DNS server does not provide such data.</p>") +
 
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
@@ -413,7 +413,7 @@ map<string, map> widget_description	= $[
 	// textentry label
 	"label"		: _("&Default Lifetime"),
 	// help text (do not transl. values "m","h", "d")
-	"help"		: _("<p>Values of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and <b>Clock Skew</b> are in seconds by default. Alternatively, specify the time unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day.</p>"),
+	"help"		: _("<p>By default, the time unit of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and <b>Clock Skew</b> is set to second. Alternatively, specify the time unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day.</p>"),
 	"init"		: InitDescription,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -682,7 +682,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("&Validate Initial Ticket"),
 	// help text
-	"help"		: _("<p>Select the services for which should TGT be validated by changing the value of <b>Validate Initial Ticket</b>."),
+	"help"		: _("<p>Select the services for which TGT should be validated by changing the value of <b>Validate Initial Ticket</b>."),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -694,7 +694,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("&Initial Prompt"),
 	// help text
-	"help"		: _("<p>With <b>Initial Prompt</b> checked, PAM module asks for a password before authentication attempt.</p>"),
+	"help"		: _("<p>With <b>Initial Prompt</b> checked, PAM module asks for a password before the authentication attempt.</p>"),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -705,7 +705,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("Subsequent &Prompt"),
 	// help text
-	"help"		: _("<p>If <b>Subsequent Prompt</b> is enabled, PAM module may ask user for a password if the previously-entered  password  was  somehow  insufficient for authentication.</p>"),
+	"help"		: _("<p>If <b>Subsequent Prompt</b> is enabled, the PAM module may ask the user for a password, in case the previously-entered  password  was  somehow  insufficient for authentication.</p>"),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
