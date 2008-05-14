@@ -298,7 +298,7 @@ It is common practice to use the domain name in uppercase as your default realm 
     );
     Wizard::RestoreAbortButton ();
 
-    UI::ChangeWidget (`id (`dns), `Enabled, dns_available);
+    UI::ChangeWidget (`id (`dns), `Enabled, dns_available && use_pam_krb);
     foreach (symbol widget, [`realm, `domain, `kdc, `advanced], ``{
 	UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	if (widget != `advanced && use_pam_krb)
@@ -313,7 +313,7 @@ It is common practice to use the domain name in uppercase as your default realm 
         if (result == `pamyes || result == `pamno)
 	{
             use_pam_krb = (result == `pamyes);
-	    foreach (symbol widget, [`realm, `domain, `kdc, `advanced],``{
+	    foreach (symbol widget, [`realm, `domain, `kdc, `advanced, `dns],``{
 		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	    });
 	}
@@ -382,7 +382,7 @@ It is common practice to use the domain name in uppercase as your default realm 
 		result = `not_next;
 		use_pam_krb	= false;
 		UI::ChangeWidget (`id (`rd), `Value, `pamno);
-		foreach (symbol widget, [`realm, `domain, `kdc, `advanced],``{
+		foreach (symbol widget, [`realm, `domain, `kdc,`advanced,`dns],{
 		    UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 		});
 	    }

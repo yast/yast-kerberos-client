@@ -46,22 +46,6 @@ any ret = nil;
 // --------------------------------- cmd-line handlers
 
 /**
- * Enable or disable Kerberos authentication
- * @param options  a list of parameters passed as args
- * @return boolean true on success
- */
-define boolean KerberosEnableHandler( map<string,string> options ) {
-    // check the "command" to be present exactly once
-    string command = CommandLine::UniqueOption( options,
-	["enable", "disable" ] );
-    if( command == nil ) return false;
-
-    Kerberos::use_pam_krb = ( command == "enable" );
-    Kerberos::pam_modified = true;
-    return true;
-}
-
-/**
  * Print summary of basic options
  * @return boolean false
  */
@@ -147,6 +131,26 @@ define boolean KerberosChangeConfiguration (map options ) {
 	Kerberos::renew_lifetime	= options["renew_lifetime"]:"";
 	ret	= true;
     }
+    if (options["ignore_unknown"]:"" != "")
+    {
+	boolean ignore_unknown	= (options["ignore_unknown"]:"" == "yes");
+	if (ignore_unknown != Kerberos::ignore_unknown)
+	{
+	    Kerberos::ignore_unknown	= ignore_unknown;
+	    ret				= true;
+	}
+    }
+    if (options["ssh_support"]:"" != "")
+    {
+	boolean ssh_support	= (options["ssh_support"]:"" == "yes");
+	if (ssh_support != Kerberos::ssh_support)
+	{
+	    Kerberos::ssh_support	= ssh_support;
+	    Kerberos::ssh_modified	= true;
+	    ret				= true;
+	}
+    }
+
     foreach (string expert_key, [
 	"keytab", "ccache_dir", "ccname_template",
 	"mappings", "existing_ticket", "external", "validate", "use_shmem",
@@ -181,6 +185,28 @@ define boolean KerberosChangeConfiguration (map options ) {
 	Kerberos::modified = true;
     return ret;
 }
+
+/**
+ * Enable or disable Kerberos authentication
+ * @param options  a list of parameters passed as args
+ * @return boolean true on success
+ */
+define boolean KerberosEnableHandler( map<string,string> options ) {
+    // check the "command" to be present exactly once
+    string command = CommandLine::UniqueOption( options,
+	["enable", "disable" ] );
+    if( command == nil ) return false;
+
+    if ((Kerberos::use_pam_krb && command == "disable") ||
+	(!Kerberos::use_pam_krb && command == "enable"))
+	Kerberos::pam_modified = true;
+
+    Kerberos::use_pam_krb = ( command == "enable" );
+
+    KerberosChangeConfiguration (options);
+    return Kerberos::modified || Kerberos::pam_modified;
+}
+
 
 /**
  * Wrapper for writing Kerberos configuration
@@ -341,9 +367,30 @@ map cmdline = $[
 	    "help"	: _("Subsequent Prompt"),
 	    "type"	: "string",
 	],
+	"ssh_support"	: $[
+	    // help text for command line option
+	    "help"	: deletechars(_("Kerberos Support for Open&SSH Client"),
+		"&"),
+	    "type"      : "enum",
+	    "typespec"  : [ "yes", "no" ],
+	],
+	"ignore_unknown"	: $[
+	    // help text for command line option
+	    "help"	: deletechars (_("&Ignore Unknown Users"),"&"),
+	    "type"      : "enum",
+	    "typespec"  : [ "yes", "no" ],
+	],
     ],
     "mappings"		: $[
-	"pam"		: [ "enable", "disable" ],
+	"pam"		: [ "enable", "disable",
+	    "kdc", "domain", "realm", "minimum_uid","clockskew",
+	    "ticket_lifetime", "renew_lifetime", "forwardable", "proxiable",
+	    "keytab", "ccache_dir", "ccname_template",
+	    "mappings", "existing_ticket", "external", "validate", "use_shmem",
+	    "addressless", "debug", "debug_sensitive",
+	    "initial_prompt", "subsequent_prompt", "dns",
+	    "ignore_unknown", "ssh_support",
+	],
 	"summary"	: [],
 	"configure"	: ["kdc", "domain", "realm", "minimum_uid","clockskew",
 	    "ticket_lifetime", "renew_lifetime", "forwardable", "proxiable",
@@ -351,6 +398,7 @@ map cmdline = $[
 	    "mappings", "existing_ticket", "external", "validate", "use_shmem",
 	    "addressless", "debug", "debug_sensitive",
 	    "initial_prompt", "subsequent_prompt", "dns",
+	    "ignore_unknown", "ssh_support",
 	],
     ]
 ];

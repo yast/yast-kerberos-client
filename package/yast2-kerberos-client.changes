@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May 14 16:01:06 CEST 2008 - jsuchome@suse.cz
+
+- added CLI options for ssh_support and ignore_unknown
+- options from "configure" command may be used in "pam" command
+- 2.16.11
+
+-------------------------------------------------------------------
 Tue Apr 15 13:58:36 CEST 2008 - jsuchome@suse.cz
 
 - merged texts from proofread
