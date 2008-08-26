@@ -493,6 +493,9 @@ global define boolean Write () ``{
         if (use_pam_krb)
         {
 	    Pam::Add ("krb5");
+	    // If ldap is configured we need to change it to ldap-account_only
+	    if (Pam::Enabled("ldap"))
+		Pam::Add("ldap-account_only");
 	    if (ignore_unknown)
 		Pam::Add ("krb5-ignore_unknown_principals");
 	    else
@@ -500,6 +503,9 @@ global define boolean Write () ``{
         }
         else
         {
+	    // if ldap-account_only is used we need to change it to ldap
+	    if (Pam::Enabled("ldap-account_only"))
+		Pam::Add("ldap");
 	    Pam::Remove ("krb5");
         }
     }
