@@ -415,7 +415,7 @@ map<string, map> widget_description	= $[
 	// textentry label
 	"label"		: _("&Default Lifetime"),
 	// help text (do not transl. values "m","h", "d")
-	"help"		: _("<p>By default, the time unit of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and <b>Clock Skew</b> is set to second. Alternatively, specify the time unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day.</p>"),
+	"help"		: _("<p>By default, the time unit of <b>Default Lifetime</b>, <b>Default Renewable Lifetime</b>, and <b>Clock Skew</b> is set to seconds. Alternatively, specify the time unit (<tt>m</tt> for minutes, <tt>h</tt> for hours, or <tt>d</tt> for days) and use it as a value suffix, as in <tt>1d</tt> or <tt>24h</tt> for one day.</p>"),
 	"init"		: InitDescription,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -588,7 +588,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("&Mappings"),
 	// help text
-	"help"		: _("<p>With <b>Mappings</b>, specify how PAM module should derive the principal's name from the system user name.</p>"),
+	"help"		: _("<p>With <b>Mappings</b>, specify how the PAM module should derive the principal's name from the system user name.</p>"),
 	"init"		: InitDescription,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -696,7 +696,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("&Initial Prompt"),
 	// help text
-	"help"		: _("<p>With <b>Initial Prompt</b> checked, PAM module asks for a password before the authentication attempt.</p>"),
+	"help"		: _("<p>With <b>Initial Prompt</b> checked, the PAM module asks for a password before the authentication attempt.</p>"),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
