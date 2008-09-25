@@ -774,8 +774,10 @@ map get_tabs_descr () {
 	    "services_help",
 	    `VSpacing (0.4),
 	    "addressless",
+	    /*
 	    `VSpacing (0.4),
 	    "existing_ticket",
+	    */
 	    `VSpacing (0.4),
 	    "external",
 	    `VSpacing (0.4),
@@ -799,7 +801,7 @@ map get_tabs_descr () {
 	), `HSpacing (2)),
 	"widget_names" : [
 	    "services_help", "addressless",
-	    "existing_ticket", "external", "use_shmem", "validate",
+	    "external", "use_shmem", "validate",
 	    "debug", "debug_sensitive",
 	    "initial_prompt", "subsequent_prompt",
 	],
