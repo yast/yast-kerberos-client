@@ -85,7 +85,8 @@
 	    "openafs-client": nil
 	],
 	"target": $[
-	    "stat": $[ 1:2 ]
+	    "stat": $[ 1:2 ],
+	    "string"	: "",
 	]
     ];
 

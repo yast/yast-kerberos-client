@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  9 11:08:58 CEST 2008 - jsuchome@suse.cz
+
+- fixed failing testsuite (Hostname.ycp)
+- 2.17.3
+
+-------------------------------------------------------------------
 Wed Sep 24 16:26:10 CEST 2008 - jsuchome@suse.cz
 
 - hide the option with "existing_ticket" from UI (bnc#429161)
