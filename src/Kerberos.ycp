@@ -26,6 +26,7 @@ import "Pam";
 import "Progress";
 import "Report";
 import "Service";
+import "Stage";
 import "Summary";
 
 /**
@@ -338,6 +339,13 @@ global define boolean Read () ``{
     if (default_domain == "")
     {
 	default_domain	= Hostname::CurrentDomain ();
+	// workaround for bug#393951
+	if (default_domain == "" && Stage::cont ())
+	{
+	    map out = (map) SCR::Execute (.target.bash_output, "domainname");
+	    if (out["exit"]:0 == 0)
+		default_domain	= deletechars (out["stdout"]:"", "\n");
+	}
     }
 
     // now, check DNS status (Fate 301812)
@@ -524,7 +532,8 @@ global define boolean Write () ``{
 	    string domain = default_domain;
 	    if ( findfirstof (domain, ".") != 0)
 		domain = "." + domain;
-	    WriteFile (add(.etc.krb5_conf.v.domain_realm,domain),default_realm);
+	    WriteKrb5ConfValue (add(.etc.krb5_conf.v.domain_realm,domain),
+		default_realm);
 	}
 
 	WriteKrb5ConfValue (.etc.krb5_conf.v.libdefaults.clockskew, clockskew);
