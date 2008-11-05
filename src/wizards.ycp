@@ -11,11 +11,12 @@
 
 textdomain "kerberos";
 
+import "Label";
+import "Popup";
 import "Sequencer";
+import "Stage";
 import "Wizard";
 
-import "Popup";
-import "Label";
 
 include "kerberos-client/dialogs.ycp";
 
@@ -79,7 +80,15 @@ define symbol KerberosSequence() ``{
 	]
     ];
 
-    Wizard::CreateDialog();
+    if (Stage::cont ())
+    {
+	Wizard::CreateDialog();
+    }
+    else
+    {
+	Wizard::OpenNextBackDialog ();
+	Wizard::HideAbortButton ();
+    }
     Wizard::SetDesktopIcon("kerberos");
     symbol ret = Sequencer::Run (aliases, sequence);
     UI::CloseDialog();

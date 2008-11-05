@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov  5 13:14:02 CET 2008 - jsuchome@suse.cz
+
+- button labels adaped fro current style guide (bnc#440523)
+- 2.17.5 
+
+-------------------------------------------------------------------
 Wed Oct 15 12:46:25 CEST 2008 - jsuchome@suse.cz
 
 - use domainname to get the domain name (workaround for bnc#393951)
