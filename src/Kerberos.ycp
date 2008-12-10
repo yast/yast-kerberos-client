@@ -153,6 +153,7 @@ global define boolean Import (map settings) ``{
 	ExpertSettings["use_shmem"]	= use_shmem;
     pam_modified	= true;
     modified		= true;
+    ssh_modified	= true;
     return true;
 }
 
