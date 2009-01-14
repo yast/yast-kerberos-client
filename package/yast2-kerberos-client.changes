@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan 14 15:43:01 CET 2009 - jsuchome@suse.cz
+
+- no exit confirmation popup if no changes were made (bnc#460157)
+
+-------------------------------------------------------------------
 Wed Dec 10 14:45:42 CET 2008 - jsuchome@suse.cz
 
 - write openssh enablement when Imported (bnc#457672)
