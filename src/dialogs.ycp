@@ -610,7 +610,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
     "services_help"		:$[
 	"widget"	: `empty,
 	// generic help for Services tab
-	"help"		: _("All settings in this dialog can be applied for all PAM services, no service or a specific list of services separated by commas."),
+	"help"		: _("<p>All settings in this dialog can be applied for all PAM services, no service or a specific list of services separated by commas.</p>"),
     ],
     "addressless" : $[
 	"widget"	: `combobox,
