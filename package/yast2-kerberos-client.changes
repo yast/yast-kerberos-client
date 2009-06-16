@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 16 14:27:40 CEST 2009 - mvidner@suse.cz
+
+- Using autodocs-ycp.ami, which contains a fix for automake 1.11.
+
+-------------------------------------------------------------------
 Fri Jun  5 14:13:22 CEST 2009 - jsuchome@suse.cz
 
 - fixed architecture dependent packages for PPC (bnc#505263) 
