@@ -11,7 +11,7 @@ Requires:	yast2 >= 2.16.48
 
 BuildArchitectures:	noarch
 
-Summary:	Configuration of kerberos-client
+Summary:	YaST2 - Kerberos Client Configuration
 
 %description
 -
