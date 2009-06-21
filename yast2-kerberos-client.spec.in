@@ -14,7 +14,8 @@ BuildArchitectures:	noarch
 Summary:	YaST2 - Kerberos Client Configuration
 
 %description
--
+With this YaST2 module, you can configure a Kerberos client so that a
+Kerberos server will be used for user authentication.
 
 @PREP@
 
