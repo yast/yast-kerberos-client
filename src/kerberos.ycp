@@ -213,7 +213,7 @@ define boolean KerberosEnableHandler( map<string,string> options ) {
  */
 define boolean KerberosWrite ()
 {
-    if (!Package::InstallAll (Kerberos::UpdatedArchPackages (Kerberos::required_packages)))
+    if (!Package::InstallAll (Kerberos::required_packages))
 	return false;
     return Kerberos::Write ();
 }

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jun 26 14:59:58 CEST 2009 - jsuchome@suse.cz
+
+- manual installation of 32bit packages packages no longer needed
+  (bnc#354164) 
+- 2.18.2  
+
+-------------------------------------------------------------------
 Thu Jun 18 09:16:18 CEST 2009 - jsuchome@suse.cz
 
 - 2.18.1 

@@ -16,7 +16,6 @@ module "Kerberos";
 
 textdomain "kerberos";
 
-import "Arch";
 import "FileUtils";
 import "Hostname";
 import "Label";
@@ -84,22 +83,6 @@ string ssh_section = "*";
 
 // packages to install (openssh etc.)
 global list<string> packages = [];
-
-// packages to install for specific arhitectures (#49808)
-global map arch_packages	= $[
-    "krb5"	: $[
-        "ia64"		: [ "krb5-x86" ],
-        "ppc64"		: [ "krb5-32bit" ],
-        "s390_64"	: [ "krb5-32bit" ],
-        "x86_64"	: [ "krb5-32bit" ],
-    ],
-    "pam_krb5"	: $[
-        "ia64"		: [ "pam_krb5-x86" ],
-        "ppc64"		: [ "pam_krb5-32bit" ],
-        "s390_64"	: [ "pam_krb5-32bit" ],
-        "x86_64"	: [ "pam_krb5-32bit" ],
-    ],
-];
 
 // if DNS can be used for retrieving configuration data
 global boolean dns_available	= false;
@@ -726,27 +709,12 @@ global define string ShortSummary() ``{
 }
 
 /**
- * Return list of architecture specific packages (derived from package list
- * given as parameter) merged with the packages in parameter
- */
-global define list<string> UpdatedArchPackages (list<string> packages) {
-
-    list<string> ret	= packages;
-    string arch		= Arch::architecture ();
-
-    foreach (string package, packages, {
-        ret	= (list<string>) union (ret, arch_packages[package,arch]:[]);
-    });
-    return ret;
-}
-
-/**
  * Return required packages for auto-installation
  * @return map of packages to be installed and to be removed
  */
 global define map AutoPackages() {
     return ($[
-	"install": UpdatedArchPackages (required_packages),
+	"install": required_packages,
 	"remove": []
     ]);
 }
