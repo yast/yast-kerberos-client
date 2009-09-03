@@ -19,6 +19,7 @@ X-SuSE-YaST-AutoInstClonable=true
 X-SuSE-YaST-AutoInst=all
 X-SuSE-YaST-AutoInstClient=kerberos-client_auto
 X-SuSE-YaST-AutoInstSchema=kerberos.rnc
+X-SuSE-YaST-Keywords=kerberos,authentication
 
 Icon=yast-kerberos
 Exec=/sbin/yast2 kerberos-client 
