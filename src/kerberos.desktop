@@ -22,9 +22,8 @@ X-SuSE-YaST-AutoInstSchema=kerberos.rnc
 X-SuSE-YaST-Keywords=kerberos,authentication
 
 Icon=yast-kerberos
-Exec=/sbin/yast2 kerberos-client 
+Exec=xdg-su -c "/sbin/yast2 kerberos-client"
 
 Name=Kerberos Client
 GenericName=Configure a Kerberos client
-X-KDE-SubstituteUID=true
 StartupNotify=true
