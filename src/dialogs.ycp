@@ -238,7 +238,7 @@ Enter your <b>Default Domain</b>, <b>Default Realm</b>, and the hostname or addr
 It is common practice to use the domain name in uppercase as your default realm name, but you can select freely. If the realm is not available on the server, you cannot log in.  Ask your server administrator if you need more information.</p>
 ") +
 
-    // help text for Use DNS to aquire the configuration data at runtime
+    // help text for Use DNS to acquire the configuration data at runtime
     _("Check <b>Use DNS to Aquire the Configuration Data at Runtime</b> to let your client use the Kerberos authentication data provided by DNS. This option cannot be selected if the DNS server does not provide such data.</p>") +
 
     // help text 5/5
@@ -268,7 +268,7 @@ It is common practice to use the domain name in uppercase as your default realm 
 	    `HSpacing (2),
 	    `CheckBox (`id (`dns), `opt (`notify),
 		// checkbox label
-		_("Use DN&S to aquire the configuration data at runtime"),
+		_("Use DN&S to acquire the configuration data at runtime"),
 		dns_used)
 	)),
         `VSpacing (),
@@ -318,9 +318,10 @@ It is common practice to use the domain name in uppercase as your default realm 
         if (result == `pamyes || result == `pamno)
 	{
             use_pam_krb = (result == `pamyes);
-	    foreach (symbol widget, [`realm, `domain, `kdc, `advanced, `dns],``{
+	    foreach (symbol widget, [`realm, `domain, `kdc, `advanced],``{
 		UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 	    });
+	    UI::ChangeWidget (`id (`dns), `Enabled, dns_available && use_pam_krb);
 	}
 	if (result == `dns)
 	{

@@ -1,3 +1,10 @@
+-------------------------------------------------------------------
+Thu Jan 28 15:55:03 CET 2010 - jsuchome@suse.cz
+
+- leave DNS checkbox disabled when DNS info is not available
+  (bnc#574679)
+- 2.19.0 
+
 ------------------------------------------------------------------
 Wed Jan 13 18:56:03 CET 2010 - kmachalkova@suse.cz
 
