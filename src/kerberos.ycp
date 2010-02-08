@@ -253,7 +253,7 @@ map cmdline = $[
 	    "help"	: _("Disable the service")
 	],
 	"dns"		: $[
-	    "help"	: _("Use DNS to aquire the configuration at runtime"),
+	    "help"	: _("Use DNS to acquire the configuration at runtime"),
 	    "type"      : "enum",
 	    "typespec"  : [ "yes", "no" ],
 	],

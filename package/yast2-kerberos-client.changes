@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Feb  8 11:11:06 CET 2010 - jsuchome@suse.cz
+
+- leave DNS checkbox disabled when DNS info is not available
+  (bnc#574679)
+- fixed typo (aquire -> acquire)
+- 2.17.8
+
+-------------------------------------------------------------------
 Fri Jun  5 13:46:07 CEST 2009 - jsuchome@suse.cz
 
 - fixed architecture dependent packages for PPC (bnc#505263)
