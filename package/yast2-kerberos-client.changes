@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug  6 11:05:12 CEST 2010 - jsuchome@suse.cz
+
+- testsuite adapted to changes in yast2-pam
+- 2.20.0
+
+-------------------------------------------------------------------
 Thu Jan 28 15:55:03 CET 2010 - jsuchome@suse.cz
 
 - leave DNS checkbox disabled when DNS info is not available

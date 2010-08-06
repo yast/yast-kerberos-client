@@ -1,5 +1,5 @@
 Dump	==== reading... ============================
-Execute	.target.bash_output "pam-config -q --krb5" $["stdout":"password: "]
+Execute	.target.bash_output "/usr/sbin/pam-config -q --krb5" $["stdout":"password: "]
 Dir	.etc.krb5_conf.s: []
 Read	.etc.krb5_conf.v.libdefaults.default_realm ["SUSE.CZ"]
 Read	.etc.krb5_conf.v.libdefaults.clockskew ["500"]
@@ -40,7 +40,7 @@ Dump
 Dump	ssh support: true
 Dump	============================================
 Dump	==== reading... ============================
-Execute	.target.bash_output "pam-config -q --krb5" $["stdout":"password: "]
+Execute	.target.bash_output "/usr/sbin/pam-config -q --krb5" $["stdout":"password: "]
 Execute	.target.bash "/usr/bin/touch /etc/krb5.conf" 0
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.s: ["*"]
