@@ -482,7 +482,12 @@ global define boolean Write () ``{
     // -- pam settings
     if (pam_modified || write_only)
     {
-        if (use_pam_krb)
+	if (Pam::Enabled ("sss"))
+	{
+	    y2milestone ("not using pam_krb5 because sssd is configured");
+	    Pam::Remove ("krb5");
+	}
+        else if (use_pam_krb)
         {
 	    Pam::Add ("krb5");
 	    // If ldap is configured we need to change it to ldap-account_only

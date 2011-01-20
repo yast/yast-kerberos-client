@@ -1,6 +1,7 @@
 Dump	==== writing without any changes =================================
 Return	true
 Dump	==== pam enabled with krb5-ignore_unknown_principals=
+Execute	.target.bash_output "/usr/sbin/pam-config -q --sss" $["stdout":""]
 Execute	.target.bash_output "/usr/sbin/pam-config -a --krb5" $["stdout":""]
 Execute	.target.bash_output "/usr/sbin/pam-config -q --ldap" $["stdout":""]
 Execute	.target.bash_output "/usr/sbin/pam-config -a --krb5-ignore_unknown_principals" $["stdout":""]
@@ -11,6 +12,7 @@ Write	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes" true
 Write	.etc.ssh.ssh_config nil true
 Return	true
 Dump	==== kerberos disabled, ssh support disabled, krb5.conf untouched=
+Execute	.target.bash_output "/usr/sbin/pam-config -q --sss" $["stdout":""]
 Execute	.target.bash_output "/usr/sbin/pam-config -q --ldap-account_only" $["stdout":""]
 Execute	.target.bash_output "/usr/sbin/pam-config -d --krb5" $["stdout":""]
 Write	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "no" true

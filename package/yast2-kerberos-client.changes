@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jan 20 16:12:22 CET 2011 - jsuchome@suse.cz
+
+- do not use pam_krb5 when sssd is configured
+- 2.20.1 
+
+-------------------------------------------------------------------
 Fri Aug  6 11:05:12 CEST 2010 - jsuchome@suse.cz
 
 - testsuite adapted to changes in yast2-pam
