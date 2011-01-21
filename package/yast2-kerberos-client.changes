@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 21 12:26:47 CET 2011 - jsuchome@suse.cz
+
+- when sssd is configured, update sssd.conf's kerberos values
+- agent for krb5.conf moved to yast2-pam to be usable by ldap-client
+- 2.20.2
+
+-------------------------------------------------------------------
 Thu Jan 20 16:12:22 CET 2011 - jsuchome@suse.cz
 
 - do not use pam_krb5 when sssd is configured

@@ -482,10 +482,24 @@ global define boolean Write () ``{
     // -- pam settings
     if (pam_modified || write_only)
     {
+	// whem sssd is configured, do not use pam_krb5 and update sssd.conf
+	// fate#308902
 	if (Pam::Enabled ("sss"))
 	{
 	    y2milestone ("not using pam_krb5 because sssd is configured");
 	    Pam::Remove ("krb5");
+
+	    y2milestone ("updating sssd.conf with new kerberos values");
+
+	    path domain     = add (.etc.sssd_conf.v, "domain/default");
+	    SCR::Write (add (domain, "auth_provider"), "krb5");
+	    SCR::Write (add (domain, "chpass_provider"), "krb5");
+	    SCR::Write (add (domain, "krb5_realm"), default_realm);
+	    SCR::Write (add (domain, "krb5_kdcip"), kdc);
+	    if (!SCR::Write(.etc.sssd_conf, nil))
+	    {
+		y2error ("error writing ldap.conf file");
+	    }
 	}
         else if (use_pam_krb)
         {
