@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jan 24 16:18:57 CET 2011 - jsuchome@suse.cz
+
+- do not install pam_krb5 if sssd is configured (bnc#666186)
+- 2.20.3 
+
+-------------------------------------------------------------------
 Fri Jan 21 12:26:47 CET 2011 - jsuchome@suse.cz
 
 - when sssd is configured, update sssd.conf's kerberos values

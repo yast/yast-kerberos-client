@@ -383,7 +383,7 @@ It is common practice to use the domain name in uppercase as your default realm 
 	}
 	if (result == `next && use_pam_krb)
 	{
-	    if (!Package::InstallAll (Kerberos::required_packages))
+	    if (!Package::InstallAll (Kerberos::RequiredPackages ()))
 	    {
 		result = `not_next;
 		use_pam_krb	= false;

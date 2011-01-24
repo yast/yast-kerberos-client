@@ -728,12 +728,27 @@ global define string ShortSummary() ``{
 }
 
 /**
+ * Return the list of packages for kerberos configuration
+ */
+global list<string> RequiredPackages () {
+
+    list<string> packages	= required_packages;
+    // do not install pam_krb5 if sssd is configured
+    if (Pam::Enabled ("sss"))
+    {
+	packages	= filter (string p, packages, ``(p != "pam_krb5"));
+    }
+    return packages;
+}
+
+
+/**
  * Return required packages for auto-installation
  * @return map of packages to be installed and to be removed
  */
 global define map AutoPackages() {
     return ($[
-	"install": required_packages,
+	"install": RequiredPackages (),
 	"remove": []
     ]);
 }
