@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 16 14:51:12 CET 2011 - jsuchome@suse.cz
+
+- show an info that sssd is configured (fate#308902)
+- 2.21.0
+
+-------------------------------------------------------------------
 Mon Jan 24 16:18:57 CET 2011 - jsuchome@suse.cz
 
 - do not install pam_krb5 if sssd is configured (bnc#666186)
