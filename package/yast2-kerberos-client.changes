@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Mar 18 10:45:39 CET 2011 - jsuchome@suse.cz
+
+- do not use pam_krb5 when sssd is configured (fate#308902)
+- when sssd is configured, update sssd.conf's kerberos values
+- agent for krb5.conf moved to yast2-pam to be usable by ldap-client
+- do not install pam_krb5 if sssd is configured (bnc#666186) 
+- show an info that sssd is configured (fate#308902)
+- 2.17.9
+
+-------------------------------------------------------------------
 Mon Feb  8 11:11:06 CET 2010 - jsuchome@suse.cz
 
 - leave DNS checkbox disabled when DNS info is not available

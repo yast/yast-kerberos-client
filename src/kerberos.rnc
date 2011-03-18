@@ -9,7 +9,8 @@ kerberos = element kerberos {
 
 
 pam_login = element pam_login {
-    element use_kerberos { BOOLEAN }?
+    element use_kerberos { BOOLEAN }? &
+    element sssd { BOOLEAN }?
 }
 
 kerberos_client = element kerberos_client {

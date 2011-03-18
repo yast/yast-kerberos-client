@@ -107,6 +107,9 @@ global boolean dns_available	= false;
 // if DNS is used for retrieving configuration data
 global boolean dns_used		= false;
 
+// if sssd is configured, do not use pam_krb5
+global boolean sssd		= false;
+
 /**
   map with the settings configurable in the expert tabs
  */
@@ -151,6 +154,8 @@ global define boolean Import (map settings) ``{
     ExpertSettings	= client["ExpertSettings"]:$[];
     if (!haskey (ExpertSettings, "use_shmem") && haskey (client, "use_shmem"))
 	ExpertSettings["use_shmem"]	= use_shmem;
+
+    sssd		= settings["sssd"]:sssd;
     pam_modified	= true;
     modified		= true;
     ssh_modified	= true;
@@ -167,6 +172,7 @@ global define map Export () ``{
     map export_map	= $[
 	"pam_login": $[
 		"use_kerberos"		: use_pam_krb,
+		"sssd"			: sssd,
 	],
 	"kerberos_client": $[
 		"default_domain"	: default_domain,
@@ -432,6 +438,8 @@ global define boolean Read () ``{
     if (ssh_support == nil)
 	ssh_support = false;
 
+    sssd	= Pam::Enabled ("sss");
+
     return true;
 }
 
@@ -499,7 +507,26 @@ global define boolean Write () ``{
     // -- pam settings
     if (pam_modified || write_only)
     {
-        if (use_pam_krb)
+	// whem sssd is configured, do not use pam_krb5 and update sssd.conf
+	// fate#308902
+	if (sssd)
+	{
+	    y2milestone ("not using pam_krb5 because sssd is configured");
+	    Pam::Remove ("krb5");
+
+	    y2milestone ("updating sssd.conf with new kerberos values");
+
+	    path domain     = add (.etc.sssd_conf.v, "domain/default");
+	    SCR::Write (add (domain, "auth_provider"), "krb5");
+	    SCR::Write (add (domain, "chpass_provider"), "krb5");
+	    SCR::Write (add (domain, "krb5_realm"), default_realm);
+	    SCR::Write (add (domain, "krb5_kdcip"), kdc);
+	    if (!SCR::Write(.etc.sssd_conf, nil))
+	    {
+		y2error ("error writing ldap.conf file");
+	    }
+	}
+        else if (use_pam_krb)
         {
 	    Pam::Add ("krb5");
 	    // If ldap is configured we need to change it to ldap-account_only
@@ -740,13 +767,27 @@ global define list<string> UpdatedArchPackages (list<string> packages) {
     return ret;
 }
 
+/*
+ * Return the list of packages for kerberos configuration
+ */
+global list<string> RequiredPackages () {
+
+    list<string> packages	= required_packages;
+    // do not install pam_krb5 if sssd is configured
+    if (sssd)
+    {
+	packages	= filter (string p, packages, ``(p != "pam_krb5"));
+    }
+    return packages;
+}
+
 /**
  * Return required packages for auto-installation
  * @return map of packages to be installed and to be removed
  */
 global define map AutoPackages() {
     return ($[
-	"install": UpdatedArchPackages (required_packages),
+	"install": UpdatedArchPackages (RequiredPackages ()),
 	"remove": []
     ]);
 }
