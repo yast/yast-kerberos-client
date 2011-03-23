@@ -164,15 +164,7 @@ boolean	text_mode	= false;
  */
 define symbol ReallyAbort () {
 
-    boolean ret = true;
-    if (!Stage::cont () || contains (WFM::Args (), "from_users"))
-    {
-	ret = Kerberos::Modified() ? Popup::ReallyAbort (true) : true;
-    }
-    else
-    {
-	ret = Popup::ConfirmAbort (`incomplete);
-    }
+    boolean ret = (Kerberos::Modified() || Stage::cont ()) ? Popup::ReallyAbort (true) : true;
 
     if ( ret )	return `abort;
     else	return `back;
