@@ -231,7 +231,7 @@ It is common practice to use the domain name in uppercase as your default realm 
 ") +
 
     // help text for Use DNS to acquire the configuration data at runtime
-    _("Check <b>Use DNS to Aquire the Configuration Data at Runtime</b> to let your client use the Kerberos authentication data provided by DNS. This option cannot be selected if the DNS server does not provide such data.</p>") +
+    _("Check <b>Use DNS to Acquire the Configuration Data at Runtime</b> to let your client use the Kerberos authentication data provided by DNS. This option cannot be selected if the DNS server does not provide such data.</p>") +
 
     // help text 5/5
     _("<p>To configure more settings, click <b>Advanced Settings</b>.</p>");
@@ -445,7 +445,7 @@ map<string, map> widget_description	= $[
 	// checkbox label
 	"label"		: _("For&wardable"),
 	// help text
-	"help"		: _("<p><b>Forwardable</b> lets you transfer your complete identity (TGT) to another machine. <b>Proxiable</b> only lets you transfer particular tickets. Select if the options should be aplied to all PAM services, none of them or enter a list of services separated by spaces.</p>"),
+	"help"		: _("<p><b>Forwardable</b> lets you transfer your complete identity (TGT) to another machine. <b>Proxiable</b> only lets you transfer particular tickets. Select if the options should be applied to all PAM services, none of them or enter a list of services separated by spaces.</p>"),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -575,7 +575,7 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	// textentry label
 	"label"		: _("&Keytab File Location"),
 	// help text
-	"help"		: _("<p>Specify the location of the file with the keys of pricipals in <b>Keytab File Location</b>.</p>"),
+	"help"		: _("<p>Specify the location of the file with the keys of principals in <b>Keytab File Location</b>.</p>"),
 	"init"		: InitDescription,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
