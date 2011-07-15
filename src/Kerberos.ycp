@@ -740,13 +740,13 @@ global define string ShortSummary() ``{
  */
 global list<string> RequiredPackages () {
 
-    list<string> packages	= required_packages;
+    list<string> pkgs	= required_packages;
     // do not install pam_krb5 if sssd is configured
     if (sssd)
     {
-	packages	= filter (string p, packages, ``(p != "pam_krb5"));
+	pkgs	= filter (string p, pkgs, ``(p != "pam_krb5"));
     }
-    return packages;
+    return pkgs;
 }
 
 
