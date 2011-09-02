@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  2 16:11:00 CEST 2011 - jsuchome@suse.cz
+
+- DNS config detection: dig output can have more lines (bnc#712448)
+- 2.17.11 
+
+-------------------------------------------------------------------
 Fri Jul 15 12:04:18 CEST 2011 - jsuchome@suse.cz
 
 - fixed typos in help texts (bnc#703166)
