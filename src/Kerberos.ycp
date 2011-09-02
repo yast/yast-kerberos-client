@@ -347,7 +347,7 @@ global define boolean Read () ``{
 	if (dns_default_realm != "")
 	{
 	    out = (map) SCR::Execute (.target.bash_output, sformat ("dig SRV _kerberos._udp.%1 +short", default_domain));
-	    list split = splitstring (deletechars (out["stdout"]:"", "\n")," ");
+	    list split = splitstring (splitstring (out["stdout"]:"", "\n")[0]:""," ");
 	    dns_kdc	= split[3]:"";
 	    if (dns_kdc != "" &&
 		substring (dns_kdc, size (dns_kdc) - 1, 1) == ".")

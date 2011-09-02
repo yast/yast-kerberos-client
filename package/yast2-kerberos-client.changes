@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  2 16:10:03 CEST 2011 - jsuchome@suse.cz
+
+- DNS config detection: dig output can have more lines (bnc#712448)
+- 2.21.3
+
+-------------------------------------------------------------------
 Fri Aug  5 12:32:57 CEST 2011 - tgoettlicher@suse.de
 
 - fixed .desktop file (bnc #681249)
