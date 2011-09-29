@@ -89,7 +89,7 @@ define symbol KerberosSequence() ``{
 	Wizard::OpenNextBackDialog ();
 	Wizard::HideAbortButton ();
     }
-    Wizard::SetDesktopIcon("kerberos");
+    Wizard::SetDesktopTitleAndIcon("kerberos");
     symbol ret = Sequencer::Run (aliases, sequence);
     UI::CloseDialog();
 
@@ -110,7 +110,7 @@ define symbol KerberosAutoSequence() ``{
     term contents = `Label(_("Initializing..."));
 
     Wizard::CreateDialog();
-    Wizard::SetDesktopIcon("kerberos");
+    Wizard::SetDesktopTitleAndIcon("kerberos");
     Wizard::SetContentsButtons(caption, contents, "",
 	    Label::BackButton(), Label::NextButton());
 

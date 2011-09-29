@@ -9,7 +9,8 @@ BuildRequires:	doxygen perl-XML-Writer update-desktop-files yast2 yast2-devtools
 Requires:	yast2-pam >= 2.20.0
 
 # Hostname::CurrentDomain, CurrentHostname
-Requires:	yast2 >= 2.16.48
+# Wizard::SetDesktopTitleAndIcon
+Requires:	yast2 >= 2.21.22
 
 BuildArchitectures:	noarch
 

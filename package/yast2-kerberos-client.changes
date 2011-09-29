@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 29 11:57:46 CEST 2011 - visnov@suse.cz
+
+- set dialog title
+- 2.21.4 
+
+-------------------------------------------------------------------
 Fri Sep  2 16:10:03 CEST 2011 - jsuchome@suse.cz
 
 - DNS config detection: dig output can have more lines (bnc#712448)
