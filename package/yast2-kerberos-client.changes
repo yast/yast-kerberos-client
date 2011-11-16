@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 16 15:28:44 CET 2011 - jsuchome@suse.cz
+
+- correctly handle sssd config with more LDAP servers (bnc#729174)
+- 2.20.4 
+
+-------------------------------------------------------------------
 Mon Jan 24 16:18:57 CET 2011 - jsuchome@suse.cz
 
 - do not install pam_krb5 if sssd is configured (bnc#666186)
