@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 16 16:21:52 CET 2011 - jsuchome@suse.cz
+
+- correctly handle sssd config with more LDAP servers (bnc#729174)
+- 2.17.12 
+
+-------------------------------------------------------------------
 Fri Sep  2 16:11:00 CEST 2011 - jsuchome@suse.cz
 
 - DNS config detection: dig output can have more lines (bnc#712448)

@@ -520,7 +520,9 @@ global define boolean Write () ``{
 	    SCR::Write (add (domain, "auth_provider"), "krb5");
 	    SCR::Write (add (domain, "chpass_provider"), "krb5");
 	    SCR::Write (add (domain, "krb5_realm"), default_realm);
-	    SCR::Write (add (domain, "krb5_kdcip"), kdc);
+	    // divide by commas: krb5_kdcip = kdcserver1, kdcserver2 (bnc#729174)
+	    string krb5_kdcip	= mergestring (splitstring (kdc, " "), ",");
+	    SCR::Write (add (domain, "krb5_kdcip"), krb5_kdcip);
 	    if (!SCR::Write(.etc.sssd_conf, nil))
 	    {
 		y2error ("error writing ldap.conf file");
