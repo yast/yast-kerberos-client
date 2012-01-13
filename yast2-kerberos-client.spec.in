@@ -1,8 +1,8 @@
 @HEADER-COMMENT@
 
 @HEADER@
-Group:	System/YaST
-License: GPL-2.0+
+Group:          System/YaST
+License:        GPL-2.0
 BuildRequires:	doxygen perl-XML-Writer update-desktop-files yast2 yast2-devtools yast2-pam yast2-testsuite
 
 # etc_krb5_conf.scr 
@@ -42,3 +42,4 @@ Kerberos server will be used for user authentication.
 @yncludedir@/kerberos-client/dialogs.ycp
 @yncludedir@/kerberos-client/wizards.ycp
 %doc @docdir@
+%doc COPYING
