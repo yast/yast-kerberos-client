@@ -465,7 +465,7 @@ map<string, map> widget_description	= $[
 	// checkbox label
 	"label"		: _("For&wardable"),
 	// help text
-	"help"		: _("<p><b>Forwardable</b> lets you transfer your complete identity (TGT) to another machine. <b>Proxiable</b> only lets you transfer particular tickets. Select if the options should be applied to all PAM services, none of them or enter a list of services separated by spaces.</p>"),
+	"help"		: _("<p><b>Forwardable</b> lets you transfer your complete identity (TGT) to another machine. <b>Proxiable</b> only lets you transfer particular tickets. Select wheter the options should be applied to all PAM services, none of them or enter a list of services separated by spaces.</p>"),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -496,7 +496,7 @@ map<string, map> widget_description	= $[
 	// checkbox label
 	"label"		: _("Kerberos Support for Open&SSH Client"),
 	// help text
-	"help"		: _("<p>To enable Kerberos support for your OpenSSH client, select <b>Kerberos Support for OpenSSH Client</b>. In such a case, Kerberos tickets are used for user authentication on the SSH server.</p>"),
+	"help"		: _("<p>To enable Kerberos support for your OpenSSH client, select <b>Kerberos Support for OpenSSH Client</b>. In this case, Kerberos tickets are used for user authentication on the SSH server.</p>"),
 	"init"		: InitCheckBox,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
@@ -682,9 +682,9 @@ as an NTP client. Access the configuration with <b>NTP Configuration</b>.
 	"widget"	: `combobox,
 	"opt"		: [ `hstretch, `notify, `editable ],
 	// textentry label
-	"label"		: _("E&xternal credentials"),
+	"label"		: _("E&xternal Credentials"),
 	// help text
-	"help"		: _("<p>List the services allowed to provide credentials in <b>External credentials</b>.</p>"),
+	"help"		: _("<p>List the services allowed to provide credentials in <b>External Credentials</b>.</p>"),
 	"init"		: InitCombo,
 	"store"		: StoreDescription,
 	"handle"	: HandleDescription,
