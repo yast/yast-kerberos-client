@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  7 10:06:25 CEST 2012 - jsuchome@suse.cz
+
+- correctly import sssd status (bnc#779010)
+- 2.22.3 
+
+-------------------------------------------------------------------
 Thu Mar 29 15:18:30 CEST 2012 - jsuchome@suse.cz
 
 - merged proofread texts
