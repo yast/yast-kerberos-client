@@ -158,7 +158,7 @@ global define boolean Import (map settings) ``{
     if (!haskey (ExpertSettings, "use_shmem") && haskey (client, "use_shmem"))
 	ExpertSettings["use_shmem"]	= use_shmem;
 
-    sssd		= settings["sssd"]:sssd;
+    sssd		= settings["pam_login", "sssd"]:sssd;
     pam_modified	= true;
     modified		= true;
     ssh_modified	= true;
