@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 13 10:47:53 CEST 2012 - jsuchome@suse.cz
+
+- correctly import sssd status (bnc#779010)
+- 2.17.15 
+
+-------------------------------------------------------------------
 Mon Feb  6 08:37:24 CET 2012 - jsuchome@suse.cz
 
 - removed previous workaround (bnc#743355 fixed properly)
