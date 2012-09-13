@@ -155,7 +155,7 @@ global define boolean Import (map settings) ``{
     if (!haskey (ExpertSettings, "use_shmem") && haskey (client, "use_shmem"))
 	ExpertSettings["use_shmem"]	= use_shmem;
 
-    sssd		= settings["sssd"]:sssd;
+    sssd		= settings["pam_login", "sssd"]:sssd;
     pam_modified	= true;
     modified		= true;
     ssh_modified	= true;
@@ -774,13 +774,13 @@ global define list<string> UpdatedArchPackages (list<string> packages) {
  */
 global list<string> RequiredPackages () {
 
-    list<string> packages	= required_packages;
+    list<string> pkgs   = required_packages;
     // do not install pam_krb5 if sssd is configured
     if (sssd)
     {
-	packages	= filter (string p, packages, ``(p != "pam_krb5"));
+	pkgs    = filter (string p, pkgs, ``(p != "pam_krb5"));
     }
-    return packages;
+    return pkgs;
 }
 
 /**
