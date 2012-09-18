@@ -1,0 +1,8 @@
+Return	true
+Return	$["kerberos_client":$["ExpertSettings":$[], "clockskew":"300", "default_domain":"", "default_realm":"", "forwardable":true, "ignore_unknown":true, "kdc_server":"", "minimum_uid":"1", "proxiable":false, "renew_lifetime":"1d", "ssh_support":false, "ticket_lifetime":"1d"], "pam_login":$["sssd":false, "use_kerberos":false]]
+Dump	
+Dump	sssd: false
+Return	true
+Return	$["kerberos_client":$["ExpertSettings":$[], "clockskew":"300", "default_domain":"", "default_realm":"", "forwardable":true, "ignore_unknown":true, "kdc_server":"", "minimum_uid":"1", "proxiable":false, "renew_lifetime":"1d", "ssh_support":false, "ticket_lifetime":"1d"], "pam_login":$["sssd":true, "use_kerberos":false]]
+Dump	
+Dump	sssd: true
