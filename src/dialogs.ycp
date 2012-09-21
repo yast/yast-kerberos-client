@@ -408,9 +408,7 @@ It is common practice to use the domain name in uppercase as your default realm 
 	    {
 		// popup message
 		Popup::Message ("System Security Services Daemon (SSSD) is configured.
-It is in use for Kerberos authentication instead of pam_krb5.
-
-You can disable SSSD in yast2 ldap-client module.");
+It is in use for Kerberos authentication instead of pam_krb5.");
 	    }
 	}
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));

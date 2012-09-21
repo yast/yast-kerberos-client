@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 20 15:44:26 CEST 2012 - jsuchome@suse.cz
+
+- do not mention switching off SSSD, which is used by default
+  (bnc#775167)
+- 2.23.0
+
+-------------------------------------------------------------------
 Fri Sep  7 10:06:25 CEST 2012 - jsuchome@suse.cz
 
 - correctly import sssd status (bnc#779010)
