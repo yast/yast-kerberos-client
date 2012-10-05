@@ -514,22 +514,35 @@ global define boolean Write () ``{
 	// fate#308902
 	if (sssd)
 	{
-	    y2milestone ("not using pam_krb5 because sssd is configured");
-	    Pam::Remove ("krb5");
+            y2milestone ("not using pam_krb5 because sssd is configured");
+            Pam::Remove ("krb5");
 
-	    y2milestone ("updating sssd.conf with new kerberos values");
+            y2milestone ("updating sssd.conf with new kerberos values");
 
-	    path domain     = add (.etc.sssd_conf.v, "domain/default");
-	    SCR::Write (add (domain, "auth_provider"), "krb5");
-	    SCR::Write (add (domain, "chpass_provider"), "krb5");
-	    SCR::Write (add (domain, "krb5_realm"), default_realm);
-	    // divide by commas: krb5_kdcip = kdcserver1, kdcserver2 (bnc#729174)
-	    string krb5_kdcip	= mergestring (splitstring (kdc, " "), ",");
-	    SCR::Write (add (domain, "krb5_kdcip"), krb5_kdcip);
-	    if (!SCR::Write(.etc.sssd_conf, nil))
-	    {
-		y2error ("error writing ldap.conf file");
-	    }
+            path domain     = add (.etc.sssd_conf.v, "domain/default");
+            SCR::Write (add (domain, "auth_provider"), "krb5");
+            SCR::Write (add (domain, "chpass_provider"), "krb5");
+            SCR::Write (add (domain, "krb5_realm"), default_realm);
+            // divide by commas: krb5_kdcip = kdcserver1, kdcserver2 (bnc#729174)
+            string krb5_kdcip	= mergestring (splitstring (kdc, " "), ",");
+            SCR::Write (add (domain, "krb5_kdcip"), krb5_kdcip);
+
+            // write expert settings (bnc#778513)
+            SCR::Write (add (domain, "krb5_ccachedir"),
+              ExpertSettings["ccache_dir"]:"" == "" ? nil : ExpertSettings["ccache_dir"]:"");
+            SCR::Write (add (domain, "ccname_template"),
+              ExpertSettings["ccname_template"]:"" == "" ? nil : ExpertSettings["ccname_template"]:"");
+            SCR::Write (add (domain, "krb5_validate"),
+              ExpertSettings["validate"]:"" == "true" ? "True" : "False");
+            SCR::Write (add (domain, "krb5_keytab"),
+              ExpertSettings["keytab"]:"" == "" ? nil : ExpertSettings["keytab"]:"");
+            SCR::Write (add (domain, "krb5_renewable_lifetime"), renew_lifetime);
+            SCR::Write (add (domain, "krb5_lifetime"), ticket_lifetime);
+
+            if (!SCR::Write(.etc.sssd_conf, nil))
+            {
+                y2error ("error writing ldap.conf file");
+            }
 	}
         else if (use_pam_krb)
         {
