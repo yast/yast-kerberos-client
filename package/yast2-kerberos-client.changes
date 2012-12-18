@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Dec 12 15:30:50 CET 2012 - jsuchome@suse.cz
+
+- read available Kerberos options from sssd if sssd is configured
+  (bnc#792415) 
+- 2.23.2
+
+-------------------------------------------------------------------
 Thu Oct  4 10:14:49 CEST 2012 - jsuchome@suse.cz
 
 - save Kerberos expert options to sssd.conf as well (bnc#778513)
