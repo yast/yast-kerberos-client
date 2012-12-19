@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Dec 12 15:28:02 CET 2012 - jsuchome@suse.cz
+
+- save Kerberos expert options to sssd.conf as well (bnc#778513)
+- read available Kerberos options from sssd if sssd is configured
+  (bnc#792415)
+- 2.17.16 
+
+-------------------------------------------------------------------
 Thu Sep 13 10:47:53 CEST 2012 - jsuchome@suse.cz
 
 - correctly import sssd status (bnc#779010)

@@ -281,7 +281,20 @@ global define boolean WriteFile (path path_to_value, string value) {
     return WriteKrb5ConfValue (path_to_value, value);
 }
 
+/**
+ * Read given value from /etc/sssd/sssd.conf
+ * @param default_value default, if not found in the file
+ */
+string ReadSSSDValue (string key, string default_value) {
 
+    string ret  = default_value;
+    string val  = (string) SCR::Read (add (add (.etc.sssd_conf.v, "domain/default"), key));
+    if (val != nil)
+    {
+      ret       = val;
+    }
+    return ret;
+}
 
 /**
  * Reads Kerberos settings from the SCR
@@ -440,9 +453,56 @@ global define boolean Read () ``{
 
     sssd	= Pam::Enabled ("sss");
 
+    if (sssd && FileUtils::Exists ("/etc/sssd/sssd.conf"))
+    {
+        // read kerberos settings from sssd.conf (if available)
+        default_realm   = ReadSSSDValue ("krb5_realm", default_realm);
+        kdc             = ReadSSSDValue ("krb5_kdcip", kdc);
+        ExpertSettings["ccache_dir"]    = ReadSSSDValue ("krb5_ccachedir", ExpertSettings["ccache_dir"]:"");
+        ExpertSettings["ccname_template"] = ReadSSSDValue ("krb5_ccname_template", ExpertSettings["ccname_template"]:"");
+        ExpertSettings["keytab"]        = ReadSSSDValue ("krb5_keytab", ExpertSettings["keytab"]:"");
+        renew_lifetime                  = ReadSSSDValue ("krb5_renewable_lifetime", renew_lifetime);
+        ticket_lifetime                 = ReadSSSDValue ("krb5_lifetime", ticket_lifetime);
+        ExpertSettings["validate"]      = tolower (ReadSSSDValue ("krb5_validate", ExpertSettings["validate"]:""));
+    }
     return true;
 }
 
+/**
+ * Write Kerberos related settings to sssd.conf
+ */
+boolean WriteSSSD () {
+
+    y2milestone ("updating sssd.conf with new kerberos values");
+
+    path domain     = add (.etc.sssd_conf.v, "domain/default");
+
+    SCR::Write (add (domain, "auth_provider"), "krb5");
+    SCR::Write (add (domain, "chpass_provider"), "krb5");
+    SCR::Write (add (domain, "krb5_realm"), default_realm);
+    // divide by commas: krb5_kdcip = kdcserver1, kdcserver2 (bnc#729174)
+    string krb5_kdcip	= mergestring (splitstring (kdc, " "), ",");
+    SCR::Write (add (domain, "krb5_kdcip"), krb5_kdcip);
+
+    // write expert settings (bnc#778513)
+    SCR::Write (add (domain, "krb5_ccachedir"),
+      ExpertSettings["ccache_dir"]:"" == "" ? nil : ExpertSettings["ccache_dir"]:"");
+    SCR::Write (add (domain, "krb5_ccname_template"),
+      ExpertSettings["ccname_template"]:"" == "" ? nil : ExpertSettings["ccname_template"]:"");
+    SCR::Write (add (domain, "krb5_validate"),
+      ExpertSettings["validate"]:"" == "true" ? "True" : "False");
+    SCR::Write (add (domain, "krb5_keytab"),
+      ExpertSettings["keytab"]:"" == "" ? nil : ExpertSettings["keytab"]:"");
+    SCR::Write (add (domain, "krb5_renewable_lifetime"), renew_lifetime);
+    SCR::Write (add (domain, "krb5_lifetime"), ticket_lifetime);
+
+    boolean ret = SCR::Write(.etc.sssd_conf, nil);
+    if (!ret)
+    {
+      y2error ("error writing sssd.conf file");
+    }
+    return ret;
+}
 
 /**
  * Saves Kerberos configuration.
@@ -513,20 +573,6 @@ global define boolean Write () ``{
 	{
 	    y2milestone ("not using pam_krb5 because sssd is configured");
 	    Pam::Remove ("krb5");
-
-	    y2milestone ("updating sssd.conf with new kerberos values");
-
-	    path domain     = add (.etc.sssd_conf.v, "domain/default");
-	    SCR::Write (add (domain, "auth_provider"), "krb5");
-	    SCR::Write (add (domain, "chpass_provider"), "krb5");
-	    SCR::Write (add (domain, "krb5_realm"), default_realm);
-	    // divide by commas: krb5_kdcip = kdcserver1, kdcserver2 (bnc#729174)
-	    string krb5_kdcip	= mergestring (splitstring (kdc, " "), ",");
-	    SCR::Write (add (domain, "krb5_kdcip"), krb5_kdcip);
-	    if (!SCR::Write(.etc.sssd_conf, nil))
-	    {
-		y2error ("error writing ldap.conf file");
-	    }
 	}
         else if (use_pam_krb)
         {
@@ -597,6 +643,11 @@ global define boolean Write () ``{
     }
     if (modified)
     {
+        if (sssd)
+        {
+            WriteSSSD ();
+        }
+
 	/*
 	    3. Yes, if the user chooses DNS you need to remove the domain_realm
 	    section (so that the domain->realm mapping can be read through DNS)

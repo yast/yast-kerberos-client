@@ -184,6 +184,16 @@ define symbol ReallyAbort () {
  */
 define symbol ReadDialog() ``{
     boolean ret = Kerberos::Read();
+
+    if (Kerberos::sssd)
+    {
+        // popup message
+	Popup::Message ("System Security Services Daemon (SSSD) is configured.
+It is in use for Kerberos authentication instead of pam_krb5.
+
+SSSD specific options can be configured in LDAP Client Configuration module.");
+    }
+
     return ret ? `next : `abort;
 }
 
@@ -391,14 +401,6 @@ It is common practice to use the domain name in uppercase as your default realm 
 		foreach (symbol widget, [`realm, `domain, `kdc,`advanced,`dns],{
 		    UI::ChangeWidget (`id (widget), `Enabled, use_pam_krb);
 		});
-	    }
-	    if (Kerberos::sssd)
-	    {
-		// popup message
-		Popup::Message ("System Security Services Daemon (SSSD) is configured.
-It is in use for Kerberos authentication instead of pam_krb5.
-
-You can disable SSSD in yast2 ldap-client module.");
 	    }
 	}
     } while (!contains ([`back, `cancel, `abort, `next, `advanced], result));
