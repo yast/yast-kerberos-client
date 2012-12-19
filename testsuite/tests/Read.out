@@ -50,7 +50,7 @@ Dump	ssh support: true
 Dump	============================================
 Dump	==== reading... ============================
 Execute	.target.bash_output "/usr/sbin/pam-config -q --krb5" $["stdout":"password: "]
-Execute	.target.bash "touch /etc/krb5.conf" 0
+Execute	.target.bash "/usr/bin/touch /etc/krb5.conf" 0
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
