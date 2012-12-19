@@ -80,6 +80,20 @@
 		    ],
 		]
 	    ],
+	    "sssd_conf"	: $[
+		"v"			: $[
+		    "domain/default"	: $[
+			"krb5_realm"	: "SUSE.DE",
+			"krb5_kdcip"	: nil,
+                        "krb5_ccachedir"        : nil,
+                        "krb5_ccname_template"  : nil,
+                        "krb5_keytab"           : nil,
+                        "krb5_renewable_lifetime"       : nil,
+                        "krb5_lifetime"         : nil,
+                        "krb5_validate"         : nil,
+		    ],
+		],
+	    ],
 	],
 	"sysconfig": $[
 	    "openafs-client": nil
