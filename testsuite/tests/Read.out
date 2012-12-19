@@ -32,17 +32,25 @@ Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentia
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes"
 Execute	.target.bash_output "/usr/sbin/pam-config -q --sss" $["stdout":"password: "]
+Read	.etc.sssd_conf.v."domain/default"."krb5_realm" "SUSE.DE"
+Read	.etc.sssd_conf.v."domain/default"."krb5_kdcip" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_ccachedir" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_ccname_template" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_keytab" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_renewable_lifetime" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_lifetime" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_validate" nil
 Return	true
 Dump	============================================
 Dump	kerberos used: true
-Dump	default realm: SUSE.CZ
+Dump	default realm: SUSE.DE
 Dump	kdc: chimera.suse.cz kdc.suse.cz
 Dump	
 Dump	ssh support: true
 Dump	============================================
 Dump	==== reading... ============================
 Execute	.target.bash_output "/usr/sbin/pam-config -q --krb5" $["stdout":"password: "]
-Execute	.target.bash "/usr/bin/touch /etc/krb5.conf" 0
+Execute	.target.bash "touch /etc/krb5.conf" 0
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.s: ["*"]
 Dir	.etc.ssh.ssh_config.v."*": ["GSSAPIAuthentication", "GSSAPIDelegateCredentials"]
@@ -50,5 +58,5 @@ Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes"
 Execute	.target.bash_output "/usr/sbin/pam-config -q --sss" $["stdout":"password: "]
 Return	true
-Dump	default realm: SUSE.CZ
+Dump	default realm: SUSE.DE
 Dump	============================================
