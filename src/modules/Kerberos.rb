@@ -549,7 +549,7 @@ module Yast
       if @sssd && FileUtils.Exists("/etc/sssd/sssd.conf")
         # read kerberos settings from sssd.conf (if available)
         @default_realm = ReadSSSDValue("krb5_realm", @default_realm)
-        @kdc = ReadSSSDValue("krb5_kdcip", @kdc)
+        @kdc = ReadSSSDValue("krb5_server", @kdc)
         Ops.set(
           @ExpertSettings,
           "ccache_dir",
@@ -602,9 +602,9 @@ module Yast
       SCR.Write(Builtins.add(domain, "auth_provider"), "krb5")
       SCR.Write(Builtins.add(domain, "chpass_provider"), "krb5")
       SCR.Write(Builtins.add(domain, "krb5_realm"), @default_realm)
-      # divide by commas: krb5_kdcip = kdcserver1, kdcserver2 (bnc#729174)
-      krb5_kdcip = Builtins.mergestring(Builtins.splitstring(@kdc, " "), ",")
-      SCR.Write(Builtins.add(domain, "krb5_kdcip"), krb5_kdcip)
+      # divide by commas: krb5_server = kdcserver1, kdcserver2 (bnc#729174)
+      krb5_server = Builtins.mergestring(Builtins.splitstring(@kdc, " "), ",")
+      SCR.Write(Builtins.add(domain, "krb5_server"), krb5_server)
 
       # write expert settings (bnc#778513)
       SCR.Write(
