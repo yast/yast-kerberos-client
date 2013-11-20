@@ -603,8 +603,7 @@ module Yast
       SCR.Write(Builtins.add(domain, "chpass_provider"), "krb5")
       SCR.Write(Builtins.add(domain, "krb5_realm"), @default_realm)
       # divide by commas: krb5_server = kdcserver1, kdcserver2 (bnc#729174)
-      krb5_server = Builtins.mergestring(Builtins.splitstring(@kdc, " "), ",")
-      SCR.Write(Builtins.add(domain, "krb5_server"), krb5_server)
+      SCR.Write(Builtins.add(domain, "krb5_server"), @kdc.gsub(/\s+/, ","))
 
       # write expert settings (bnc#778513)
       SCR.Write(
