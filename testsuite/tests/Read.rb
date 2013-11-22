@@ -80,7 +80,7 @@ module Yast
             "v" => {
               "domain/default" => {
                 "krb5_realm"              => "SUSE.DE",
-                "krb5_kdcip"              => nil,
+                "krb5_server"             => nil,
                 "krb5_ccachedir"          => nil,
                 "krb5_ccname_template"    => nil,
                 "krb5_keytab"             => nil,

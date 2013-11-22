@@ -33,7 +33,7 @@ Read	.etc.ssh.ssh_config.v."*"."GSSAPIAuthentication" "yes"
 Read	.etc.ssh.ssh_config.v."*"."GSSAPIDelegateCredentials" "yes"
 Execute	.target.bash_output "/usr/sbin/pam-config -q --sss" $["stdout":"password: "]
 Read	.etc.sssd_conf.v."domain/default"."krb5_realm" "SUSE.DE"
-Read	.etc.sssd_conf.v."domain/default"."krb5_kdcip" nil
+Read	.etc.sssd_conf.v."domain/default"."krb5_server" nil
 Read	.etc.sssd_conf.v."domain/default"."krb5_ccachedir" nil
 Read	.etc.sssd_conf.v."domain/default"."krb5_ccname_template" nil
 Read	.etc.sssd_conf.v."domain/default"."krb5_keytab" nil

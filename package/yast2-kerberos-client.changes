@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov 19 15:01:35 CET 2013 - jsuchome@suse.cz
+
+- replace obsolete krb5_kdcip with krb5_server (bnc#851048)
+- 3.1.1 
+
+-------------------------------------------------------------------
 Wed Sep 18 17:47:06 UTC 2013 - lslezak@suse.cz
 
 - do not use *.spec.in template, use *.spec file with RPM macros
